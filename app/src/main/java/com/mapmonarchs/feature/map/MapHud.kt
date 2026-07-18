@@ -79,6 +79,7 @@ fun MapHud(
 
         CaptureAction(
             availability = state.captureAvailability,
+            label = state.captureLabel(),
             onClick = onCapture,
             modifier = Modifier
                 .align(Alignment.BottomCenter)
@@ -142,15 +143,11 @@ private fun Holdings(hexesHeld: Int, delta: Int, modifier: Modifier = Modifier) 
 @Composable
 private fun CaptureAction(
     availability: CaptureAvailability,
+    label: String,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val enabled = availability == CaptureAvailability.AVAILABLE
-    val label = when (availability) {
-        CaptureAvailability.AVAILABLE -> "CLAIM HEX"
-        CaptureAvailability.UNAVAILABLE -> "OUT OF RANGE"
-        CaptureAvailability.IN_FLIGHT -> "CLAIMING"
-    }
     val shape = RoundedCornerShape(14.dp)
 
     Box(

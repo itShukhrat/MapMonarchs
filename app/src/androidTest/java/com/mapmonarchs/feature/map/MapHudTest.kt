@@ -33,7 +33,10 @@ class MapHudTest {
         territoryColor = Color(0xFF4C8DFF),
         hexesHeld = hexesHeld,
         hexesHeldDelta = delta,
-        captureAvailability = availability
+        captureAvailability = availability,
+        locationPermissionGranted = true,
+        hasFix = true,
+        lastRejection = null
     )
 
     @Test

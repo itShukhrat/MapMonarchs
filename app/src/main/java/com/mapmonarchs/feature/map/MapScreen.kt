@@ -1,11 +1,18 @@
 package com.mapmonarchs.feature.map
 
+import android.Manifest
+import android.content.pm.PackageManager
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.mapbox.geojson.Point
 import com.mapbox.maps.extension.compose.MapboxMap
@@ -20,15 +27,33 @@ import com.mapbox.maps.extension.compose.style.MapStyle
  */
 private const val MAPBOX_DARK = "mapbox://styles/mapbox/dark-v11"
 
-// Default camera until real location is wired (N3).
+// Default camera until a real fix arrives.
 private val DEFAULT_CENTER: Point = Point.fromLngLat(69.2401, 41.2995)
 
 @Composable
-fun MapScreen(
-    modifier: Modifier = Modifier,
-    viewModel: MapViewModel = viewModel()
-) {
+fun MapScreen(modifier: Modifier = Modifier) {
+    val context = LocalContext.current
+    val viewModel: MapViewModel = viewModel(factory = MapViewModelFactory(context))
     val state by viewModel.uiState.collectAsState()
+
+    val permissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { granted -> viewModel.onPermissionResult(granted) }
+
+    LaunchedEffect(Unit) {
+        val alreadyGranted = ContextCompat.checkSelfPermission(
+            context, Manifest.permission.ACCESS_FINE_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED
+
+        if (alreadyGranted) {
+            viewModel.onPermissionResult(true)
+        } else {
+            // Asked immediately because the map is useless without it. A priming
+            // screen explaining WHY belongs here before release -- permission
+            // denial rate is a top-of-funnel killer in location games.
+            permissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
+        }
+    }
 
     Box(modifier = modifier.fillMaxSize()) {
         // Map draws full-bleed, deliberately under the system bars. Only the HUD
@@ -43,12 +68,6 @@ fun MapScreen(
                     // performance one: in a territory game you must read hex
                     // adjacency and ownership across an area, and pitch trades
                     // that away for cinematics. Revisit only with a real reason.
-                    //
-                    // (Cold-start timings measured on this emulator are NOT
-                    // reliable evidence either way -- two emulators sharing one
-                    // software GPU produced 91s pitched vs 121s flat, i.e. noise
-                    // dominated by host contention. Any real perf claim about
-                    // pitch must come from a real mid-range device.)
                     pitch(0.0)
                 }
             },
