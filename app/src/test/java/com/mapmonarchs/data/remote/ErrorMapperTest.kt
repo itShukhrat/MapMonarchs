@@ -49,6 +49,25 @@ class ErrorMapperTest {
     }
 
     @Test
+    fun `anonymous sign-in disabled is explicit, not Unexpected`() {
+        val t = RuntimeException("Anonymous sign-ins are disabled")
+        assertTrue(t.toAppError() is AppError.AuthUnavailable)
+    }
+
+    @Test
+    fun `anonymous provider not enabled is explicit`() {
+        val t = RuntimeException("anonymous_provider_disabled: provider is not enabled")
+        assertTrue(t.toAppError() is AppError.AuthUnavailable)
+    }
+
+    @Test
+    fun `auth unavailable message does not blame the player`() {
+        val msg = AppError.AuthUnavailable("anonymous disabled").playerMessage()
+        assertTrue(msg.isNotBlank())
+        assertTrue(!msg.contains("anonymous"))
+    }
+
+    @Test
     fun `unrecognised cause becomes Unexpected rather than a tidy wrong bucket`() {
         assertTrue(RuntimeException("something nobody predicted").toAppError() is AppError.Unexpected)
     }

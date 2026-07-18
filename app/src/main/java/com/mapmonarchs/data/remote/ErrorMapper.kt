@@ -36,6 +36,13 @@ fun Throwable.toAppError(): AppError {
             text.contains("could not find the table") ||
             text.contains("could not find the function") -> AppError.SchemaMissing(detail)
 
+        // Supabase reports this as anonymous_provider_disabled / "Anonymous
+        // sign-ins are disabled". A project-config problem, not a mystery.
+        text.contains("anonymous") &&
+            (text.contains("disabled") || text.contains("not enabled")) -> AppError.AuthUnavailable(detail)
+
+        text.contains("signup") && text.contains("disabled") -> AppError.AuthUnavailable(detail)
+
         text.contains("jwt") ||
             text.contains("401") ||
             text.contains("permission denied") ||

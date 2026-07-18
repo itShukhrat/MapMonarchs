@@ -37,6 +37,14 @@ sealed class AppError(val technical: String) {
     /** Reached the backend, it failed for another reason. */
     class BackendFailure(technical: String) : AppError(technical)
 
+    /**
+     * Sign-in cannot be established -- most commonly because anonymous sign-in
+     * is disabled for the project. Distinct from Unauthorized (we HAVE a session
+     * and were refused) and from Unexpected (we have no idea). Kept separate so
+     * a config problem never masquerades as a mystery bug.
+     */
+    class AuthUnavailable(technical: String) : AppError(technical)
+
     /** Genuinely unclassified. Still carries the cause; still shown. */
     class Unexpected(technical: String) : AppError(technical)
 
@@ -47,6 +55,7 @@ sealed class AppError(val technical: String) {
         is Unauthorized -> "Access refused. Sign-in may have expired."
         is Malformed -> "Territory data could not be read."
         is BackendFailure -> "Territory service error."
+        is AuthUnavailable -> "Sign-in unavailable."
         is Unexpected -> "Something went wrong loading territory."
     }
 }

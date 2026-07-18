@@ -4,16 +4,15 @@ import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.mapmonarchs.data.remote.SupabaseProvider
+import com.mapmonarchs.data.repository.SupabaseAuthRepository
 import com.mapmonarchs.data.repository.SupabaseTerritoryRepository
 import com.mapmonarchs.domain.validation.MovementValidator
 import com.mapmonarchs.location.LocationTracker
 
 /**
- * Manual composition root.
- *
- * A DI framework is deliberately not used yet: at this size it would add a
- * dependency and build time without removing any real complexity. Introduce one
- * when the graph actually branches, not before.
+ * Manual composition root. A DI framework would add a dependency and build time
+ * without removing real complexity at this size. Introduce one when the graph
+ * actually branches.
  */
 class MapViewModelFactory(context: Context) : ViewModelProvider.Factory {
 
@@ -24,10 +23,12 @@ class MapViewModelFactory(context: Context) : ViewModelProvider.Factory {
         require(modelClass.isAssignableFrom(MapViewModel::class.java)) {
             "Unknown ViewModel: ${modelClass.name}"
         }
+        val client = SupabaseProvider.client
         return MapViewModel(
             locationTracker = LocationTracker(appContext),
             validator = MovementValidator(),
-            repository = SupabaseTerritoryRepository(SupabaseProvider.client)
+            repository = SupabaseTerritoryRepository(client),
+            authRepository = SupabaseAuthRepository(client)
         ) as T
     }
 }

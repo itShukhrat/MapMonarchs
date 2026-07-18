@@ -1,6 +1,5 @@
 package com.mapmonarchs.feature.map
 
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.junit4.createComposeRule
@@ -9,6 +8,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.mapmonarchs.domain.model.AppError
+import com.mapmonarchs.domain.model.Identity
 import com.mapmonarchs.domain.validation.RejectionReason
 import com.mapmonarchs.ui.theme.MapMonarchsTheme
 import org.junit.Assert.assertEquals
@@ -26,25 +26,61 @@ class MapHudTest {
     @get:Rule
     val rule = createComposeRule()
 
+    private val realUser = "6f2c1e4a-1111-4b2a-9c3d-000000000001"
+
     private fun state(
-        handle: String = "monarch",
+        identity: Identity = Identity.from(realUser),
         territory: TerritoryLoad = TerritoryLoad.Loaded(emptyList()),
         capture: CaptureState = CaptureState.Ready,
         delta: Int = 0
-    ) = MapUiState(
-        handle = handle,
-        territoryColor = Color(0xFF4C8DFF),
-        territory = territory,
-        capture = capture,
-        hexesHeldDelta = delta
-    )
+    ) = MapUiState(identity = identity, territory = territory, capture = capture, hexesHeldDelta = delta)
 
     @Test
-    fun rendersHandleUppercased() {
+    fun rendersDerivedCallsignForSignedInUser() {
+        val id = Identity.from(realUser)
         rule.setContent {
-            MapMonarchsTheme { MapHud(state(handle = "shukhrat"), onCapture = {}, onRetry = {}) }
+            MapMonarchsTheme { MapHud(state(identity = id), onCapture = {}, onRetry = {}) }
         }
-        rule.onNodeWithTag(MapHudTags.HANDLE).assertTextEquals("SHUKHRAT")
+        rule.onNodeWithTag(MapHudTags.HANDLE).assertTextEquals(id.callsign)
+    }
+
+    @Test
+    fun neverShowsAFabricatedHandleWhenSignedOut() {
+        rule.setContent {
+            MapMonarchsTheme { MapHud(state(identity = Identity.SignedOut), onCapture = {}, onRetry = {}) }
+        }
+        rule.onNodeWithTag(MapHudTags.HANDLE).assertTextEquals("NO IDENTITY")
+    }
+
+    @Test
+    fun identityUnavailableIsShownExplicitlyWithItsCause() {
+        rule.setContent {
+            MapMonarchsTheme {
+                MapHud(
+                    state(identity = Identity.Unavailable(AppError.AuthUnavailable("disabled"))),
+                    onCapture = {},
+                    onRetry = {}
+                )
+            }
+        }
+        rule.onNodeWithTag(MapHudTags.HANDLE).assertTextEquals("IDENTITY UNAVAILABLE")
+        rule.onNodeWithTag(MapHudTags.ERROR).assertIsDisplayed()
+    }
+
+    @Test
+    fun captureIsInertWithoutIdentityEvenWhenReady() {
+        var clicks = 0
+        rule.setContent {
+            MapMonarchsTheme {
+                MapHud(
+                    state(identity = Identity.SignedOut, capture = CaptureState.Ready),
+                    onCapture = { clicks++ },
+                    onRetry = {}
+                )
+            }
+        }
+        rule.onNodeWithTag(MapHudTags.CAPTURE).assertTextEquals("NO IDENTITY").performClick()
+        assertEquals(0, clicks)
     }
 
     @Test
@@ -56,7 +92,7 @@ class MapHudTest {
     }
 
     @Test
-    fun failureStripIsHiddenWhenTerritoryLoads() {
+    fun failureStripIsHiddenWhenEverythingLoads() {
         rule.setContent {
             MapMonarchsTheme { MapHud(state(), onCapture = {}, onRetry = {}) }
         }
@@ -81,7 +117,7 @@ class MapHudTest {
     }
 
     @Test
-    fun captureInvokesCallbackWhenReady() {
+    fun captureInvokesCallbackWhenIdentityAndFixAreReal() {
         var clicks = 0
         rule.setContent {
             MapMonarchsTheme {

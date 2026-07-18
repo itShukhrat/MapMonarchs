@@ -24,6 +24,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -80,12 +81,14 @@ fun MapHud(
             verticalArrangement = Arrangement.spacedBy(10.dp),
             horizontalAlignment = Alignment.Start
         ) {
-            Identity(
-                handle = state.handle,
-                territoryColor = state.territoryColor,
+            IdentityChip(
+                label = state.identityLabel(),
+                territoryColor = state.territoryColor(),
                 modifier = Modifier.wrapContentWidth()
             )
-            state.territoryError?.let { error ->
+            // Identity failure outranks territory failure: without a session the
+            // player is not in the game at all, so that is the fact to surface.
+            (state.identityError() ?: state.territoryError)?.let { error ->
                 FailureStrip(message = error.playerMessage(), onRetry = onRetry)
             }
         }
@@ -109,8 +112,17 @@ fun MapHud(
     }
 }
 
+/**
+ * Identity is a derived callsign beside a hex glyph -- never an avatar circle.
+ * The shape is the identity language of this game.
+ *
+ * A null territoryColor means we have no authenticated session, and the glyph
+ * renders HOLLOW rather than picking a default colour. An unclaimed outline is
+ * literally accurate for a player who does not exist yet, and it makes the
+ * absence of identity visible at a glance instead of disguising it.
+ */
 @Composable
-private fun Identity(handle: String, territoryColor: Color, modifier: Modifier = Modifier) {
+private fun IdentityChip(label: String, territoryColor: Color?, modifier: Modifier = Modifier) {
     Row(
         modifier = modifier
             .clip(RoundedCornerShape(8.dp))
@@ -118,13 +130,11 @@ private fun Identity(handle: String, territoryColor: Color, modifier: Modifier =
             .padding(horizontal = 12.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // The player's colour is a hex, not an avatar circle. The shape itself is
-        // the identity language of this game.
         HexGlyph(color = territoryColor, glyphSize = 16.dp)
         Text(
-            text = handle.uppercase(),
+            text = label,
             style = MaterialTheme.typography.labelMedium,
-            color = TextPrimary,
+            color = if (territoryColor != null) TextPrimary else TextMuted,
             modifier = Modifier
                 .padding(start = 10.dp)
                 .testTag(MapHudTags.HANDLE)
@@ -236,9 +246,12 @@ private fun CaptureAction(
     }
 }
 
-/** Flat geometric hexagon -- the app's core shape language. */
+/**
+ * Flat geometric hexagon -- the app's core shape language.
+ * Filled when identity is real; hollow outline when it is not.
+ */
 @Composable
-private fun HexGlyph(color: Color, glyphSize: Dp, modifier: Modifier = Modifier) {
+private fun HexGlyph(color: Color?, glyphSize: Dp, modifier: Modifier = Modifier) {
     Canvas(modifier = modifier.size(glyphSize)) {
         val radius = size.minDimension / 2f
         val cx = size.width / 2f
@@ -251,6 +264,10 @@ private fun HexGlyph(color: Color, glyphSize: Dp, modifier: Modifier = Modifier)
             if (i == 0) path.moveTo(x, y) else path.lineTo(x, y)
         }
         path.close()
-        drawPath(path, color)
+        if (color != null) {
+            drawPath(path, color)
+        } else {
+            drawPath(path, TextMuted, style = Stroke(width = 1.5.dp.toPx()))
+        }
     }
 }

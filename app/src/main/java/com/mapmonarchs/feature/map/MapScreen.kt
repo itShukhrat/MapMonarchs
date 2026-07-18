@@ -81,7 +81,7 @@ fun MapScreen(modifier: Modifier = Modifier) {
         MapHud(
             state = state,
             onCapture = viewModel::onCaptureRequested,
-            onRetry = viewModel::loadTerritory
+            onRetry = viewModel::onRetry
         )
     }
 }
