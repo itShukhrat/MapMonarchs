@@ -1,3 +1,5 @@
+import org.gradle.authentication.http.BasicAuthentication
+
 pluginManagement {
     repositories {
         google {
@@ -19,6 +21,16 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
+        // Mapbox SDK is served from an authenticated repo. The sk.* download token
+        // lives in ~/.gradle/gradle.properties as MAPBOX_DOWNLOADS_TOKEN (never in this repo).
+        maven {
+            url = uri("https://api.mapbox.com/downloads/v2/releases/maven")
+            authentication { create<BasicAuthentication>("basic") }
+            credentials {
+                username = "mapbox"
+                password = providers.gradleProperty("MAPBOX_DOWNLOADS_TOKEN").orNull ?: ""
+            }
+        }
     }
 }
 
