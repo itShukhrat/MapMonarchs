@@ -13,7 +13,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.mapbox.geojson.Point
 import com.mapbox.maps.extension.compose.MapboxMap
 import com.mapbox.maps.extension.compose.animation.viewport.rememberMapViewportState
@@ -30,10 +29,17 @@ private const val MAPBOX_DARK = "mapbox://styles/mapbox/dark-v11"
 // Default camera until a real fix arrives.
 private val DEFAULT_CENTER: Point = Point.fromLngLat(69.2401, 41.2995)
 
+/**
+ * The ViewModel is supplied by the shell so that Settings and Identity read the
+ * same instance. Creating it here as well would give the map and the command
+ * screens two disagreeing copies of session and permission state.
+ */
 @Composable
-fun MapScreen(modifier: Modifier = Modifier) {
+fun MapScreen(
+    viewModel: MapViewModel,
+    modifier: Modifier = Modifier
+) {
     val context = LocalContext.current
-    val viewModel: MapViewModel = viewModel(factory = MapViewModelFactory(context))
     val state by viewModel.uiState.collectAsState()
 
     val permissionLauncher = rememberLauncherForActivityResult(

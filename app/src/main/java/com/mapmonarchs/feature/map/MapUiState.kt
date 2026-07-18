@@ -33,7 +33,9 @@ data class MapUiState(
     val identity: Identity,
     val territory: TerritoryLoad,
     val capture: CaptureState,
-    val hexesHeldDelta: Int = 0
+    val hexesHeldDelta: Int = 0,
+    /** Mirrors the OS permission so Settings can report it without re-querying. */
+    val locationPermissionGranted: Boolean = false
 ) {
     /**
      * null means UNKNOWN and the UI must render it as such. Showing 0 before

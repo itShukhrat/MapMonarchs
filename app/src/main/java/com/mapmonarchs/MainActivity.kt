@@ -8,7 +8,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import com.mapbox.common.MapboxOptions
-import com.mapmonarchs.feature.map.MapScreen
+import com.mapmonarchs.feature.shell.AppShell
 import com.mapmonarchs.ui.theme.MapMonarchsTheme
 
 class MainActivity : ComponentActivity() {
@@ -22,7 +22,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             MapMonarchsTheme {
                 Surface(modifier = Modifier.fillMaxSize()) {
-                    MapScreen()
+                    AppShell()
                 }
             }
         }

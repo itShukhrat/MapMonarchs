@@ -11,6 +11,7 @@ import com.mapmonarchs.domain.repository.Outcome
 import com.mapmonarchs.domain.repository.TerritoryRepository
 import com.mapmonarchs.domain.validation.MovementValidator
 import com.mapmonarchs.domain.validation.MovementVerdict
+import com.mapmonarchs.data.local.TrackingMode
 import com.mapmonarchs.location.LocationTracker
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -42,6 +43,7 @@ class MapViewModel(
     /** Last fix that passed local plausibility -- the baseline for teleport checks. */
     private var lastAcceptedFix: LocationFix? = null
     private var trackingJob: Job? = null
+    private var trackingMode: TrackingMode = TrackingMode.BALANCED
 
     init {
         resolveIdentity()
@@ -86,18 +88,39 @@ class MapViewModel(
 
     fun onPermissionResult(granted: Boolean) {
         if (granted) {
-            _uiState.value = _uiState.value.copy(capture = CaptureState.AcquiringFix)
+            _uiState.value = _uiState.value.copy(
+                capture = CaptureState.AcquiringFix,
+                locationPermissionGranted = true
+            )
             startTracking()
         } else {
             stopTracking()
-            _uiState.value = _uiState.value.copy(capture = CaptureState.PermissionRequired)
+            _uiState.value = _uiState.value.copy(
+                capture = CaptureState.PermissionRequired,
+                locationPermissionGranted = false
+            )
+        }
+    }
+
+    /**
+     * Applies a new cadence immediately by restarting the stream. Deferring it
+     * until the next app launch would make the setting feel broken -- the player
+     * changed it to fix a battery problem they are having right now.
+     */
+    fun onTrackingModeChanged(mode: TrackingMode) {
+        if (mode == trackingMode) return
+        trackingMode = mode
+        Log.i(TAG, "tracking cadence -> ${mode.name} (${mode.intervalMillis}ms)")
+        if (trackingJob?.isActive == true) {
+            stopTracking()
+            startTracking()
         }
     }
 
     private fun startTracking() {
         if (trackingJob?.isActive == true) return
         trackingJob = viewModelScope.launch {
-            locationTracker.fixes()
+            locationTracker.fixes(intervalMillis = trackingMode.intervalMillis)
                 .catch { t ->
                     // NOT a silent catch: cause logged, failure surfaced as state.
                     // Losing location silently would leave "ACQUIRING GPS" forever
