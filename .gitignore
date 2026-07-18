@@ -1,0 +1,25 @@
+# --- Secrets: never commit ---
+local.properties
+*.keystore
+*.jks
+.env
+.env.*
+!.env.example
+
+# --- Android / Kotlin ---
+.gradle/
+build/
+captures/
+.cxx/
+*.apk
+*.aab
+*.ap_
+*.dex
+
+# --- Android Studio / IntelliJ ---
+.idea/
+*.iml
+.DS_Store
+
+# --- Mapbox / keys pulled at build time ---
+mapbox.token
