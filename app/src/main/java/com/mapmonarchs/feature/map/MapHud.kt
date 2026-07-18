@@ -9,9 +9,12 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -22,6 +25,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.mapmonarchs.ui.theme.Contested
@@ -40,20 +46,22 @@ object MapHudTags {
     const val HELD = "hud_held"
     const val DELTA = "hud_delta"
     const val CAPTURE = "hud_capture"
+    const val ERROR = "hud_error"
 }
 
 /**
  * The HUD is a FRAME, not a panel.
  *
- * The map is the hero, so the centre of the screen is never occluded. Content
- * hugs three edges only: identity (top-left), holdings (top-right), and the one
- * action (bottom-centre, thumb-reachable). No cards, no bottom nav, no elevation
- * shadows -- separation comes from tonal contrast on near-black.
+ * The map is the hero, so the centre is never occluded. Content hugs three edges:
+ * identity (top-left), holdings (top-right), one action (bottom-centre). A fourth
+ * element -- the failure strip -- exists but is rendered ONLY on failure, so a
+ * healthy screen carries no extra chrome at all.
  */
 @Composable
 fun MapHud(
     state: MapUiState,
     onCapture: () -> Unit,
+    onRetry: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Box(
@@ -61,16 +69,29 @@ fun MapHud(
             .fillMaxSize()
             .safeDrawingPadding()
     ) {
-        Identity(
-            handle = state.handle,
-            territoryColor = state.territoryColor,
+        // Width-capped: the failure strip must never grow into the holdings zone
+        // on the right. A HUD that overlaps itself stops reading as an instrument
+        // panel and starts reading as a bug.
+        Column(
             modifier = Modifier
                 .align(Alignment.TopStart)
-                .padding(start = 20.dp, top = 16.dp)
-        )
+                .fillMaxWidth(0.62f)
+                .padding(start = 20.dp, top = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp),
+            horizontalAlignment = Alignment.Start
+        ) {
+            Identity(
+                handle = state.handle,
+                territoryColor = state.territoryColor,
+                modifier = Modifier.wrapContentWidth()
+            )
+            state.territoryError?.let { error ->
+                FailureStrip(message = error.playerMessage(), onRetry = onRetry)
+            }
+        }
 
         Holdings(
-            hexesHeld = state.hexesHeld,
+            holdings = state.holdingsLabel(),
             delta = state.hexesHeldDelta,
             modifier = Modifier
                 .align(Alignment.TopEnd)
@@ -78,8 +99,8 @@ fun MapHud(
         )
 
         CaptureAction(
-            availability = state.captureAvailability,
             label = state.captureLabel(),
+            enabled = state.isCaptureActionable(),
             onClick = onCapture,
             modifier = Modifier
                 .align(Alignment.BottomCenter)
@@ -97,8 +118,8 @@ private fun Identity(handle: String, territoryColor: Color, modifier: Modifier =
             .padding(horizontal = 12.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // The player's colour is shown as a hex, not an avatar circle.
-        // The shape itself is the identity language of this game.
+        // The player's colour is a hex, not an avatar circle. The shape itself is
+        // the identity language of this game.
         HexGlyph(color = territoryColor, glyphSize = 16.dp)
         Text(
             text = handle.uppercase(),
@@ -111,18 +132,67 @@ private fun Identity(handle: String, territoryColor: Color, modifier: Modifier =
     }
 }
 
+/**
+ * Shown only when territory failed to load. Deliberately NOT a card, dialog, or
+ * full-screen takeover: the map stays usable and the failure stays honest. A
+ * modal would imply the app is dead; a silent empty map would imply the player
+ * owns nothing, which is a lie we refuse to tell.
+ */
 @Composable
-private fun Holdings(hexesHeld: Int, delta: Int, modifier: Modifier = Modifier) {
+private fun FailureStrip(message: String, onRetry: () -> Unit, modifier: Modifier = Modifier) {
+    Row(
+        modifier = modifier
+            .clip(RoundedCornerShape(8.dp))
+            .background(Void.copy(alpha = 0.82f))
+            .border(1.dp, Contested.copy(alpha = 0.55f), RoundedCornerShape(8.dp))
+            .padding(horizontal = 12.dp, vertical = 8.dp)
+            .testTag(MapHudTags.ERROR),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Box(
+            modifier = Modifier
+                .size(6.dp)
+                .clip(RoundedCornerShape(3.dp))
+                .background(Contested)
+        )
+        Text(
+            text = message,
+            style = MaterialTheme.typography.bodyMedium,
+            color = TextPrimary,
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier
+                .weight(1f, fill = false)
+                .padding(start = 10.dp)
+        )
+        Text(
+            text = "RETRY",
+            style = MaterialTheme.typography.labelMedium,
+            color = SovereignGlow,
+            modifier = Modifier
+                .padding(start = 14.dp)
+                .clickable(onClick = onRetry)
+        )
+    }
+}
+
+@Composable
+private fun Holdings(holdings: String, delta: Int, modifier: Modifier = Modifier) {
     Column(
         modifier = modifier,
         horizontalAlignment = Alignment.End,
         verticalArrangement = Arrangement.spacedBy(2.dp)
     ) {
         Text(
-            text = hexesHeld.toString(),
+            text = holdings,
             style = MaterialTheme.typography.displayLarge,
-            color = TextPrimary,
-            modifier = Modifier.testTag(MapHudTags.HELD)
+            color = if (holdings == "--") TextMuted else TextPrimary,
+            modifier = Modifier
+                .testTag(MapHudTags.HELD)
+                .semantics {
+                    contentDescription =
+                        if (holdings == "--") "Hexes held: unknown" else "Hexes held: $holdings"
+                }
         )
         Text(
             text = "HEXES HELD",
@@ -142,14 +212,12 @@ private fun Holdings(hexesHeld: Int, delta: Int, modifier: Modifier = Modifier) 
 
 @Composable
 private fun CaptureAction(
-    availability: CaptureAvailability,
     label: String,
+    enabled: Boolean,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val enabled = availability == CaptureAvailability.AVAILABLE
     val shape = RoundedCornerShape(14.dp)
-
     Box(
         modifier = modifier
             .clip(shape)

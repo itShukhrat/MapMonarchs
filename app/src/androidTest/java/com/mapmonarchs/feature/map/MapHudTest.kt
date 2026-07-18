@@ -5,8 +5,11 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.mapmonarchs.domain.model.AppError
+import com.mapmonarchs.domain.validation.RejectionReason
 import com.mapmonarchs.ui.theme.MapMonarchsTheme
 import org.junit.Assert.assertEquals
 import org.junit.Rule
@@ -15,7 +18,7 @@ import org.junit.runner.RunWith
 
 /**
  * The HUD is tested in isolation from MapboxMap on purpose: the GL surface needs
- * a real map context, while the HUD is the part that carries actual state logic.
+ * a real map context, while the HUD carries the state logic worth asserting.
  */
 @RunWith(AndroidJUnit4::class)
 class MapHudTest {
@@ -25,51 +28,64 @@ class MapHudTest {
 
     private fun state(
         handle: String = "monarch",
-        hexesHeld: Int = 0,
-        delta: Int = 0,
-        availability: CaptureAvailability = CaptureAvailability.AVAILABLE
+        territory: TerritoryLoad = TerritoryLoad.Loaded(emptyList()),
+        capture: CaptureState = CaptureState.Ready,
+        delta: Int = 0
     ) = MapUiState(
         handle = handle,
         territoryColor = Color(0xFF4C8DFF),
-        hexesHeld = hexesHeld,
-        hexesHeldDelta = delta,
-        captureAvailability = availability,
-        locationPermissionGranted = true,
-        hasFix = true,
-        lastRejection = null
+        territory = territory,
+        capture = capture,
+        hexesHeldDelta = delta
     )
 
     @Test
-    fun rendersHandleUppercasedAndHoldingsFromState() {
+    fun rendersHandleUppercased() {
         rule.setContent {
-            MapMonarchsTheme { MapHud(state = state(handle = "shukhrat", hexesHeld = 47), onCapture = {}) }
+            MapMonarchsTheme { MapHud(state(handle = "shukhrat"), onCapture = {}, onRetry = {}) }
         }
         rule.onNodeWithTag(MapHudTags.HANDLE).assertTextEquals("SHUKHRAT")
-        rule.onNodeWithTag(MapHudTags.HELD).assertTextEquals("47")
     }
 
     @Test
-    fun showsPositiveDeltaWithExplicitSign() {
+    fun holdingsShowUnknownRatherThanZero() {
         rule.setContent {
-            MapMonarchsTheme { MapHud(state = state(delta = 3), onCapture = {}) }
+            MapMonarchsTheme { MapHud(state(), onCapture = {}, onRetry = {}) }
         }
-        rule.onNodeWithTag(MapHudTags.DELTA).assertTextEquals("+3")
+        rule.onNodeWithTag(MapHudTags.HELD).assertTextEquals("--")
     }
 
     @Test
-    fun hidesDeltaWhenZero() {
+    fun failureStripIsHiddenWhenTerritoryLoads() {
         rule.setContent {
-            MapMonarchsTheme { MapHud(state = state(delta = 0), onCapture = {}) }
+            MapMonarchsTheme { MapHud(state(), onCapture = {}, onRetry = {}) }
         }
-        rule.onNodeWithTag(MapHudTags.DELTA).assertDoesNotExist()
+        rule.onNodeWithTag(MapHudTags.ERROR).assertDoesNotExist()
     }
 
     @Test
-    fun captureInvokesCallbackWhenAvailable() {
+    fun failureStripAppearsAndRetryWorksWhenTerritoryFails() {
+        var retries = 0
+        rule.setContent {
+            MapMonarchsTheme {
+                MapHud(
+                    state(territory = TerritoryLoad.Failed(AppError.SchemaMissing("42P01"))),
+                    onCapture = {},
+                    onRetry = { retries++ }
+                )
+            }
+        }
+        rule.onNodeWithTag(MapHudTags.ERROR).assertIsDisplayed()
+        rule.onNodeWithText("RETRY").performClick()
+        assertEquals(1, retries)
+    }
+
+    @Test
+    fun captureInvokesCallbackWhenReady() {
         var clicks = 0
         rule.setContent {
             MapMonarchsTheme {
-                MapHud(state = state(availability = CaptureAvailability.AVAILABLE), onCapture = { clicks++ })
+                MapHud(state(capture = CaptureState.Ready), onCapture = { clicks++ }, onRetry = {})
             }
         }
         rule.onNodeWithTag(MapHudTags.CAPTURE).assertIsDisplayed().performClick()
@@ -77,14 +93,26 @@ class MapHudTest {
     }
 
     @Test
-    fun captureDoesNotInvokeCallbackWhenOutOfRange() {
+    fun captureIsInertWhenBlocked() {
         var clicks = 0
         rule.setContent {
             MapMonarchsTheme {
-                MapHud(state = state(availability = CaptureAvailability.UNAVAILABLE), onCapture = { clicks++ })
+                MapHud(
+                    state(capture = CaptureState.Blocked(RejectionReason.MOCK_LOCATION)),
+                    onCapture = { clicks++ },
+                    onRetry = {}
+                )
             }
         }
-        rule.onNodeWithTag(MapHudTags.CAPTURE).performClick()
+        rule.onNodeWithTag(MapHudTags.CAPTURE).assertTextEquals("MOCK LOCATION").performClick()
         assertEquals(0, clicks)
+    }
+
+    @Test
+    fun deltaHiddenWhenZero() {
+        rule.setContent {
+            MapMonarchsTheme { MapHud(state(delta = 0), onCapture = {}, onRetry = {}) }
+        }
+        rule.onNodeWithTag(MapHudTags.DELTA).assertDoesNotExist()
     }
 }

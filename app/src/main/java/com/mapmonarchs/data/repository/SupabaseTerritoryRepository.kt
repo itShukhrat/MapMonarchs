@@ -1,10 +1,13 @@
 package com.mapmonarchs.data.repository
 
+import android.util.Log
 import com.mapmonarchs.data.dto.HexOwnershipDto
 import com.mapmonarchs.data.dto.toDomain
+import com.mapmonarchs.data.remote.toAppError
 import com.mapmonarchs.domain.model.CaptureOutcome
 import com.mapmonarchs.domain.model.HexOwnership
 import com.mapmonarchs.domain.model.LocationFix
+import com.mapmonarchs.domain.repository.Outcome
 import com.mapmonarchs.domain.repository.TerritoryRepository
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.postgrest.postgrest
@@ -16,35 +19,38 @@ import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.put
 
+private const val TAG = "TerritoryRepo"
+
 class SupabaseTerritoryRepository(
     private val client: SupabaseClient
 ) : TerritoryRepository {
 
-    override suspend fun ownershipFor(h3Indexes: List<String>): Result<List<HexOwnership>> =
+    override suspend fun territorySnapshot(limit: Int): Outcome<List<HexOwnership>> =
         withContext(Dispatchers.IO) {
-            runCatching {
-                if (h3Indexes.isEmpty()) return@runCatching emptyList()
-                client.postgrest["hex_ownership"]
-                    .select { filter { isIn("h3_index", h3Indexes) } }
+            try {
+                val hexes = client.postgrest["hex_ownership"]
+                    .select { limit(limit.toLong()) }
                     .decodeList<HexOwnershipDto>()
                     .map { it.toDomain() }
+                Outcome.Success(hexes)
+            } catch (t: Throwable) {
+                val error = t.toAppError()
+                // Logged with the cause, then RETURNED. This is not a silent
+                // catch: the failure reaches the UI and is rendered.
+                Log.w(TAG, "territorySnapshot failed: ${error.technical}", t)
+                Outcome.Failure(error)
             }
         }
 
     /**
-     * UNVERIFIED END-TO-END.
-     *
-     * Calls attempt_capture(), which has not yet been applied to the database, so
-     * this path has never executed against a real server. It compiles and the
-     * shape is right; that is all that is currently proven. Do not treat it as
-     * working until the schema is applied and the H3 sanity check returns
-     * 8928308280fffff.
+     * GATED -- never executed against a real server. attempt_capture() has not
+     * been applied to the database. Compiles; that is all that is proven.
      *
      * Note what is sent: raw lat/lng only. No hex index -- the server derives it.
      */
-    override suspend fun attemptCapture(fix: LocationFix): Result<CaptureOutcome> =
+    override suspend fun attemptCapture(fix: LocationFix): Outcome<CaptureOutcome> =
         withContext(Dispatchers.IO) {
-            runCatching {
+            try {
                 val params = buildJsonObject {
                     put("_lat", fix.latitude)
                     put("_lng", fix.longitude)
@@ -58,17 +64,20 @@ class SupabaseTerritoryRepository(
                     .decodeAs<JsonObject>()
 
                 val ok = response["ok"]?.jsonPrimitive?.content?.toBooleanStrictOrNull() ?: false
-                if (ok) {
+                val outcome = if (ok) {
                     CaptureOutcome.Applied(
                         h3Index = response["h3"]?.jsonPrimitive?.content.orEmpty(),
                         action = response["action"]?.jsonPrimitive?.content.orEmpty(),
                         ownerId = response["owner"]?.jsonPrimitive?.content.orEmpty()
                     )
                 } else {
-                    CaptureOutcome.Rejected(
-                        reason = response["reason"]?.jsonPrimitive?.content.orEmpty()
-                    )
+                    CaptureOutcome.Rejected(response["reason"]?.jsonPrimitive?.content.orEmpty())
                 }
+                Outcome.Success(outcome)
+            } catch (t: Throwable) {
+                val error = t.toAppError()
+                Log.w(TAG, "attemptCapture failed: ${error.technical}", t)
+                Outcome.Failure(error)
             }
         }
 }
