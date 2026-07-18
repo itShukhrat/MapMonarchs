@@ -23,3 +23,6 @@ captures/
 
 # --- Mapbox / keys pulled at build time ---
 mapbox.token
+
+# --- from Android Studio wizard ---
+.externalNativeBuild
