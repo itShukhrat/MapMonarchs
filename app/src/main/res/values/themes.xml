@@ -1,5 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <style name="Theme.MapMonarchs" parent="android:Theme.Material.Light.NoActionBar" />
+    <!--
+      Dark launch theme. The wizard default was Theme.Material.Light.NoActionBar,
+      which flashed a white window for ~1s on every cold start before Compose drew
+      the dark UI. On a dark premium app that flash reads as a bug, so the launch
+      window background matches Void (#07090D) exactly.
+    -->
+    <style name="Theme.MapMonarchs" parent="android:Theme.Material.NoActionBar">
+        <item name="android:windowBackground">@color/void_black</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+    </style>
 </resources>
