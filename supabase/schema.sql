@@ -13,10 +13,26 @@ create extension if not exists h3          with schema extensions;
 create extension if not exists h3_postgis  with schema extensions;
 
 -- ---- Tables ----------------------------------------------------------------
+-- profiles is an ANCHOR, not an identity store.
+--
+-- It deliberately carries no handle and no colour. Both are derived on the
+-- CLIENT from the user id (SHA-256 -> 6-char callsign; SHA-256 -> one of 8
+-- palette colours), which makes them deterministic and identical for every
+-- viewer. Storing a second copy here created two different truths for the same
+-- player:
+--
+--   * handle was 'monarch_' || substr(id, 1, 8) in a WORLD-READABLE table,
+--     publishing the first 8 characters of every user's UUID. The client
+--     hashes the id precisely so no fragment of it is ever rendered; the
+--     server was undoing that.
+--   * colour was assigned by random() from a 6-colour list while the client
+--     derives from an 8-colour list, so the same player had two different
+--     colours depending on which source you read.
+--
+-- That divergence would surface only once other players render on the map --
+-- by which point it is a data migration rather than a deletion.
 create table if not exists public.profiles (
   id         uuid primary key references auth.users(id) on delete cascade,
-  handle     text unique,
-  color      text not null default '#3B82F6',
   created_at timestamptz not null default now()
 );
 
@@ -43,6 +59,10 @@ create table if not exists public.location_events (
   created_at timestamptz not null default now()
 );
 create index if not exists idx_events_user_time on public.location_events(user_id, created_at desc);
+
+-- "Which hexes do I hold?" is the most-read query in the game and is a
+-- sequential scan without this.
+create index if not exists idx_hex_owner on public.hex_ownership(owner_id);
 
 -- ---- Row Level Security ----------------------------------------------------
 alter table public.profiles       enable row level security;
@@ -78,12 +98,8 @@ $$;
 create or replace function public.handle_new_user()
 returns trigger language plpgsql security definer set search_path = public as $$
 begin
-  insert into public.profiles(id, handle, color)
-  values (
-    new.id,
-    'monarch_' || substr(new.id::text, 1, 8),
-    (array['#3B82F6','#22D3EE','#A855F7','#F59E0B','#10B981','#EF4444'])[1 + floor(random()*6)]
-  )
+  -- Anchor row only. Identity is derived client-side from the user id.
+  insert into public.profiles(id) values (new.id)
   on conflict (id) do nothing;
   return new;
 end; $$;
@@ -201,10 +217,33 @@ begin
   end if;
 end; $$;
 
-grant execute on function public.attempt_capture to authenticated;
+-- Postgres grants EXECUTE on new functions to PUBLIC by default, so the grant
+-- below does not by itself keep anon out. The body already returns
+-- not_authenticated when auth.uid() is null, so this is defence in depth --
+-- but an unauthenticated caller should not reach the body at all.
+revoke execute on function public.attempt_capture(
+  double precision, double precision, real, real, boolean
+) from public;
+grant execute on function public.attempt_capture(
+  double precision, double precision, real, real, boolean
+) to authenticated;
 
 -- ---- Realtime: push hex ownership changes to the map live -------------------
-alter publication supabase_realtime add table public.hex_ownership;
+-- Every other statement in this file is re-runnable; this one was not. ALTER
+-- PUBLICATION ... ADD TABLE errors with "relation is already member" on a
+-- second run -- and the most likely reason to re-run this file is the sanity
+-- check below failing and the point() order needing a swap.
+do $$
+begin
+  if not exists (
+    select 1 from pg_publication_tables
+    where pubname = 'supabase_realtime'
+      and schemaname = 'public'
+      and tablename = 'hex_ownership'
+  ) then
+    alter publication supabase_realtime add table public.hex_ownership;
+  end if;
+end $$;
 
 -- ============================================================================
 -- SANITY CHECK — run this once. It MUST return 8928308280fffff.
