@@ -96,7 +96,11 @@ class ShellNavigatorTest {
     }
 
     @Test
-    fun `command routes do not include map - map has its own entry`() {
-        assertFalse(COMMAND_ROUTES.contains(Route.Map))
+    fun `map is a first-class command entry and is never duplicated`() {
+        // Map used to be rendered as a separate hardcoded row beneath the command
+        // list. It is now a normal COMMAND_ROUTES member, so the menu has one
+        // source of truth -- and exactly one MAP entry.
+        assertTrue(COMMAND_ROUTES.contains(Route.Map))
+        assertEquals(1, ALL_ROUTES.count { it == Route.Map })
     }
 }

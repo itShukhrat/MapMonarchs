@@ -25,7 +25,10 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.mapmonarchs.data.local.FirstRunStore
 import com.mapmonarchs.data.local.TrackingPreferences
+import com.mapmonarchs.feature.diagnostics.DiagnosticsScreen
+import com.mapmonarchs.feature.help.HelpScreen
 import com.mapmonarchs.feature.identity.IdentityScreen
+import com.mapmonarchs.feature.locked.LockedScreen
 import com.mapmonarchs.feature.map.MapScreen
 import com.mapmonarchs.feature.map.MapViewModel
 import com.mapmonarchs.feature.map.MapViewModelFactory
@@ -41,8 +44,10 @@ import com.mapmonarchs.feature.settings.SettingsScreen
  *  - The map is always the root; it is never popped and never sits behind a tab.
  *  - Navigation is a launcher (command menu), not persistent chrome, so the map
  *    keeps the full frame.
- *  - Secondary screens replace the map rather than floating over it. A half-
- *    transparent sheet over a live GL map is expensive and reads as clutter.
+ *  - Secondary screens replace the map rather than floating over it. A
+ *    half-transparent sheet over a live GL map is expensive and reads as clutter.
+ *  - Locked routes are real destinations, not disabled rows. A tap that does
+ *    nothing reads as a bug; a tap that explains the boundary reads as design.
  */
 @Composable
 fun AppShell(modifier: Modifier = Modifier) {
@@ -68,23 +73,39 @@ fun AppShell(modifier: Modifier = Modifier) {
         return
     }
 
-    // Back closes the menu, then unwinds the stack, then falls through to the
-    // system (exit). Handled explicitly so back never strands the player.
-    BackHandler(enabled = navigator.commandMenuOpen || navigator.canGoBack) {
-        navigator.back()
-    }
+    BackHandler(enabled = navigator.commandMenuOpen || navigator.canGoBack) { navigator.back() }
 
     Box(modifier = modifier.fillMaxSize()) {
-        when (navigator.current) {
-            Route.Map -> MapScreen(viewModel = viewModel)
+        val route = navigator.current
+        val lock = route.lock
 
-            Route.Identity -> IdentityScreen(
+        when {
+            lock != null -> LockedScreen(
+                title = route.title,
+                lock = lock,
+                onBack = { navigator.back() },
+                onOpenDiagnostics = { navigator.navigateTo(Route.Diagnostics) }
+            )
+
+            route == Route.Map -> MapScreen(viewModel = viewModel)
+
+            route == Route.Identity -> IdentityScreen(
                 identity = state.identity,
                 onBack = { navigator.back() },
                 onRetry = { viewModel.resolveIdentity() }
             )
 
-            Route.Settings -> SettingsScreen(
+            route == Route.Diagnostics -> DiagnosticsScreen(
+                state = state,
+                trackingMode = trackingMode,
+                onBack = { navigator.back() },
+                onRefresh = {
+                    viewModel.resolveIdentity()
+                    viewModel.loadTerritory()
+                }
+            )
+
+            route == Route.Settings -> SettingsScreen(
                 locationGranted = state.locationPermissionGranted,
                 trackingMode = trackingMode,
                 onTrackingModeChange = { mode ->
@@ -96,16 +117,22 @@ fun AppShell(modifier: Modifier = Modifier) {
                 onBack = { navigator.back() }
             )
 
-            Route.Safety -> SafetyScreen(onBack = { navigator.back() })
+            route == Route.Help -> HelpScreen(
+                state = state,
+                onBack = { navigator.back() },
+                onOpenDiagnostics = { navigator.navigateTo(Route.Diagnostics) },
+                onOpenSettings = { navigator.navigateTo(Route.Settings) }
+            )
 
-            Route.About -> AboutScreen(onBack = { navigator.back() })
+            route == Route.Safety -> SafetyScreen(onBack = { navigator.back() })
+
+            route == Route.About -> AboutScreen(onBack = { navigator.back() })
         }
 
-        // The command button belongs to the map only. On secondary screens the
-        // BACK control is the navigation, and two competing affordances would be
-        // one too many.
+        // The command button belongs to the map only. On every other screen BACK
+        // is the navigation, and two competing affordances would be one too many.
         AnimatedVisibility(
-            visible = navigator.current == Route.Map && !navigator.commandMenuOpen,
+            visible = route == Route.Map && !navigator.commandMenuOpen,
             enter = fadeIn(),
             exit = fadeOut(),
             modifier = Modifier
@@ -118,7 +145,7 @@ fun AppShell(modifier: Modifier = Modifier) {
 
         CommandMenu(
             visible = navigator.commandMenuOpen,
-            current = navigator.current,
+            current = route,
             onSelect = { navigator.navigateTo(it) },
             onDismiss = { navigator.closeCommandMenu() }
         )

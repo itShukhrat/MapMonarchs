@@ -6,14 +6,18 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -54,27 +58,22 @@ fun CommandButton(onClick: () -> Unit, modifier: Modifier = Modifier) {
             .semantics { contentDescription = "Open command menu" },
         contentAlignment = Alignment.Center
     ) {
-        // Three stacked bars, drawn as text-free geometry: a menu mark that does
-        // not borrow a stock hamburger icon.
-        Column(verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(3.dp)) {
+        Column(verticalArrangement = Arrangement.spacedBy(3.dp)) {
             repeat(3) {
-                Box(
-                    modifier = Modifier
-                        .size(width = 14.dp, height = 1.5.dp)
-                        .background(TextPrimary)
-                )
+                Box(modifier = Modifier.size(width = 14.dp, height = 1.5.dp).background(TextPrimary))
             }
         }
     }
 }
 
 /**
- * Full-screen command menu.
+ * Full-screen command menu, tiered.
  *
- * Typographic, not a drawer of icons and cards. Large entries in the display
- * scale read as a strategy game's command list; a Material NavigationDrawer
- * would read as any productivity app. Dismissed by tapping anywhere off the
- * list, which is why the scrim itself is clickable.
+ * Three weights, deliberately: COMMAND is what you do, REFERENCE is what you read
+ * once, LOCKED is what does not exist yet. A flat list at equal weight would make
+ * a product that is mostly locked look mostly broken; hiding the locked entries
+ * would leave the player with no sense of where this is going. Dimmed and last is
+ * the honest middle.
  */
 @Composable
 fun CommandMenu(
@@ -84,59 +83,98 @@ fun CommandMenu(
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    AnimatedVisibility(
-        visible = visible,
-        enter = fadeIn(),
-        exit = fadeOut(),
-        modifier = modifier
-    ) {
+    AnimatedVisibility(visible = visible, enter = fadeIn(), exit = fadeOut(), modifier = modifier) {
         val interaction = remember { MutableInteractionSource() }
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Void.copy(alpha = 0.96f))
-                .clickable(
-                    interactionSource = interaction,
-                    indication = null,
-                    onClick = onDismiss
-                )
+                .background(Void.copy(alpha = 0.97f))
+                .clickable(interactionSource = interaction, indication = null, onClick = onDismiss)
                 .testTag(UiTags.COMMAND_MENU)
         ) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
                     .safeDrawingPadding()
-                    .padding(horizontal = 28.dp, vertical = 32.dp)
+                    .verticalScroll(rememberScrollState())
+                    .padding(horizontal = 28.dp, vertical = 28.dp)
             ) {
-                Text(
-                    text = "COMMAND",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = TextMuted
-                )
-
+                MenuGroupLabel("COMMAND")
                 COMMAND_ROUTES.forEach { route ->
-                    val isCurrent = route == current
-                    Text(
-                        text = route.title,
-                        style = MaterialTheme.typography.displayMedium,
-                        color = if (isCurrent) SovereignGlow else TextPrimary,
-                        modifier = Modifier
-                            .padding(top = 26.dp)
-                            .clickable { onSelect(route) }
-                            .testTag("command_${route.title}")
-                    )
+                    PrimaryEntry(route = route, isCurrent = route == current, onSelect = onSelect)
                 }
 
-                Text(
-                    text = "MAP",
-                    style = MaterialTheme.typography.displayMedium,
-                    color = if (current == Route.Map) SovereignGlow else TextPrimary,
-                    modifier = Modifier
-                        .padding(top = 26.dp)
-                        .clickable { onSelect(Route.Map) }
-                        .testTag("command_MAP")
-                )
+                MenuGroupLabel("REFERENCE", topPadding = 34.dp)
+                REFERENCE_ROUTES.forEach { route ->
+                    SecondaryEntry(route = route, isCurrent = route == current, locked = false, onSelect = onSelect)
+                }
+
+                MenuGroupLabel("LOCKED", topPadding = 34.dp)
+                LOCKED_ROUTES.forEach { route ->
+                    SecondaryEntry(route = route, isCurrent = route == current, locked = true, onSelect = onSelect)
+                }
+
+                Box(modifier = Modifier.padding(bottom = 40.dp))
             }
         }
+    }
+}
+
+@Composable
+private fun MenuGroupLabel(text: String, topPadding: androidx.compose.ui.unit.Dp = 0.dp) {
+    Text(
+        text = text,
+        style = MaterialTheme.typography.labelSmall,
+        color = TextMuted,
+        modifier = Modifier.padding(top = topPadding, bottom = 4.dp)
+    )
+}
+
+@Composable
+private fun PrimaryEntry(route: Route, isCurrent: Boolean, onSelect: (Route) -> Unit) {
+    Text(
+        text = route.title,
+        style = MaterialTheme.typography.displayMedium,
+        color = if (isCurrent) SovereignGlow else TextPrimary,
+        modifier = Modifier
+            .padding(top = 18.dp)
+            .clickable { onSelect(route) }
+            .testTag("command_${route.title}")
+    )
+}
+
+/**
+ * Locked entries stay tappable. Tapping through to a surface that explains the
+ * lock is far more useful than an inert row that ignores the tap -- an unresponsive
+ * entry reads as a bug, not as a boundary.
+ */
+@Composable
+private fun SecondaryEntry(route: Route, isCurrent: Boolean, locked: Boolean, onSelect: (Route) -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 16.dp)
+            .clickable { onSelect(route) }
+            .testTag("command_${route.title}"),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        if (locked) {
+            Box(
+                modifier = Modifier
+                    .size(10.dp)
+                    .clip(HexagonShape)
+                    .border(1.dp, SlateEdge, HexagonShape)
+            )
+        }
+        Text(
+            text = route.title,
+            style = MaterialTheme.typography.titleLarge,
+            color = when {
+                isCurrent -> SovereignGlow
+                locked -> TextMuted
+                else -> TextPrimary
+            },
+            modifier = Modifier.padding(start = if (locked) 12.dp else 0.dp)
+        )
     }
 }
