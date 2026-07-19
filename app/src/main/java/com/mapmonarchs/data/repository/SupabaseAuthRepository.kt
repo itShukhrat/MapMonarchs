@@ -14,12 +14,18 @@ import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.auth.OtpType
 import io.github.jan.supabase.auth.auth
 import io.github.jan.supabase.auth.providers.builtin.OTP
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.TimeoutCancellationException
+import kotlinx.coroutines.withTimeout
 import kotlinx.coroutines.withContext
 import java.net.HttpURLConnection
 import java.net.URL
 
 private const val TAG = "AuthRepo"
+
+/** Generous ceiling: a local session read is milliseconds, never seconds. */
+private const val SESSION_INIT_TIMEOUT_MS = 10_000L
 
 class SupabaseAuthRepository(
     private val client: SupabaseClient,
@@ -33,7 +39,23 @@ class SupabaseAuthRepository(
             // currentUserOrNull() can return null on a cold start even though a
             // valid session exists -- which would sign the player out and, on the
             // next sign-in, hand them a different identity entirely.
-            client.auth.awaitInitialization()
+            //
+            // BOUNDED, because an unbounded await is a silent hang. Proven, not
+            // hypothesised: in an instrumented test with no Activity started,
+            // awaitInitialization() never returns. The test logged nothing from
+            // this method at all -- not the success line, not the catch line --
+            // because execution never left the await. Whether the same stall can
+            // occur in production is UNPROVEN; the app has always completed it on
+            // device. But a wait with no ceiling cannot fail loudly: identity
+            // would sit at Resolving forever, the HUD would read IDENTIFYING with
+            // no error and no retry, and nothing would be caught or logged. That
+            // is the one failure mode this codebase refuses to ship.
+            //
+            // Ten seconds is far beyond any legitimate local-storage read, so a
+            // timeout here means something is genuinely wrong rather than slow.
+            withTimeout(SESSION_INIT_TIMEOUT_MS) {
+                client.auth.awaitInitialization()
+            }
 
             val user = client.auth.currentUserOrNull()
             if (user == null) {
@@ -43,6 +65,23 @@ class SupabaseAuthRepository(
                 Log.i(TAG, "restored session")
                 Identity.from(user.id)
             }
+        } catch (t: TimeoutCancellationException) {
+            // A named, retryable failure instead of an invisible stall. Unavailable
+            // (not SignedOut) because we do not know whether a session exists --
+            // reporting SignedOut would be a claim we cannot support, and would
+            // silently drop a player who is in fact signed in.
+            Log.w(TAG, "session init did not complete within ${SESSION_INIT_TIMEOUT_MS}ms", t)
+            Identity.Unavailable(
+                AppError.AuthUnavailable(
+                    "session initialisation timed out after ${SESSION_INIT_TIMEOUT_MS}ms"
+                )
+            )
+        } catch (t: CancellationException) {
+            // Not ours to swallow. This is the caller cancelling us -- a ViewModel
+            // being cleared, a scope shutting down -- and converting it into a
+            // domain error would report a failure to a screen that no longer
+            // exists, and would break structured concurrency.
+            throw t
         } catch (t: Throwable) {
             val error = t.toAppError()
             Log.w(TAG, "restoreSession failed: ${error.technical}", t)
