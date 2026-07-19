@@ -109,6 +109,27 @@ create trigger on_auth_user_created
   after insert on auth.users
   for each row execute function public.handle_new_user();
 
+-- Backfill. The trigger above fires on INSERT only, so it covers future signups
+-- and nobody else. Every user who already exists in auth.users when this
+-- migration runs would otherwise have no profiles row -- and both
+-- hex_ownership.owner_id and location_events.user_id are FKs to profiles(id).
+--
+-- The failure that causes is nasty and late: the first attempt_capture by such a
+-- user violates the FK on the location_events insert, raising an unhandled
+-- plpgsql exception. The RPC then returns a 500 carrying a raw Postgres string
+-- instead of {ok:false, reason:...}, which the client can only file under
+-- "backend failure" -- indistinguishable from the server being down, and only
+-- discovered by someone standing outdoors tapping CLAIM.
+--
+-- This matters for the sequencing we are actually in: email delivery is being
+-- tested BEFORE this migration is applied, so the first real account will be
+-- exactly the user this backfill exists for.
+--
+-- Anchor rows only, and idempotent, so re-running the file is harmless.
+insert into public.profiles(id)
+select u.id from auth.users u
+on conflict (id) do nothing;
+
 -- ============================================================================
 -- attempt_capture — the only path that mutates territory.
 -- Client sends raw lat/lng (+ accuracy/speed/mock flag). Server derives the hex
