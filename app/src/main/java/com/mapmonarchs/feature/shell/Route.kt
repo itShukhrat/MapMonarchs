@@ -1,5 +1,7 @@
 package com.mapmonarchs.feature.shell
 
+import com.mapmonarchs.domain.model.Blocker
+
 /**
  * A feature that exists in the design but cannot honestly be used yet.
  *
@@ -120,3 +122,46 @@ val LOCKED_ROUTES: List<Route> = listOf(
 )
 
 val ALL_ROUTES: List<Route> = COMMAND_ROUTES + REFERENCE_ROUTES + LOCKED_ROUTES
+
+/**
+ * Where a blocked action should send the player.
+ *
+ * WHY THIS IS A PROJECTION OF [Blocker] AND NOT ITS OWN RULE: AppShell used to
+ * decide this inline with `identity !is SignedIn && !previewMode`, which was a
+ * second, simpler copy of a precedence rule Blocker already owned. The two
+ * disagreed in a reachable state:
+ *
+ *   signed out AND location permission denied
+ *     -> Blocker says LocationPermissionMissing (position outranks identity)
+ *     -> the capture button reads "LOCATION OFF"
+ *     -> the old routing saw "no session" and sent the player to SIGN IN
+ *
+ * A button that says LOCATION OFF and opens a sign-in form is the same defect as
+ * the HUD and diagnostics naming different blockers -- one rule, two
+ * hand-maintained copies. This was the fourth surface of that rule and the one
+ * missed when the other three were consolidated, because it was not a `when`
+ * chain and so did not look like one.
+ *
+ * Exhaustive over Blocker on purpose: a new variant will not compile until it
+ * has been given a destination.
+ */
+fun remedyRouteFor(blocker: Blocker): Route = when (blocker) {
+    // The blocker's own explanation says "Grant it in SETTINGS", and SETTINGS is
+    // where permission state is shown along with the fact that Android will not
+    // ask again once denied. Prose and destination must not drift apart.
+    is Blocker.LocationPermissionMissing -> Route.Settings
+
+    // Identity is the blocker and signing in is the action that clears it.
+    is Blocker.NotSignedIn,
+    is Blocker.IdentityUnavailable -> Route.SignIn
+
+    // Nothing here is actionable by the player right now -- a session being
+    // established, a fix being acquired, a reading rejected, or a backend
+    // function that was never deployed. Status is the honest destination; a
+    // sign-in form would imply an action that would not help.
+    is Blocker.IdentityResolving,
+    is Blocker.AcquiringFix,
+    is Blocker.FixRejected,
+    is Blocker.CaptureNotDeployed,
+    is Blocker.None -> Route.Diagnostics
+}

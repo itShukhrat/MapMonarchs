@@ -34,6 +34,7 @@ import com.mapmonarchs.feature.help.HelpScreen
 import com.mapmonarchs.feature.identity.IdentityScreen
 import com.mapmonarchs.feature.locked.LockedScreen
 import com.mapmonarchs.feature.map.MapScreen
+import com.mapmonarchs.feature.map.resolveBlocker
 import com.mapmonarchs.feature.map.MapViewModel
 import com.mapmonarchs.feature.map.MapViewModelFactory
 import com.mapmonarchs.feature.onboarding.OnboardingScreen
@@ -107,8 +108,9 @@ fun AppShell(modifier: Modifier = Modifier) {
                 // sign-in; sending the player to a status page they cannot act on
                 // would be technically informative and practically useless.
                 onExplainBlocker = {
-                    val needsSession = state.identity !is Identity.SignedIn && !state.previewMode
-                    navigator.navigateTo(if (needsSession) Route.SignIn else Route.Diagnostics)
+                    // Routes by the SAME blocker the button is labelled from, so
+                    // a button reading LOCATION OFF can never open a sign-in form.
+                    navigator.navigateTo(remedyRouteFor(resolveBlocker(state)))
                 }
             )
 
