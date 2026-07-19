@@ -4,6 +4,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.mapmonarchs.data.remote.SupabaseProvider
 import com.mapmonarchs.domain.model.CapabilitiesProbe
 import com.mapmonarchs.domain.model.Identity
+import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -139,6 +140,60 @@ class SupabaseAuthRepositoryTest {
             "a signed-out device must never restore an authenticated user, got $identity",
             identity !is Identity.SignedIn
         )
+    }
+
+    // --- the timeout branch, proven deterministically ------------------------
+
+    /**
+     * The branch that exists because of the stall this suite found, exercised on
+     * purpose rather than waited for.
+     *
+     * An initialiser that never completes is injected, so this does not race the
+     * real one and cannot flake. Everything the branch promises is asserted:
+     * it returns, it returns Unavailable, and it says why.
+     */
+    @Test
+    fun aStalledInitialisationBecomesANamedFailureRatherThanAHang() {
+        val neverCompletes = SupabaseAuthRepository(
+            client = SupabaseProvider.client,
+            awaitInitialization = { awaitCancellation() },
+            sessionInitTimeoutMs = 300L
+        )
+
+        val (identity, elapsed) = timed { neverCompletes.restoreSession() }
+
+        assertTrue(
+            "a stalled init must not hang the caller; took ${elapsed}ms",
+            elapsed < 5_000L
+        )
+        assertTrue(
+            "a stall is not knowledge that nobody is signed in, got $identity",
+            identity is Identity.Unavailable
+        )
+        assertTrue(
+            "must never report SignedOut on a stall -- that would silently drop a " +
+                "player who does have a session",
+            identity !is Identity.SignedOut
+        )
+        val cause = (identity as Identity.Unavailable).error.technical
+        assertTrue("the cause must name the timeout, got '$cause'", cause.contains("timed out"))
+    }
+
+    /**
+     * A stall must not be mistaken for a working session either. Belt and braces
+     * on the variant that would be worst: inventing an authenticated user while
+     * the session layer is visibly broken.
+     */
+    @Test
+    fun aStalledInitialisationNeverFabricatesAUser() {
+        val neverCompletes = SupabaseAuthRepository(
+            client = SupabaseProvider.client,
+            awaitInitialization = { awaitCancellation() },
+            sessionInitTimeoutMs = 300L
+        )
+
+        val (identity, _) = timed { neverCompletes.restoreSession() }
+        assertTrue("no user exists to restore, got $identity", identity !is Identity.SignedIn)
     }
 
     // --- the probe, end to end ----------------------------------------------

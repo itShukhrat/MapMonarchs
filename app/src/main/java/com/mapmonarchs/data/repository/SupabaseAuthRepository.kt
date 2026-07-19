@@ -30,7 +30,24 @@ private const val SESSION_INIT_TIMEOUT_MS = 10_000L
 class SupabaseAuthRepository(
     private val client: SupabaseClient,
     private val supabaseUrl: String = BuildConfig.SUPABASE_URL,
-    private val anonKey: String = BuildConfig.SUPABASE_ANON_KEY
+    private val anonKey: String = BuildConfig.SUPABASE_ANON_KEY,
+    /**
+     * Seams, present ONLY so the timeout branch below can be proven.
+     *
+     * That branch is the app's entire response to a stall that was actually
+     * observed once and never reproduced. If it were wrong -- returning
+     * SignedOut, or losing the cause -- a player with a valid session would be
+     * silently signed out at the exact moment the app was already misbehaving.
+     * Asserting it by reading the code was not good enough for a path that only
+     * runs when something has already gone wrong.
+     *
+     * A test could instead have passed a 1ms timeout and raced the real
+     * initialiser, but initialisation measured ~4ms on this emulator, so that
+     * test would pass or fail on timing. A flaky test claiming coverage is worse
+     * than an honest gap.
+     */
+    private val awaitInitialization: suspend () -> Unit = { client.auth.awaitInitialization() },
+    private val sessionInitTimeoutMs: Long = SESSION_INIT_TIMEOUT_MS
 ) : AuthRepository {
 
     override suspend fun restoreSession(): Identity = withContext(Dispatchers.IO) {
@@ -53,8 +70,8 @@ class SupabaseAuthRepository(
             //
             // Ten seconds is far beyond any legitimate local-storage read, so a
             // timeout here means something is genuinely wrong rather than slow.
-            withTimeout(SESSION_INIT_TIMEOUT_MS) {
-                client.auth.awaitInitialization()
+            withTimeout(sessionInitTimeoutMs) {
+                awaitInitialization()
             }
 
             val user = client.auth.currentUserOrNull()
@@ -70,10 +87,10 @@ class SupabaseAuthRepository(
             // (not SignedOut) because we do not know whether a session exists --
             // reporting SignedOut would be a claim we cannot support, and would
             // silently drop a player who is in fact signed in.
-            Log.w(TAG, "session init did not complete within ${SESSION_INIT_TIMEOUT_MS}ms", t)
+            Log.w(TAG, "session init did not complete within ${sessionInitTimeoutMs}ms", t)
             Identity.Unavailable(
                 AppError.AuthUnavailable(
-                    "session initialisation timed out after ${SESSION_INIT_TIMEOUT_MS}ms"
+                    "session initialisation timed out after ${sessionInitTimeoutMs}ms"
                 )
             )
         } catch (t: CancellationException) {
