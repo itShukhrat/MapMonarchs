@@ -21,7 +21,7 @@ import com.mapmonarchs.data.local.DeliveryProofStore
 import com.mapmonarchs.data.local.TrackingMode
 import com.mapmonarchs.domain.model.CapabilitiesProbe
 import com.mapmonarchs.domain.model.DeliveryProof
-import com.mapmonarchs.domain.model.redactEmail
+import com.mapmonarchs.domain.model.deliveryProofFor
 import com.mapmonarchs.feature.diagnostics.DiagnosticsState
 import com.mapmonarchs.location.LocationTracker
 import kotlinx.coroutines.Job
@@ -156,20 +156,13 @@ class MapViewModel(
         if (current.sending) return
         viewModelScope.launch {
             _signIn.value = current.copy(sending = true, error = null)
-            val hint = redactEmail(current.email)
-            when (val result = authRepository.requestEmailCode(current.email)) {
-                is CodeRequest.Sent -> {
-                    // REQUESTED, not DELIVERED. The backend accepted the send; no
-                    // one has yet proven a code reached a human being.
-                    recordDelivery(DeliveryProof.Requested(hint, System.currentTimeMillis()))
-                    _signIn.value = SignInState.EnteringCode(email = current.email.trim())
-                }
-                is CodeRequest.Failed -> {
-                    recordDelivery(
-                        DeliveryProof.Failed(hint, result.error, System.currentTimeMillis())
-                    )
-                    _signIn.value = current.copy(sending = false, error = result.error)
-                }
+            val result = authRepository.requestEmailCode(current.email)
+            // One place decides what a result means for delivery. This call site
+            // cannot accidentally claim a 200 was an arrived email.
+            recordDelivery(deliveryProofFor(result, current.email, System.currentTimeMillis()))
+            _signIn.value = when (result) {
+                is CodeRequest.Sent -> SignInState.EnteringCode(email = current.email.trim())
+                is CodeRequest.Failed -> current.copy(sending = false, error = result.error)
             }
         }
     }
@@ -177,18 +170,11 @@ class MapViewModel(
     fun resendSignInCode() {
         val current = _signIn.value as? SignInState.EnteringCode ?: return
         viewModelScope.launch {
-            val hint = redactEmail(current.email)
-            when (val result = authRepository.requestEmailCode(current.email)) {
-                is CodeRequest.Sent -> {
-                    recordDelivery(DeliveryProof.Requested(hint, System.currentTimeMillis()))
-                    _signIn.value = current.copy(resent = true, error = null)
-                }
-                is CodeRequest.Failed -> {
-                    recordDelivery(
-                        DeliveryProof.Failed(hint, result.error, System.currentTimeMillis())
-                    )
-                    _signIn.value = current.copy(error = result.error)
-                }
+            val result = authRepository.requestEmailCode(current.email)
+            recordDelivery(deliveryProofFor(result, current.email, System.currentTimeMillis()))
+            _signIn.value = when (result) {
+                is CodeRequest.Sent -> current.copy(resent = true, error = null)
+                is CodeRequest.Failed -> current.copy(error = result.error)
             }
         }
     }
@@ -198,15 +184,14 @@ class MapViewModel(
         if (current.verifying) return
         viewModelScope.launch {
             _signIn.value = current.copy(verifying = true, error = null)
-            when (val result = authRepository.verifyEmailCode(current.email, current.code)) {
+            val result = authRepository.verifyEmailCode(current.email, current.code)
+            // A verified code is the only proof that mail arrived. A rejected one
+            // is ambiguous -- most often a typo -- so the mapping returns null and
+            // the prior record stands rather than being overwritten with a guess.
+            deliveryProofFor(result, current.email, System.currentTimeMillis())
+                ?.let { recordDelivery(it) }
+            when (result) {
                 is CodeVerification.Succeeded -> {
-                    // A correct code was typed back, so mail demonstrably arrived.
-                    // This is the only transition that may claim delivery.
-                    recordDelivery(
-                        DeliveryProof.Delivered(
-                            redactEmail(current.email), System.currentTimeMillis()
-                        )
-                    )
                     // Identity comes from the SERVER's user id, derived -- never
                     // from anything typed into this screen.
                     _uiState.value = _uiState.value.copy(identity = result.identity)
