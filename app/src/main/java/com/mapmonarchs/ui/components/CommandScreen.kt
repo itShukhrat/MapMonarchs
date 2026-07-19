@@ -11,6 +11,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
@@ -25,11 +27,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.disabled
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
+import com.mapmonarchs.ui.theme.DisabledFg
+import com.mapmonarchs.ui.theme.Obsidian
 import com.mapmonarchs.ui.theme.Slate
+import com.mapmonarchs.ui.theme.DisabledFg
+import com.mapmonarchs.ui.theme.Obsidian
 import com.mapmonarchs.ui.theme.SlateEdge
 import com.mapmonarchs.ui.theme.Sovereign
 import com.mapmonarchs.ui.theme.SovereignGlow
@@ -65,12 +75,11 @@ fun CommandScreen(
                 .padding(horizontal = 20.dp, vertical = 18.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(
-                text = "BACK",
-                style = MaterialTheme.typography.labelMedium,
-                color = SovereignGlow,
+            TextCommand(
+                label = "BACK",
+                onClick = onBack,
                 modifier = Modifier
-                    .clickable(onClick = onBack)
+                    .offset(x = (-10).dp)
                     .testTag(UiTags.BACK)
             )
             Text(
@@ -78,7 +87,7 @@ fun CommandScreen(
                 style = MaterialTheme.typography.labelSmall,
                 color = TextMuted,
                 modifier = Modifier
-                    .padding(start = 20.dp)
+                    .padding(start = 10.dp)
                     .testTag(UiTags.SCREEN_TITLE)
             )
         }
@@ -110,6 +119,45 @@ object UiTags {
 
     const val ERROR_STRIP = "ui_error_strip"
     const val RETRY = "ui_retry"
+}
+
+/**
+ * A command that is set as text rather than as a filled control.
+ *
+ * WHY THIS EXISTS: BACK, RESEND CODE, USE A DIFFERENT ADDRESS and EXIT were each
+ * a bare `Text` with `.clickable`, which makes the touch target exactly the size
+ * of the word. "BACK" at labelMedium is roughly 40x14dp -- a third of the 48dp
+ * floor, on the control every single screen depends on to get out. They also
+ * announced as plain text, so a screen reader never called them buttons.
+ *
+ * The padding is what makes the target; the text is only what you see. Keeping
+ * the typographic look was deliberate -- a chevron or a filled button here would
+ * drag the whole product back toward stock Android.
+ */
+@Composable
+fun TextCommand(
+    label: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    color: Color = SovereignGlow
+) {
+    val haptics = LocalHapticFeedback.current
+    Box(
+        modifier = modifier
+            .heightIn(min = 48.dp)
+            .clip(RoundedCornerShape(8.dp))
+            .clickable(
+                role = Role.Button,
+                onClick = {
+                    haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                    onClick()
+                }
+            )
+            .padding(horizontal = 10.dp, vertical = 14.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(text = label, style = MaterialTheme.typography.labelMedium, color = color)
+    }
 }
 
 /** Section divider. A tracked label over a hairline -- no card, no elevation. */
@@ -167,30 +215,103 @@ fun BodyNote(text: String, modifier: Modifier = Modifier) {
     )
 }
 
-/** Primary action. Same geometry as the capture button so the language is one system. */
+/**
+ * Whether an action can be taken, and if not, why.
+ *
+ * A sealed type rather than `enabled: Boolean` plus an optional reason string,
+ * because an unavailable control with no stated reason is not representable this
+ * way. That is the same construction used by Blocker, DeliveryProof and
+ * FeatureLock -- in each case the alternative was a boolean that let the
+ * explanation go missing, and in each case it eventually did.
+ */
+sealed interface ActionState {
+    data object Ready : ActionState
+
+    /** [reason] is announced to screen readers and is never optional. */
+    data class Unavailable(val reason: String) : ActionState
+}
+
+/**
+ * The primary action.
+ *
+ * WHY IT IS NO LONGER A SATURATED SLAB: the fill was `Sovereign`, which is
+ * 0xFF4C8DFF -- byte for byte the first entry of TERRITORY_PALETTE. One player in
+ * eight owns ground drawn in exactly the colour of every primary button in the
+ * app, and on the map screen both are on screen at once. Colour.kt's own rule is
+ * that territory must be the most saturated thing on screen; a full-bleed accent
+ * button broke that rule and made a control indistinguishable from land.
+ *
+ * Emphasis now comes from geometry and edge instead: a dark core, a lit border,
+ * and a FILLED HEXAGON marking the live action. That hexagon already means "this
+ * is the active one" in ChoiceRow and in the command dock indicator, so the
+ * product has one selection language rather than three.
+ *
+ * Unavailable actions stay legible and announce their reason. They do not stay
+ * tappable -- unlike the capture button, whose blocker lives on a server the
+ * player cannot see, these are gated by something visible directly above them
+ * (an empty field). What was missing was never the tap, it was the announcement.
+ */
 @Composable
 fun CommandAction(
     label: String,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    enabled: Boolean = true
+    state: ActionState = ActionState.Ready
 ) {
+    val ready = state is ActionState.Ready
     val shape = RoundedCornerShape(14.dp)
+    val haptics = LocalHapticFeedback.current
+
+    val edge = if (ready) Sovereign else SlateEdge
+    val labelColor = if (ready) SovereignGlow else DisabledFg
+
     Box(
         modifier = modifier
             .fillMaxWidth()
+            // 52dp floor including padding: this is the largest, most-used control
+            // in the product and it is pressed outdoors, one-handed, walking.
+            .heightIn(min = 52.dp)
             .clip(shape)
-            .background(if (enabled) Sovereign else Slate)
-            .border(1.dp, if (enabled) SovereignGlow else SlateEdge, shape)
-            .clickable(enabled = enabled, onClick = onClick)
-            .padding(vertical = 16.dp),
+            .background(if (ready) Obsidian else Slate)
+            .border(if (ready) 1.5.dp else 1.dp, edge, shape)
+            .clickable(
+                enabled = ready,
+                role = Role.Button,
+                onClick = {
+                    haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                    onClick()
+                }
+            )
+            .semantics {
+                if (state is ActionState.Unavailable) {
+                    disabled()
+                    contentDescription = "$label. Unavailable: ${state.reason}"
+                }
+            }
+            .padding(horizontal = 20.dp, vertical = 16.dp),
         contentAlignment = Alignment.Center
     ) {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.labelLarge,
-            color = if (enabled) Void else TextMuted
-        )
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            // Non-colour cue for the live state, so emphasis survives greyscale
+            // and colour-vision deficiency.
+            Box(
+                modifier = Modifier
+                    // 11dp, not 9: below about 10dp the six sides stop resolving
+                    // and it reads as a dot, which loses the only reason it is a
+                    // hexagon rather than a bullet.
+                    .size(11.dp)
+                    .rotate(90f)
+                    .clip(HexagonShape)
+                    .background(if (ready) Sovereign else Color.Transparent)
+                    .border(1.dp, if (ready) Sovereign else DisabledFg, HexagonShape)
+            )
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelLarge,
+                color = labelColor,
+                modifier = Modifier.padding(start = 12.dp)
+            )
+        }
     }
 }
 

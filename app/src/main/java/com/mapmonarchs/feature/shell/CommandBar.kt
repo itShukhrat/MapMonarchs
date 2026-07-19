@@ -139,8 +139,13 @@ fun CommandBar(
             // caught it. matchParentSize measures against the siblings instead,
             // which is exactly what a background layer wants.
             Canvas(modifier = Modifier.matchParentSize()) {
-                val slot = size.width / destinations.size
-                val cx = slot * (indicator + 0.5f)
+                // The indicator's glow is wider than its hexagon, so at the first
+                // and last seats it overran the bar's rounded clip and was cut
+                // flat. Both the canvas and the row below inset by the same
+                // amount, so the shape stays whole and the two stay aligned.
+                val inset = EDGE_INSET.toPx()
+                val slot = (size.width - inset * 2f) / destinations.size
+                val cx = inset + slot * (indicator + 0.5f)
                 val cy = size.height / 2f
                 val r = size.height * 0.30f
 
@@ -170,7 +175,7 @@ fun CommandBar(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 10.dp),
+                .padding(horizontal = EDGE_INSET, vertical = 10.dp),
             horizontalArrangement = Arrangement.SpaceEvenly,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -275,6 +280,12 @@ private fun animationsEnabled(context: android.content.Context): Boolean {
     )
     return scale != 0f
 }
+
+/**
+ * Breathing room at the bar's ends, shared by the indicator canvas and the row so
+ * they cannot drift apart.
+ */
+private val EDGE_INSET = 10.dp
 
 /** Height reserved so map content can inset above the bar without guessing. */
 val CommandBarHeight = 78.dp

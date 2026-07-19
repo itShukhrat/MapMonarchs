@@ -18,11 +18,14 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import com.mapmonarchs.ui.components.ActionState
 import com.mapmonarchs.ui.components.BodyNote
 import com.mapmonarchs.ui.components.CommandAction
 import com.mapmonarchs.ui.components.CommandScreen
 import com.mapmonarchs.ui.components.ErrorStrip
 import com.mapmonarchs.ui.components.SectionHeader
+import com.mapmonarchs.ui.components.TextCommand
+import androidx.compose.foundation.layout.offset
 import com.mapmonarchs.ui.theme.Slate
 import com.mapmonarchs.ui.theme.SlateEdge
 import com.mapmonarchs.ui.theme.Sovereign
@@ -109,7 +112,14 @@ private fun EmailStep(
     CommandAction(
         label = if (state.sending) "SENDING" else "SEND CODE",
         onClick = onRequestCode,
-        enabled = state.email.looksLikeEmail() && !state.sending,
+        // The reason is stated rather than left to the dimming. A player using a
+        // screen reader hears why the control will not respond; previously they
+        // heard nothing at all and had no way to learn the field was the problem.
+        state = when {
+            state.sending -> ActionState.Unavailable("a code is already being sent")
+            !state.email.looksLikeEmail() -> ActionState.Unavailable("enter an email address first")
+            else -> ActionState.Ready
+        },
         modifier = Modifier
             .padding(top = 20.dp)
             .testTag(SignInTags.PRIMARY)
@@ -160,7 +170,11 @@ private fun CodeStep(
     CommandAction(
         label = if (state.verifying) "VERIFYING" else "CONFIRM",
         onClick = onVerifyCode,
-        enabled = state.code.looksLikeCode() && !state.verifying,
+        state = when {
+            state.verifying -> ActionState.Unavailable("checking the code")
+            !state.code.looksLikeCode() -> ActionState.Unavailable("enter all six digits")
+            else -> ActionState.Ready
+        },
         modifier = Modifier
             .padding(top = 20.dp)
             .testTag(SignInTags.PRIMARY)
@@ -171,23 +185,22 @@ private fun CodeStep(
         "Check spam. Delivery depends on the mail service this project is " +
             "configured with, so it can take a moment."
     )
-    Text(
-        text = "RESEND CODE",
-        style = MaterialTheme.typography.labelMedium,
-        color = SovereignGlow,
+    TextCommand(
+        label = "RESEND CODE",
+        onClick = onResend,
         modifier = Modifier
-            .padding(top = 8.dp)
+            .padding(top = 4.dp)
+            .offset(x = (-10).dp)
             .testTag(SignInTags.RESEND)
-            .clickableText(onResend)
     )
-    Text(
-        text = "USE A DIFFERENT ADDRESS",
-        style = MaterialTheme.typography.labelMedium,
+    TextCommand(
+        label = "USE A DIFFERENT ADDRESS",
+        onClick = onChangeEmail,
         color = TextMuted,
         modifier = Modifier
-            .padding(top = 16.dp)
+            .padding(top = 4.dp)
+            .offset(x = (-10).dp)
             .testTag(SignInTags.CHANGE_EMAIL)
-            .clickableText(onChangeEmail)
     )
 }
 
@@ -236,4 +249,3 @@ private fun FieldBox(
     }
 }
 
-private fun Modifier.clickableText(onClick: () -> Unit): Modifier = this.clickable(onClick = onClick)
