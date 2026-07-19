@@ -7,7 +7,10 @@ import com.mapmonarchs.domain.model.AppError
 import com.mapmonarchs.domain.model.Identity
 import com.mapmonarchs.domain.model.LocationFix
 import com.mapmonarchs.domain.repository.AuthRepository
+import com.mapmonarchs.domain.repository.CodeRequest
+import com.mapmonarchs.domain.repository.CodeVerification
 import com.mapmonarchs.domain.repository.Outcome
+import com.mapmonarchs.feature.auth.SignInState
 import com.mapmonarchs.domain.repository.TerritoryRepository
 import com.mapmonarchs.domain.validation.MovementValidator
 import com.mapmonarchs.domain.preview.PreviewClaim
@@ -43,6 +46,9 @@ class MapViewModel(
     )
     val uiState: StateFlow<MapUiState> = _uiState.asStateFlow()
 
+    private val _signIn = MutableStateFlow<SignInState>(SignInState.EnteringEmail())
+    val signIn: StateFlow<SignInState> = _signIn.asStateFlow()
+
     /** Last fix that passed local plausibility -- the baseline for teleport checks. */
     private var lastAcceptedFix: LocationFix? = null
     private var trackingJob: Job? = null
@@ -64,7 +70,7 @@ class MapViewModel(
     fun resolveIdentity() {
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(identity = Identity.Resolving)
-            val identity = authRepository.ensureSession()
+            val identity = authRepository.restoreSession()
             when (identity) {
                 is Identity.SignedIn -> Log.i(TAG, "identity resolved: ${identity.callsign}")
                 is Identity.Unavailable -> Log.w(TAG, "identity unavailable: ${identity.error.technical}")
@@ -88,6 +94,81 @@ class MapViewModel(
                 is Outcome.Failure ->
                     _uiState.value = _uiState.value.copy(territory = TerritoryLoad.Failed(result.error))
             }
+        }
+    }
+
+    // --- email sign-in -------------------------------------------------------
+
+    fun onEmailChanged(value: String) {
+        val current = _signIn.value
+        if (current is SignInState.EnteringEmail) {
+            _signIn.value = current.copy(email = value, error = null)
+        }
+    }
+
+    fun onCodeChanged(value: String) {
+        val current = _signIn.value
+        if (current is SignInState.EnteringCode) {
+            _signIn.value = current.copy(code = value.filter { it.isDigit() }.take(6), error = null)
+        }
+    }
+
+    fun requestSignInCode() {
+        val current = _signIn.value as? SignInState.EnteringEmail ?: return
+        if (current.sending) return
+        viewModelScope.launch {
+            _signIn.value = current.copy(sending = true, error = null)
+            when (val result = authRepository.requestEmailCode(current.email)) {
+                is CodeRequest.Sent ->
+                    _signIn.value = SignInState.EnteringCode(email = current.email.trim())
+                is CodeRequest.Failed ->
+                    _signIn.value = current.copy(sending = false, error = result.error)
+            }
+        }
+    }
+
+    fun resendSignInCode() {
+        val current = _signIn.value as? SignInState.EnteringCode ?: return
+        viewModelScope.launch {
+            when (val result = authRepository.requestEmailCode(current.email)) {
+                is CodeRequest.Sent -> _signIn.value = current.copy(resent = true, error = null)
+                is CodeRequest.Failed -> _signIn.value = current.copy(error = result.error)
+            }
+        }
+    }
+
+    fun verifySignInCode() {
+        val current = _signIn.value as? SignInState.EnteringCode ?: return
+        if (current.verifying) return
+        viewModelScope.launch {
+            _signIn.value = current.copy(verifying = true, error = null)
+            when (val result = authRepository.verifyEmailCode(current.email, current.code)) {
+                is CodeVerification.Succeeded -> {
+                    // Identity comes from the SERVER's user id, derived -- never
+                    // from anything typed into this screen.
+                    _uiState.value = _uiState.value.copy(identity = result.identity)
+                    _signIn.value = SignInState.Complete
+                    Log.i(TAG, "signed in as ${result.identity.callsign}")
+                }
+                is CodeVerification.Failed ->
+                    _signIn.value = current.copy(verifying = false, error = result.error)
+            }
+        }
+    }
+
+    /** Back to the address step, e.g. wrong address entered. */
+    fun restartSignIn() {
+        _signIn.value = SignInState.EnteringEmail()
+    }
+
+    fun signOut() {
+        viewModelScope.launch {
+            val error = authRepository.signOut()
+            if (error != null) Log.w(TAG, "sign-out failed: ${error.technical}")
+            _signIn.value = SignInState.EnteringEmail()
+            _uiState.value = _uiState.value.copy(
+                identity = if (error != null) Identity.Unavailable(error) else Identity.SignedOut
+            )
         }
     }
 

@@ -30,6 +30,8 @@ object IdentityTags {
     const val CALLSIGN = "identity_callsign"
     const val STATE = "identity_state"
     const val RETRY = "identity_retry"
+    const val SIGN_IN = "identity_sign_in"
+    const val SIGN_OUT = "identity_sign_out"
 }
 
 /**
@@ -46,6 +48,8 @@ fun IdentityScreen(
     identity: Identity,
     onBack: () -> Unit,
     onRetry: () -> Unit,
+    onSignIn: () -> Unit,
+    onSignOut: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     CommandScreen(title = "IDENTITY", onBack = onBack, modifier = modifier) {
@@ -109,6 +113,13 @@ fun IdentityScreen(
                         "not stored as a profile and cannot be changed -- which also means " +
                         "nobody can impersonate your colour on the map."
                 )
+                CommandAction(
+                    label = "SIGN OUT",
+                    onClick = onSignOut,
+                    modifier = Modifier
+                        .padding(top = 16.dp)
+                        .testTag(IdentityTags.SIGN_OUT)
+                )
             }
             is Identity.Unavailable -> {
                 SectionHeader("WHY YOU HAVE NO IDENTITY")
@@ -127,13 +138,17 @@ fun IdentityScreen(
             }
             is Identity.SignedOut -> {
                 SectionHeader("NO SESSION")
-                BodyNote("You are not signed in. Claiming is disabled until you are.")
+                BodyNote(
+                    "You are not signed in, so the server cannot attribute territory to " +
+                        "you. Sign-in uses a code sent to your email -- this project has " +
+                        "anonymous sign-in switched off."
+                )
                 CommandAction(
                     label = "SIGN IN",
-                    onClick = onRetry,
+                    onClick = onSignIn,
                     modifier = Modifier
                         .padding(top = 8.dp)
-                        .testTag(IdentityTags.RETRY)
+                        .testTag(IdentityTags.SIGN_IN)
                 )
             }
             is Identity.Preview -> {

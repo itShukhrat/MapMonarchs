@@ -32,6 +32,7 @@ sealed interface Route {
     data object Identity : Route { override val title = "IDENTITY" }
     data object Diagnostics : Route { override val title = "DIAGNOSTICS" }
     data object Settings : Route { override val title = "SETTINGS" }
+    data object SignIn : Route { override val title = "SIGN IN" }
 
     data object Help : Route { override val title = "HELP" }
     data object Safety : Route { override val title = "SAFETY & PRIVACY" }

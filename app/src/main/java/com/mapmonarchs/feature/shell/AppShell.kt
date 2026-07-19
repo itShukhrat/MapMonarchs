@@ -25,6 +25,10 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.mapmonarchs.data.local.FirstRunStore
 import com.mapmonarchs.data.local.TrackingPreferences
+import androidx.compose.runtime.LaunchedEffect
+import com.mapmonarchs.domain.model.Identity
+import com.mapmonarchs.feature.auth.SignInScreen
+import com.mapmonarchs.feature.auth.SignInState
 import com.mapmonarchs.feature.diagnostics.DiagnosticsScreen
 import com.mapmonarchs.feature.help.HelpScreen
 import com.mapmonarchs.feature.identity.IdentityScreen
@@ -98,16 +102,42 @@ fun AppShell(modifier: Modifier = Modifier) {
 
             route == Route.Map -> MapScreen(
                 viewModel = viewModel,
-                // A blocked capture button routes to the screen that explains it,
-                // rather than absorbing the tap.
-                onExplainBlocker = { navigator.navigateTo(Route.Diagnostics) }
+                // A blocked capture routes to the REMEDY, not just an explanation.
+                // If the blocker is a missing session, the useful destination is
+                // sign-in; sending the player to a status page they cannot act on
+                // would be technically informative and practically useless.
+                onExplainBlocker = {
+                    val needsSession = state.identity !is Identity.SignedIn && !state.previewMode
+                    navigator.navigateTo(if (needsSession) Route.SignIn else Route.Diagnostics)
+                }
             )
 
             route == Route.Identity -> IdentityScreen(
                 identity = state.identity,
                 onBack = { navigator.back() },
-                onRetry = { viewModel.resolveIdentity() }
+                onRetry = { viewModel.resolveIdentity() },
+                onSignIn = { navigator.navigateTo(Route.SignIn) },
+                onSignOut = { viewModel.signOut() }
             )
+
+            route == Route.SignIn -> {
+                val signIn by viewModel.signIn.collectAsState()
+                // Leaving the flow the moment a real session exists: a success
+                // screen the player has to dismiss is a step that earns nothing.
+                LaunchedEffect(signIn) {
+                    if (signIn is SignInState.Complete) navigator.back()
+                }
+                SignInScreen(
+                    state = signIn,
+                    onEmailChanged = viewModel::onEmailChanged,
+                    onCodeChanged = viewModel::onCodeChanged,
+                    onRequestCode = viewModel::requestSignInCode,
+                    onVerifyCode = viewModel::verifySignInCode,
+                    onResend = viewModel::resendSignInCode,
+                    onChangeEmail = viewModel::restartSignIn,
+                    onBack = { navigator.back() }
+                )
+            }
 
             route == Route.Diagnostics -> DiagnosticsScreen(
                 state = state,

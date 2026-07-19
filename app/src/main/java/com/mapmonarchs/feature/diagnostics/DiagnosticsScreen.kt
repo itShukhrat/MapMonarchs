@@ -109,6 +109,13 @@ fun DiagnosticsScreen(
             value = (state.identity as? Identity.SignedIn)?.callsign ?: "--",
             valueColor = TextMuted
         )
+        StatusRow(label = "Sign-in method", value = "EMAIL CODE", valueColor = TextMuted)
+        StatusRow(label = "Anonymous sign-in", value = "DISABLED", valueColor = TextMuted)
+        BodyNote(
+            "This project has anonymous sign-in switched off, so a session requires an " +
+                "email code. Delivery depends on the mail service configured for the " +
+                "project -- if no code arrives, that is where to look."
+        )
 
         SectionHeader("LOCATION")
         StatusRow(

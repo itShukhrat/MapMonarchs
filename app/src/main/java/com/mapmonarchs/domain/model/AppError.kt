@@ -45,6 +45,27 @@ sealed class AppError(val technical: String) {
      */
     class AuthUnavailable(technical: String) : AppError(technical)
 
+    /** The address was rejected as malformed by the backend. */
+    class InvalidEmail(technical: String) : AppError(technical)
+
+    /** The code was wrong or has expired. The most common real failure. */
+    class InvalidCode(technical: String) : AppError(technical)
+
+    /**
+     * Too many code requests. Named separately because the remedy is "wait",
+     * which is completely different advice from "check the code" -- and because
+     * Supabase's default mailer is rate-limited to a handful per hour, so this
+     * is an expected condition, not an anomaly.
+     */
+    class RateLimited(technical: String) : AppError(technical)
+
+    /**
+     * The backend accepted the request but mail is not configured or did not
+     * deliver. Distinct from a rejected request: the player did nothing wrong
+     * and retrying will not help.
+     */
+    class MailNotDelivered(technical: String) : AppError(technical)
+
     /** Genuinely unclassified. Still carries the cause; still shown. */
     class Unexpected(technical: String) : AppError(technical)
 
@@ -56,6 +77,10 @@ sealed class AppError(val technical: String) {
         is Malformed -> "Territory data could not be read."
         is BackendFailure -> "Territory service error."
         is AuthUnavailable -> "Sign-in unavailable."
+        is InvalidEmail -> "That email address does not look right."
+        is InvalidCode -> "That code is not valid. It may have expired."
+        is RateLimited -> "Too many attempts. Wait a minute and try again."
+        is MailNotDelivered -> "The code could not be sent. Email delivery is not configured."
         is Unexpected -> "Something went wrong loading territory."
     }
 }
