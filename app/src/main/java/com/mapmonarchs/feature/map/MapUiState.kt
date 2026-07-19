@@ -99,8 +99,6 @@ fun MapUiState.identityLabel(): String = when (val id = identity) {
 }
 
 /** True only when identity is real. Drives the glyph fill vs. outline. */
-/** Real means AUTHENTICATED. Preview is deliberately excluded. */
-fun MapUiState.hasRealIdentity(): Boolean = identity is Identity.SignedIn
 
 /**
  * Territory colour, or null when there is no identity to derive one from.
@@ -167,3 +165,15 @@ fun MapUiState.isCaptureActionable(): Boolean = when {
  */
 fun MapUiState.canSubmitRealClaim(): Boolean =
     !previewMode && identity is Identity.SignedIn && capture is CaptureState.Ready
+
+/**
+ * Why a real claim was refused. Logged, never shown raw -- the player gets the
+ * capture button label instead. Exists so a refusal is always explainable rather
+ * than a silent return.
+ */
+fun MapUiState.claimRefusalReason(): String = when {
+    previewMode -> "preview mode is active"
+    identity !is Identity.SignedIn -> "no authenticated session"
+    capture !is CaptureState.Ready -> "position not accepted (${capture::class.simpleName})"
+    else -> "unknown"
+}

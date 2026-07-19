@@ -78,12 +78,6 @@ class MapUiStateTest {
         )
     }
 
-    @Test
-    fun `hasRealIdentity is true only when signed in`() {
-        assertTrue(state().hasRealIdentity())
-        assertFalse(state(identity = Identity.SignedOut).hasRealIdentity())
-        assertFalse(state(identity = Identity.Resolving).hasRealIdentity())
-    }
 
     // --- capture gating on identity ---
 

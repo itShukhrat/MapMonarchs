@@ -186,8 +186,10 @@ class MapViewModel(
      * Otherwise: GATED (hard rule 5) -- attempt_capture() is not deployed, so
      * firing it would produce a misleading failure. Explicitly inert with a log.
      *
-     * The two paths cannot be confused: canSubmitRealClaim() is false in preview
-     * by construction, so nothing simulated can reach the network.
+     * The separation is enforced by canSubmitRealClaim(), which is checked below
+     * rather than merely asserted in a comment. An earlier version documented
+     * that guard without calling it, and placed a check() after an early return
+     * where it could never execute -- a safety claim with nothing behind it.
      */
     fun onCaptureRequested() {
         val state = _uiState.value
@@ -210,7 +212,14 @@ class MapViewModel(
             )
             return
         }
-        check(!state.previewMode) { "preview must never reach the real capture path" }
+        // The real gate. Reached only outside preview, and it must hold before
+        // anything could ever be submitted. It is false in preview by
+        // construction, so this is belt and braces -- deliberately, because the
+        // cost of being wrong here is a client minting territory.
+        if (!state.canSubmitRealClaim()) {
+            Log.i(TAG, "real claim refused: ${state.claimRefusalReason()}")
+            return
+        }
         Log.i(TAG, "capture requested but gated: schema.sql not yet applied")
     }
 
