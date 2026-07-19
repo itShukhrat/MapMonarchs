@@ -28,6 +28,7 @@ object LockedTags {
     const val STATUS = "locked_status"
     const val WHY = "locked_why"
     const val UNLOCK = "locked_unlock"
+    const val PREVIEW = "locked_enter_preview"
 }
 
 /**
@@ -53,6 +54,7 @@ fun LockedScreen(
     lock: FeatureLock,
     onBack: () -> Unit,
     onOpenDiagnostics: (() -> Unit)? = null,
+    onEnterPreview: (() -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
     CommandScreen(title = title, onBack = onBack, modifier = modifier) {
@@ -88,6 +90,22 @@ fun LockedScreen(
 
         SectionHeader("FOR NOW")
         BodyNote(lock.insteadNow)
+
+        if (onEnterPreview != null) {
+            SectionHeader("SEE HOW IT WORKS")
+            BodyNote(
+                "Preview mode runs the claim loop locally on this device so you can see " +
+                    "what holding ground looks like. It is simulated: nothing is sent to " +
+                    "the server, nothing is saved, and none of it becomes real territory."
+            )
+            CommandAction(
+                label = "ENTER PREVIEW",
+                onClick = onEnterPreview,
+                modifier = Modifier
+                    .padding(top = 8.dp)
+                    .testTag(LockedTags.PREVIEW)
+            )
+        }
 
         if (onOpenDiagnostics != null) {
             CommandAction(

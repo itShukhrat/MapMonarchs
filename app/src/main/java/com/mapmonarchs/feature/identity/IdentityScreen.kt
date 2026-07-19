@@ -66,6 +66,7 @@ fun IdentityScreen(
             Text(
                 text = when (identity) {
                     is Identity.SignedIn -> identity.callsign
+                    is Identity.Preview -> identity.callsign
                     is Identity.Resolving -> "IDENTIFYING"
                     is Identity.SignedOut -> "NO IDENTITY"
                     is Identity.Unavailable -> "UNAVAILABLE"
@@ -84,6 +85,7 @@ fun IdentityScreen(
             label = "State",
             value = when (identity) {
                 is Identity.SignedIn -> "ACTIVE"
+                is Identity.Preview -> "PREVIEW"
                 is Identity.Resolving -> "RESOLVING"
                 is Identity.SignedOut -> "SIGNED OUT"
                 is Identity.Unavailable -> "UNAVAILABLE"
@@ -132,6 +134,18 @@ fun IdentityScreen(
                     modifier = Modifier
                         .padding(top = 8.dp)
                         .testTag(IdentityTags.RETRY)
+                )
+            }
+            is Identity.Preview -> {
+                SectionHeader("THIS IS NOT AN ACCOUNT")
+                BodyNote(
+                    "Preview mode gives you a placeholder callsign so the map has something " +
+                        "to colour. It is not a session, it is not stored anywhere, and it " +
+                        "cannot hold real territory."
+                )
+                BodyNote(
+                    "When sign-in becomes available you will get a real callsign derived " +
+                        "from your account -- stable across devices and reinstalls."
                 )
             }
             is Identity.Resolving -> {

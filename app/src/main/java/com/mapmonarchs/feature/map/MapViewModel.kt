@@ -10,6 +10,9 @@ import com.mapmonarchs.domain.repository.AuthRepository
 import com.mapmonarchs.domain.repository.Outcome
 import com.mapmonarchs.domain.repository.TerritoryRepository
 import com.mapmonarchs.domain.validation.MovementValidator
+import com.mapmonarchs.domain.preview.PreviewClaim
+import com.mapmonarchs.domain.preview.PreviewHexGrid
+import com.mapmonarchs.domain.preview.PreviewSession
 import com.mapmonarchs.domain.validation.MovementVerdict
 import com.mapmonarchs.data.local.TrackingMode
 import com.mapmonarchs.location.LocationTracker
@@ -44,6 +47,14 @@ class MapViewModel(
     private var lastAcceptedFix: LocationFix? = null
     private var trackingJob: Job? = null
     private var trackingMode: TrackingMode = TrackingMode.BALANCED
+
+    /**
+     * Preview state. Null unless preview is active, and destroyed on exit so
+     * simulated territory cannot outlive the mode that created it.
+     */
+    private var previewGrid: PreviewHexGrid? = null
+    private var previewSession: PreviewSession? = null
+    private var lastFix: LocationFix? = null
 
     init {
         resolveIdentity()
@@ -142,10 +153,24 @@ class MapViewModel(
     }
 
     private fun onFix(fix: LocationFix) {
+        lastFix = fix
+        // Preview anchors its grid to wherever the player actually is, so the
+        // simulation is about their real surroundings rather than a fixed city.
+        if (previewGrid == null && _uiState.value.previewMode) {
+            previewGrid = PreviewHexGrid(fix.latitude, fix.longitude)
+            previewSession = PreviewSession(previewGrid!!)
+        }
         when (val verdict = validator.validate(fix, lastAcceptedFix)) {
             is MovementVerdict.Plausible -> {
                 lastAcceptedFix = fix
-                _uiState.value = _uiState.value.copy(capture = CaptureState.Ready)
+                if (_uiState.value.playerLat == null) {
+                    Log.i(TAG, "first accepted fix at ${fix.latitude}, ${fix.longitude}")
+                }
+                _uiState.value = _uiState.value.copy(
+                    capture = CaptureState.Ready,
+                    playerLat = fix.latitude,
+                    playerLng = fix.longitude
+                )
             }
             is MovementVerdict.Implausible -> {
                 // Deliberately does NOT update lastAcceptedFix: a rejected fix must
@@ -157,12 +182,81 @@ class MapViewModel(
     }
 
     /**
-     * GATED (hard rule 5). attempt_capture() is not applied to the database, so
-     * wiring this would fire a request that cannot succeed and produce a
-     * misleading failure. Explicitly inert with a log, not silently dead.
+     * In preview: simulates a claim locally.
+     * Otherwise: GATED (hard rule 5) -- attempt_capture() is not deployed, so
+     * firing it would produce a misleading failure. Explicitly inert with a log.
+     *
+     * The two paths cannot be confused: canSubmitRealClaim() is false in preview
+     * by construction, so nothing simulated can reach the network.
      */
     fun onCaptureRequested() {
+        val state = _uiState.value
+        if (state.previewMode) {
+            val fix = lastFix
+            val session = previewSession
+            if (fix == null || session == null) {
+                Log.i(TAG, "preview claim ignored: no position yet")
+                return
+            }
+            when (val claim = session.claimAt(fix.latitude, fix.longitude)) {
+                is PreviewClaim.Captured ->
+                    Log.i(TAG, "preview: captured ${claim.cell.id} (${claim.totalHeld} held)")
+                is PreviewClaim.AlreadyHeld ->
+                    Log.i(TAG, "preview: already holding ${claim.cell.id}")
+            }
+            _uiState.value = _uiState.value.copy(
+                previewHeld = session.heldCount,
+                previewRings = renderRings(session)
+            )
+            return
+        }
+        check(!state.previewMode) { "preview must never reach the real capture path" }
         Log.i(TAG, "capture requested but gated: schema.sql not yet applied")
+    }
+
+    /**
+     * Enters the local simulation.
+     *
+     * Identity becomes Identity.Preview -- a distinct sealed variant, never a
+     * fabricated session. Territory load is left exactly as it is: preview does
+     * not pretend the backend is reachable.
+     */
+    fun enterPreview() {
+        Log.i(TAG, "entering preview mode (local simulation, no network)")
+        val fix = lastFix
+        if (fix != null) {
+            previewGrid = PreviewHexGrid(fix.latitude, fix.longitude)
+            previewSession = PreviewSession(previewGrid!!)
+        }
+        _uiState.value = _uiState.value.copy(
+            previewMode = true,
+            previewHeld = 0,
+            identity = Identity.preview()
+        )
+    }
+
+    /** Leaves preview and destroys everything it created. */
+    fun exitPreview() {
+        Log.i(TAG, "exiting preview mode; discarding simulated territory")
+        previewSession?.clear()
+        previewSession = null
+        previewGrid = null
+        _uiState.value = _uiState.value.copy(
+            previewMode = false,
+            previewHeld = null,
+            previewRings = emptyList(),
+            identity = Identity.Resolving
+        )
+        resolveIdentity()
+    }
+
+    /** Converts held cells into drawable rings. Closed by repeating the first vertex. */
+    private fun renderRings(session: PreviewSession): List<List<PreviewPoint>> {
+        val grid = previewGrid ?: return emptyList()
+        return session.heldCells().map { cell ->
+            val ring = grid.boundaryOf(cell).map { PreviewPoint(it.lat, it.lng) }
+            ring + ring.first()
+        }
     }
 
     override fun onCleared() {

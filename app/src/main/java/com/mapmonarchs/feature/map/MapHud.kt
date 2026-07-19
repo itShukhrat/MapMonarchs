@@ -43,6 +43,7 @@ import kotlin.math.cos
 import kotlin.math.sin
 
 object MapHudTags {
+    const val PREVIEW_BANNER = "hud_preview_banner"
     const val HANDLE = "hud_handle"
     const val HELD = "hud_held"
     const val DELTA = "hud_delta"
@@ -64,6 +65,7 @@ fun MapHud(
     onCapture: () -> Unit,
     onRetry: () -> Unit,
     onExplainBlocker: () -> Unit,
+    onExitPreview: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     Box(
@@ -105,6 +107,19 @@ fun MapHud(
                 .align(Alignment.TopEnd)
                 .padding(end = 20.dp, top = 8.dp)
         )
+
+        // Persistent, unmissable, and always present in preview -- not a subtle
+        // badge. A player must never be able to forget that what they are
+        // looking at is simulated, because the entire trust position of this
+        // product depends on never confusing the two.
+        if (state.previewMode) {
+            PreviewBanner(
+                onExit = onExitPreview,
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(bottom = 104.dp)
+            )
+        }
 
         CaptureAction(
             label = state.captureLabel(),
@@ -225,6 +240,37 @@ private fun CaptureAction(
             text = label,
             style = MaterialTheme.typography.labelLarge,
             color = if (ready) Void else TextMuted
+        )
+    }
+}
+
+/** The preview marker. Deliberately loud, and always offers the way out. */
+@Composable
+private fun PreviewBanner(onExit: () -> Unit, modifier: Modifier = Modifier) {
+    Row(
+        modifier = modifier
+            .clip(RoundedCornerShape(8.dp))
+            .background(Void.copy(alpha = 0.9f))
+            .border(1.dp, SovereignGlow.copy(alpha = 0.7f), RoundedCornerShape(8.dp))
+            .padding(horizontal = 14.dp, vertical = 9.dp)
+            .testTag(MapHudTags.PREVIEW_BANNER)
+            .semantics {
+                contentDescription = "Preview mode. Simulated territory, not real. Press exit to leave."
+            },
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = "PREVIEW - SIMULATED, NOT REAL",
+            style = MaterialTheme.typography.labelSmall,
+            color = SovereignGlow
+        )
+        Text(
+            text = "EXIT",
+            style = MaterialTheme.typography.labelMedium,
+            color = TextPrimary,
+            modifier = Modifier
+                .padding(start = 16.dp)
+                .clickable(onClick = onExit)
         )
     }
 }

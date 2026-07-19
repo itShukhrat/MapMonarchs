@@ -8,14 +8,21 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
 import com.mapbox.geojson.Point
+import com.mapbox.maps.CameraOptions
+import com.mapbox.maps.dsl.cameraOptions
+import com.mapbox.maps.plugin.animation.MapAnimationOptions
 import com.mapbox.maps.extension.compose.MapboxMap
 import com.mapbox.maps.extension.compose.animation.viewport.rememberMapViewportState
+import com.mapbox.maps.extension.compose.annotation.generated.PolygonAnnotation
 import com.mapbox.maps.extension.compose.style.MapStyle
 
 /**
@@ -62,34 +69,74 @@ fun MapScreen(
         }
     }
 
+    val viewportState = rememberMapViewportState {
+        setCameraOptions {
+            center(DEFAULT_CENTER)
+            zoom(15.0)
+            // Flat, top-down. This is a legibility decision, not a performance
+            // one: in a territory game you must read hex adjacency and ownership
+            // across an area, and pitch trades that away for cinematics.
+            pitch(0.0)
+        }
+    }
+
+    // Recentre once a real position is known. Keyed on the coordinates so it
+    // follows the player rather than firing once and stranding the camera.
+    LaunchedEffect(state.playerLat, state.playerLng) {
+        val lat = state.playerLat
+        val lng = state.playerLng
+        if (lat != null && lng != null) {
+            // flyTo, not setCameraOptions: on an already-attached map the latter
+            // does not move an existing camera, so the player stayed looking at
+            // the default city while their territory was drawn where they
+            // actually stood.
+            viewportState.flyTo(
+                cameraOptions {
+                    center(Point.fromLngLat(lng, lat))
+                    zoom(16.0)
+                },
+                MapAnimationOptions.mapAnimationOptions { duration(1200L) }
+            )
+        }
+    }
+
     Box(modifier = modifier.fillMaxSize()) {
         // Map draws full-bleed, deliberately under the system bars. Only the HUD
         // is inset -- that is what makes the map read as the hero surface.
         MapboxMap(
             modifier = Modifier.fillMaxSize(),
-            mapViewportState = rememberMapViewportState {
-                setCameraOptions {
-                    center(DEFAULT_CENTER)
-                    zoom(15.0)
-                    // Flat, top-down. This is a legibility decision, not a
-                    // performance one: in a territory game you must read hex
-                    // adjacency and ownership across an area, and pitch trades
-                    // that away for cinematics. Revisit only with a real reason.
-                    pitch(0.0)
-                }
-            },
+            // The SAME viewport instance the recentre effect drives. Creating a
+            // second one here left flyTo animating an orphaned object while the
+            // map kept its own camera -- the player stayed looking at a default
+            // city while their territory was drawn where they actually stood.
+            mapViewportState = viewportState,
             // Stock map furniture removed: it is Mapbox's chrome, not our HUD.
             // Logo and attribution are retained -- licensing requirement.
             scaleBar = {},
             compass = {},
             style = { MapStyle(style = MAPBOX_DARK) }
-        )
+        ) {
+            // Preview territory only. Real territory is drawn from server-owned
+            // ownership once the schema is deployed; this draws from an in-memory
+            // simulation and never from anything the server said.
+            if (state.previewMode) {
+                val fill = state.territoryColor() ?: Color(0xFF4C8DFF)
+                state.previewRings.forEach { ring ->
+                    PolygonAnnotation(points = listOf(ring.map { Point.fromLngLat(it.lng, it.lat) })) {
+                        fillColor = fill
+                        fillOpacity = 0.45
+                        fillOutlineColor = fill
+                    }
+                }
+            }
+        }
 
         MapHud(
             state = state,
             onCapture = viewModel::onCaptureRequested,
             onRetry = viewModel::onRetry,
-            onExplainBlocker = onExplainBlocker
+            onExplainBlocker = onExplainBlocker,
+            onExitPreview = viewModel::exitPreview
         )
     }
 }

@@ -84,7 +84,16 @@ fun AppShell(modifier: Modifier = Modifier) {
                 title = route.title,
                 lock = lock,
                 onBack = { navigator.back() },
-                onOpenDiagnostics = { navigator.navigateTo(Route.Diagnostics) }
+                onOpenDiagnostics = { navigator.navigateTo(Route.Diagnostics) },
+                // Preview is offered only from TERRITORY: it demonstrates the
+                // claim loop, and nothing else. Offering it from SHOP or EMPIRE
+                // would imply it simulates those too.
+                onEnterPreview = if (route == Route.Territory && !state.previewMode) {
+                    {
+                        viewModel.enterPreview()
+                        navigator.navigateTo(Route.Map)
+                    }
+                } else null
             )
 
             route == Route.Map -> MapScreen(

@@ -95,6 +95,8 @@ fun DiagnosticsScreen(
             label = "Identity",
             value = when (state.identity) {
                 is Identity.SignedIn -> "ACTIVE"
+                // Named distinctly so a preview run can never be misread as a session.
+                is Identity.Preview -> "PREVIEW (NOT SIGNED IN)"
                 is Identity.Resolving -> "RESOLVING"
                 is Identity.SignedOut -> "NONE"
                 is Identity.Unavailable -> "UNAVAILABLE"
@@ -138,7 +140,18 @@ fun DiagnosticsScreen(
         StatusRow(label = "Cadence", value = trackingMode.label, valueColor = TextMuted)
 
         SectionHeader("CAPTURE")
-        StatusRow(label = "Status", value = "DISABLED", valueColor = Contested)
+        StatusRow(
+            label = "Status",
+            value = if (state.previewMode) "PREVIEW ONLY" else "DISABLED",
+            valueColor = Contested
+        )
+        if (state.previewMode) {
+            BodyNote(
+                "Preview mode is active. Everything you claim is simulated on this device, " +
+                    "held in memory, and discarded when you leave. Nothing is sent to the " +
+                    "server and none of it is real territory."
+            )
+        }
         BodyNote(
             "Claiming is switched off in this build. The server function that decides " +
                 "ownership has not been deployed, so no client can claim ground -- including " +
