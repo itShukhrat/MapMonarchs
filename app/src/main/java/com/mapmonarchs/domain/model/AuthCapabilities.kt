@@ -15,9 +15,10 @@ data class AuthCapabilities(
     val emailEnabled: Boolean,
     val anonymousEnabled: Boolean,
     /**
-     * When false, a signup is not auto-confirmed, which means a code must
-     * genuinely arrive in an inbox before anyone can sign in. That makes mail
-     * delivery load-bearing rather than incidental, so it is worth surfacing.
+     * Whether signups are auto-confirmed. Informational only: it does NOT remove
+     * the need for mail in an OTP flow, because the player must still receive and
+     * type a code. Reported because it is a useful signal about how the project
+     * is configured, not because it makes delivery optional.
      */
     val mailerAutoconfirm: Boolean
 )
@@ -35,12 +36,46 @@ sealed interface CapabilitiesProbe {
 }
 
 /**
- * Can a sign-in even complete in this environment? Derived strictly from what
- * was observed; never optimistic.
+ * Whether sign-in can actually COMPLETE in this environment.
+ *
+ * The distinction this enum exists to make: an enabled provider is not a working
+ * provider. Diagnostics briefly answered this question with "YES" purely because
+ * `external.email` was true -- while, three lines lower on the same screen, it
+ * explained that no code had ever been delivered and delivery was untested.
+ * Those two statements cannot both be the top-line answer.
+ *
+ * Email OTP requires a code to physically arrive, every time. So an email-only
+ * project with unproven delivery is [UNPROVEN], never [POSSIBLE].
  */
-fun CapabilitiesProbe.signInPossible(): Boolean? = when (this) {
-    is CapabilitiesProbe.Observed -> capabilities.emailEnabled || capabilities.anonymousEnabled
-    // Not "false". We do not know, and guessing either way would be a claim we
-    // cannot support.
-    else -> null
+enum class SignInReadiness(val label: String) {
+    /** The backend was not reachable, so nothing is known. */
+    UNKNOWN("UNKNOWN"),
+
+    /** Observed, and no provider is enabled. Sign-in cannot happen at all. */
+    NO_PROVIDER("NO"),
+
+    /** A provider exists but depends on mail that has never been seen to arrive. */
+    UNPROVEN("UNPROVEN"),
+
+    /** Sign-in has been demonstrated to work, or needs no mail at all. */
+    POSSIBLE("YES")
+}
+
+/**
+ * Combines what the backend permits with what this device has actually seen.
+ * Neither input alone answers the question.
+ */
+fun signInReadiness(probe: CapabilitiesProbe, delivery: DeliveryProof): SignInReadiness {
+    val capabilities = (probe as? CapabilitiesProbe.Observed)?.capabilities
+        ?: return SignInReadiness.UNKNOWN
+
+    // Anonymous needs no mail, so enabling it makes sign-in possible outright.
+    if (capabilities.anonymousEnabled) return SignInReadiness.POSSIBLE
+
+    if (!capabilities.emailEnabled) return SignInReadiness.NO_PROVIDER
+
+    // Email is the only route, so the question collapses to: has a code ever
+    // actually arrived here?
+    return if (delivery is DeliveryProof.Delivered) SignInReadiness.POSSIBLE
+    else SignInReadiness.UNPROVEN
 }

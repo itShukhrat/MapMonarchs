@@ -12,7 +12,8 @@ import com.mapmonarchs.domain.model.AppError
 import com.mapmonarchs.domain.model.CapabilitiesProbe
 import com.mapmonarchs.domain.model.DeliveryProof
 import com.mapmonarchs.domain.model.Identity
-import com.mapmonarchs.domain.model.signInPossible
+import com.mapmonarchs.domain.model.SignInReadiness
+import com.mapmonarchs.domain.model.signInReadiness
 import com.mapmonarchs.feature.map.CaptureState
 import com.mapmonarchs.feature.map.MapUiState
 import com.mapmonarchs.feature.map.TerritoryLoad
@@ -126,7 +127,7 @@ fun DiagnosticsScreen(
         )
 
         SectionHeader("SIGN-IN AVAILABILITY")
-        AuthCapabilityRows(diagnostics.capabilities)
+        AuthCapabilityRows(diagnostics)
 
         SectionHeader("EMAIL DELIVERY")
         DeliveryRows(diagnostics)
@@ -200,7 +201,9 @@ fun DiagnosticsScreen(
 }
 
 @Composable
-private fun AuthCapabilityRows(probe: CapabilitiesProbe) {
+private fun AuthCapabilityRows(diagnostics: DiagnosticsState) {
+    val probe = diagnostics.capabilities
+    val readiness = signInReadiness(probe, diagnostics.delivery)
     StatusRow(
         label = "Email sign-in",
         value = probe.readBoolean { it.emailEnabled },
@@ -215,14 +218,17 @@ private fun AuthCapabilityRows(probe: CapabilitiesProbe) {
     )
     StatusRow(
         label = "Sign-in possible here",
-        value = when (probe.signInPossible()) {
-            true -> "YES"
-            false -> "NO"
-            null -> "UNKNOWN"
-        },
-        valueColor = if (probe.signInPossible() == true) SovereignGlow else Contested,
+        value = readiness.label,
+        valueColor = if (readiness == SignInReadiness.POSSIBLE) SovereignGlow else Contested,
         modifier = Modifier.testTag(DiagnosticsTags.SIGN_IN_POSSIBLE)
     )
+    if (readiness == SignInReadiness.UNPROVEN) {
+        BodyNote(
+            "Email is the only sign-in route on this project, and no code has been " +
+                "confirmed as arriving on this device. So sign-in is UNPROVEN rather " +
+                "than available -- an enabled provider is not a working one."
+        )
+    }
     when (probe) {
         is CapabilitiesProbe.NotProbed ->
             BodyNote("Sign-in configuration has not been checked yet. Press RE-CHECK.")

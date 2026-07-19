@@ -35,6 +35,10 @@ class PreviewHudTest {
         identity = Identity.preview(),
         territory = territory,
         capture = CaptureState.Ready,
+        // Permission must be GRANTED for `capture = Ready` to be a state the app
+        // can actually reach. Without it these fixtures described an impossible
+        // device -- an accepted position fix with location switched off.
+        locationPermissionGranted = true,
         previewMode = true,
         previewHeld = held
     )
@@ -42,7 +46,8 @@ class PreviewHudTest {
     private fun liveState() = MapUiState(
         identity = Identity.from("6f2c1e4a-1111-4b2a-9c3d-000000000001"),
         territory = TerritoryLoad.Loaded(emptyList()),
-        capture = CaptureState.Ready
+        capture = CaptureState.Ready,
+        locationPermissionGranted = true
     )
 
     @Test

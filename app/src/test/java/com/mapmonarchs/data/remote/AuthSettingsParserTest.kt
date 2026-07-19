@@ -1,9 +1,10 @@
 package com.mapmonarchs.data.remote
 
 import com.mapmonarchs.domain.model.CapabilitiesProbe
-import com.mapmonarchs.domain.model.signInPossible
+import com.mapmonarchs.domain.model.DeliveryProof
+import com.mapmonarchs.domain.model.SignInReadiness
+import com.mapmonarchs.domain.model.signInReadiness
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -41,22 +42,71 @@ class AuthSettingsParserTest {
         )
     }
 
+    /**
+     * An ENABLED provider is not a WORKING one.
+     *
+     * Diagnostics briefly answered "Sign-in possible here: YES" purely because
+     * `external.email` was true -- while explaining three lines lower that no
+     * code had ever arrived and delivery was untested. Email OTP needs a code to
+     * physically arrive every single time, so an email-only project with unproven
+     * delivery is UNPROVEN, not YES.
+     */
     @Test
-    fun `sign-in is possible when email is enabled`() {
-        assertEquals(true, AuthSettingsParser.parse(liveBody).signInPossible())
+    fun `email enabled but delivery unproven is UNPROVEN, not possible`() {
+        val probe = AuthSettingsParser.parse(liveBody)
+        assertEquals(
+            SignInReadiness.UNPROVEN,
+            signInReadiness(probe, DeliveryProof.NeverAttempted)
+        )
+        assertEquals(
+            "an accepted send request is still not an arrived email",
+            SignInReadiness.UNPROVEN,
+            signInReadiness(probe, DeliveryProof.Requested("e***@x.com", 1L))
+        )
+    }
+
+    @Test
+    fun `sign-in becomes possible once a code has actually been delivered`() {
+        val probe = AuthSettingsParser.parse(liveBody)
+        assertEquals(
+            SignInReadiness.POSSIBLE,
+            signInReadiness(probe, DeliveryProof.Delivered("e***@x.com", 1L))
+        )
+    }
+
+    @Test
+    fun `anonymous sign-in needs no mail and is possible immediately`() {
+        val body = """{"external":{"email":false,"anonymous_users":true},"mailer_autoconfirm":false}"""
+        assertEquals(
+            SignInReadiness.POSSIBLE,
+            signInReadiness(AuthSettingsParser.parse(body), DeliveryProof.NeverAttempted)
+        )
     }
 
     @Test
     fun `unknown capabilities never claim sign-in is possible or impossible`() {
-        assertNull(CapabilitiesProbe.NotProbed.signInPossible())
-        assertNull(CapabilitiesProbe.Probing.signInPossible())
-        assertNull(AuthSettingsParser.parse("not json at all").signInPossible())
+        assertEquals(
+            SignInReadiness.UNKNOWN,
+            signInReadiness(CapabilitiesProbe.NotProbed, DeliveryProof.NeverAttempted)
+        )
+        assertEquals(
+            SignInReadiness.UNKNOWN,
+            signInReadiness(CapabilitiesProbe.Probing, DeliveryProof.Delivered("x", 1L))
+        )
+        assertEquals(
+            "an unreachable backend must not be reported as a working one",
+            SignInReadiness.UNKNOWN,
+            signInReadiness(AuthSettingsParser.parse("not json"), DeliveryProof.Delivered("x", 1L))
+        )
     }
 
     @Test
-    fun `sign-in is impossible when every provider is off`() {
+    fun `no enabled provider means sign-in is impossible`() {
         val body = """{"external":{"email":false,"anonymous_users":false},"mailer_autoconfirm":false}"""
-        assertEquals(false, AuthSettingsParser.parse(body).signInPossible())
+        assertEquals(
+            SignInReadiness.NO_PROVIDER,
+            signInReadiness(AuthSettingsParser.parse(body), DeliveryProof.NeverAttempted)
+        )
     }
 
     // --- the whole point: absence must never become `false` ------------------
