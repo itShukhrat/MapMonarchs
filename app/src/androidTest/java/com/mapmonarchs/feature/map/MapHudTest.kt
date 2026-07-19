@@ -39,7 +39,7 @@ class MapHudTest {
     fun rendersDerivedCallsignForSignedInUser() {
         val id = Identity.from(realUser)
         rule.setContent {
-            MapMonarchsTheme { MapHud(state(identity = id), onCapture = {}, onRetry = {}) }
+            MapMonarchsTheme { MapHud(state(identity = id), {}, {}, {}) }
         }
         rule.onNodeWithTag(MapHudTags.HANDLE).assertTextEquals(id.callsign)
     }
@@ -47,7 +47,7 @@ class MapHudTest {
     @Test
     fun neverShowsAFabricatedHandleWhenSignedOut() {
         rule.setContent {
-            MapMonarchsTheme { MapHud(state(identity = Identity.SignedOut), onCapture = {}, onRetry = {}) }
+            MapMonarchsTheme { MapHud(state(identity = Identity.SignedOut), {}, {}, {}) }
         }
         rule.onNodeWithTag(MapHudTags.HANDLE).assertTextEquals("NO IDENTITY")
     }
@@ -56,11 +56,7 @@ class MapHudTest {
     fun identityUnavailableIsShownExplicitlyWithItsCause() {
         rule.setContent {
             MapMonarchsTheme {
-                MapHud(
-                    state(identity = Identity.Unavailable(AppError.AuthUnavailable("disabled"))),
-                    onCapture = {},
-                    onRetry = {}
-                )
+                MapHud(state(identity = Identity.Unavailable(AppError.AuthUnavailable("disabled"))), {}, {}, {})
             }
         }
         rule.onNodeWithTag(MapHudTags.HANDLE).assertTextEquals("IDENTITY UNAVAILABLE")
@@ -68,34 +64,14 @@ class MapHudTest {
     }
 
     @Test
-    fun captureIsInertWithoutIdentityEvenWhenReady() {
-        var clicks = 0
-        rule.setContent {
-            MapMonarchsTheme {
-                MapHud(
-                    state(identity = Identity.SignedOut, capture = CaptureState.Ready),
-                    onCapture = { clicks++ },
-                    onRetry = {}
-                )
-            }
-        }
-        rule.onNodeWithTag(MapHudTags.CAPTURE).assertTextEquals("NO IDENTITY").performClick()
-        assertEquals(0, clicks)
-    }
-
-    @Test
     fun holdingsShowUnknownRatherThanZero() {
-        rule.setContent {
-            MapMonarchsTheme { MapHud(state(), onCapture = {}, onRetry = {}) }
-        }
+        rule.setContent { MapMonarchsTheme { MapHud(state(), {}, {}, {}) } }
         rule.onNodeWithTag(MapHudTags.HELD).assertTextEquals("--")
     }
 
     @Test
     fun failureStripIsHiddenWhenEverythingLoads() {
-        rule.setContent {
-            MapMonarchsTheme { MapHud(state(), onCapture = {}, onRetry = {}) }
-        }
+        rule.setContent { MapMonarchsTheme { MapHud(state(), {}, {}, {}) } }
         rule.onNodeWithTag(MapHudTags.ERROR).assertDoesNotExist()
     }
 
@@ -106,8 +82,7 @@ class MapHudTest {
             MapMonarchsTheme {
                 MapHud(
                     state(territory = TerritoryLoad.Failed(AppError.SchemaMissing("42P01"))),
-                    onCapture = {},
-                    onRetry = { retries++ }
+                    {}, { retries++ }, {}
                 )
             }
         }
@@ -117,38 +92,58 @@ class MapHudTest {
     }
 
     @Test
-    fun captureInvokesCallbackWhenIdentityAndFixAreReal() {
-        var clicks = 0
+    fun captureInvokesCaptureWhenReady() {
+        var captures = 0
+        var explains = 0
         rule.setContent {
             MapMonarchsTheme {
-                MapHud(state(capture = CaptureState.Ready), onCapture = { clicks++ }, onRetry = {})
+                MapHud(state(capture = CaptureState.Ready), { captures++ }, {}, { explains++ })
             }
         }
         rule.onNodeWithTag(MapHudTags.CAPTURE).assertIsDisplayed().performClick()
-        assertEquals(1, clicks)
+        assertEquals(1, captures)
+        assertEquals("ready state must not route to the explanation", 0, explains)
     }
 
+    // --- regression: a blocked button used to swallow the tap entirely ---
+
     @Test
-    fun captureIsInertWhenBlocked() {
-        var clicks = 0
+    fun blockedCaptureRoutesToExplanationInsteadOfSwallowingTheTap() {
+        var captures = 0
+        var explains = 0
         rule.setContent {
             MapMonarchsTheme {
                 MapHud(
                     state(capture = CaptureState.Blocked(RejectionReason.MOCK_LOCATION)),
-                    onCapture = { clicks++ },
-                    onRetry = {}
+                    { captures++ }, {}, { explains++ }
                 )
             }
         }
         rule.onNodeWithTag(MapHudTags.CAPTURE).assertTextEquals("MOCK LOCATION").performClick()
-        assertEquals(0, clicks)
+        assertEquals("must never claim while blocked", 0, captures)
+        assertEquals("a dead tap is a dead end", 1, explains)
+    }
+
+    @Test
+    fun missingIdentityAlsoRoutesToExplanation() {
+        var captures = 0
+        var explains = 0
+        rule.setContent {
+            MapMonarchsTheme {
+                MapHud(
+                    state(identity = Identity.SignedOut, capture = CaptureState.Ready),
+                    { captures++ }, {}, { explains++ }
+                )
+            }
+        }
+        rule.onNodeWithTag(MapHudTags.CAPTURE).assertTextEquals("NO IDENTITY").performClick()
+        assertEquals(0, captures)
+        assertEquals(1, explains)
     }
 
     @Test
     fun deltaHiddenWhenZero() {
-        rule.setContent {
-            MapMonarchsTheme { MapHud(state(delta = 0), onCapture = {}, onRetry = {}) }
-        }
+        rule.setContent { MapMonarchsTheme { MapHud(state(delta = 0), {}, {}, {}) } }
         rule.onNodeWithTag(MapHudTags.DELTA).assertDoesNotExist()
     }
 }

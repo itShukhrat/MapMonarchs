@@ -87,7 +87,12 @@ fun AppShell(modifier: Modifier = Modifier) {
                 onOpenDiagnostics = { navigator.navigateTo(Route.Diagnostics) }
             )
 
-            route == Route.Map -> MapScreen(viewModel = viewModel)
+            route == Route.Map -> MapScreen(
+                viewModel = viewModel,
+                // A blocked capture button routes to the screen that explains it,
+                // rather than absorbing the tap.
+                onExplainBlocker = { navigator.navigateTo(Route.Diagnostics) }
+            )
 
             route == Route.Identity -> IdentityScreen(
                 identity = state.identity,

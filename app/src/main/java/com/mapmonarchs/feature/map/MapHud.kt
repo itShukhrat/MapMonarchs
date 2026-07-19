@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
@@ -28,9 +27,10 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.mapmonarchs.ui.components.ErrorStrip
+import com.mapmonarchs.ui.components.HexagonShape
 import com.mapmonarchs.ui.theme.Contested
 import com.mapmonarchs.ui.theme.Slate
 import com.mapmonarchs.ui.theme.SlateEdge
@@ -54,15 +54,16 @@ object MapHudTags {
  * The HUD is a FRAME, not a panel.
  *
  * The map is the hero, so the centre is never occluded. Content hugs three edges:
- * identity (top-left), holdings (top-right), one action (bottom-centre). A fourth
- * element -- the failure strip -- exists but is rendered ONLY on failure, so a
- * healthy screen carries no extra chrome at all.
+ * identity (top-left), holdings (top-right), one action (bottom-centre). The
+ * failure strip is rendered ONLY on failure, so a healthy screen carries no extra
+ * chrome at all.
  */
 @Composable
 fun MapHud(
     state: MapUiState,
     onCapture: () -> Unit,
     onRetry: () -> Unit,
+    onExplainBlocker: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Box(
@@ -89,7 +90,11 @@ fun MapHud(
             // Identity failure outranks territory failure: without a session the
             // player is not in the game at all, so that is the fact to surface.
             (state.identityError() ?: state.territoryError)?.let { error ->
-                FailureStrip(message = error.playerMessage(), onRetry = onRetry)
+                ErrorStrip(
+                    message = error.playerMessage(),
+                    onRetry = onRetry,
+                    modifier = Modifier.testTag(MapHudTags.ERROR)
+                )
             }
         }
 
@@ -103,8 +108,9 @@ fun MapHud(
 
         CaptureAction(
             label = state.captureLabel(),
-            enabled = state.isCaptureActionable(),
-            onClick = onCapture,
+            ready = state.isCaptureActionable(),
+            onReadyClick = onCapture,
+            onBlockedClick = onExplainBlocker,
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .padding(bottom = 32.dp)
@@ -114,12 +120,10 @@ fun MapHud(
 
 /**
  * Identity is a derived callsign beside a hex glyph -- never an avatar circle.
- * The shape is the identity language of this game.
  *
  * A null territoryColor means we have no authenticated session, and the glyph
  * renders HOLLOW rather than picking a default colour. An unclaimed outline is
- * literally accurate for a player who does not exist yet, and it makes the
- * absence of identity visible at a glance instead of disguising it.
+ * literally accurate for a player who does not exist yet.
  */
 @Composable
 private fun IdentityChip(label: String, territoryColor: Color?, modifier: Modifier = Modifier) {
@@ -127,7 +131,11 @@ private fun IdentityChip(label: String, territoryColor: Color?, modifier: Modifi
         modifier = modifier
             .clip(RoundedCornerShape(8.dp))
             .background(Void.copy(alpha = 0.72f))
-            .padding(horizontal = 12.dp, vertical = 8.dp),
+            .padding(horizontal = 12.dp, vertical = 8.dp)
+            .semantics {
+                contentDescription =
+                    if (territoryColor != null) "Your callsign: $label" else "Identity: $label"
+            },
         verticalAlignment = Alignment.CenterVertically
     ) {
         HexGlyph(color = territoryColor, glyphSize = 16.dp)
@@ -138,50 +146,6 @@ private fun IdentityChip(label: String, territoryColor: Color?, modifier: Modifi
             modifier = Modifier
                 .padding(start = 10.dp)
                 .testTag(MapHudTags.HANDLE)
-        )
-    }
-}
-
-/**
- * Shown only when territory failed to load. Deliberately NOT a card, dialog, or
- * full-screen takeover: the map stays usable and the failure stays honest. A
- * modal would imply the app is dead; a silent empty map would imply the player
- * owns nothing, which is a lie we refuse to tell.
- */
-@Composable
-private fun FailureStrip(message: String, onRetry: () -> Unit, modifier: Modifier = Modifier) {
-    Row(
-        modifier = modifier
-            .clip(RoundedCornerShape(8.dp))
-            .background(Void.copy(alpha = 0.82f))
-            .border(1.dp, Contested.copy(alpha = 0.55f), RoundedCornerShape(8.dp))
-            .padding(horizontal = 12.dp, vertical = 8.dp)
-            .testTag(MapHudTags.ERROR),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Box(
-            modifier = Modifier
-                .size(6.dp)
-                .clip(RoundedCornerShape(3.dp))
-                .background(Contested)
-        )
-        Text(
-            text = message,
-            style = MaterialTheme.typography.bodyMedium,
-            color = TextPrimary,
-            maxLines = 2,
-            overflow = TextOverflow.Ellipsis,
-            modifier = Modifier
-                .weight(1f, fill = false)
-                .padding(start = 10.dp)
-        )
-        Text(
-            text = "RETRY",
-            style = MaterialTheme.typography.labelMedium,
-            color = SovereignGlow,
-            modifier = Modifier
-                .padding(start = 14.dp)
-                .clickable(onClick = onRetry)
         )
     }
 }
@@ -204,44 +168,63 @@ private fun Holdings(holdings: String, delta: Int, modifier: Modifier = Modifier
                         if (holdings == "--") "Hexes held: unknown" else "Hexes held: $holdings"
                 }
         )
-        Text(
-            text = "HEXES HELD",
-            style = MaterialTheme.typography.labelSmall,
-            color = TextMuted
-        )
+        Text(text = "HEXES HELD", style = MaterialTheme.typography.labelSmall, color = TextMuted)
         if (delta != 0) {
             Text(
                 text = if (delta > 0) "+$delta" else delta.toString(),
                 style = MaterialTheme.typography.labelMedium,
                 color = if (delta > 0) SovereignGlow else Contested,
-                modifier = Modifier.testTag(MapHudTags.DELTA)
+                modifier = Modifier
+                    .testTag(MapHudTags.DELTA)
+                    .semantics { contentDescription = "Change since last check: $delta hexes" }
             )
         }
     }
 }
 
+/**
+ * The single action.
+ *
+ * When blocked, this used to be clickable(enabled = false): it stated the reason
+ * and then swallowed the tap. Telling a player something is wrong and giving them
+ * nowhere to go is a dead end -- and a control that ignores touch reads as a
+ * broken app, not as a boundary.
+ *
+ * Now the blocked state stays tappable and routes to the explanation. It is also
+ * styled distinctly from "ready": a Contested-tinted edge says "there is a
+ * problem here, press to understand it", rather than the flat grey of a disabled
+ * control that would invite no interaction at all.
+ */
 @Composable
 private fun CaptureAction(
     label: String,
-    enabled: Boolean,
-    onClick: () -> Unit,
+    ready: Boolean,
+    onReadyClick: () -> Unit,
+    onBlockedClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val shape = RoundedCornerShape(14.dp)
     Box(
         modifier = modifier
             .clip(shape)
-            .background(if (enabled) Sovereign else Slate)
-            .border(1.dp, if (enabled) SovereignGlow else SlateEdge, shape)
-            .clickable(enabled = enabled, onClick = onClick)
+            .background(if (ready) Sovereign else Slate)
+            .border(1.dp, if (ready) SovereignGlow else Contested.copy(alpha = 0.45f), shape)
+            .clickable(onClick = if (ready) onReadyClick else onBlockedClick)
             .padding(horizontal = 44.dp, vertical = 18.dp)
-            .testTag(MapHudTags.CAPTURE),
+            .testTag(MapHudTags.CAPTURE)
+            .semantics {
+                contentDescription = if (ready) {
+                    "Claim this hex"
+                } else {
+                    "Cannot claim: $label. Press to find out why."
+                }
+            },
         contentAlignment = Alignment.Center
     ) {
         Text(
             text = label,
             style = MaterialTheme.typography.labelLarge,
-            color = if (enabled) Void else TextMuted
+            color = if (ready) Void else TextMuted
         )
     }
 }
@@ -264,10 +247,7 @@ private fun HexGlyph(color: Color?, glyphSize: Dp, modifier: Modifier = Modifier
             if (i == 0) path.moveTo(x, y) else path.lineTo(x, y)
         }
         path.close()
-        if (color != null) {
-            drawPath(path, color)
-        } else {
-            drawPath(path, TextMuted, style = Stroke(width = 1.5.dp.toPx()))
-        }
+        if (color != null) drawPath(path, color)
+        else drawPath(path, TextMuted, style = Stroke(width = 1.5.dp.toPx()))
     }
 }

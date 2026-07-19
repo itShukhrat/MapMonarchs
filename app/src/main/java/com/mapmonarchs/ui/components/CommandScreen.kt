@@ -97,6 +97,8 @@ object UiTags {
     const val SCREEN_TITLE = "ui_screen_title"
     const val COMMAND_BUTTON = "ui_command_button"
     const val COMMAND_MENU = "ui_command_menu"
+    const val ERROR_STRIP = "ui_error_strip"
+    const val RETRY = "ui_retry"
 }
 
 /** Section divider. A tracked label over a hairline -- no card, no elevation. */

@@ -37,6 +37,7 @@ private val DEFAULT_CENTER: Point = Point.fromLngLat(69.2401, 41.2995)
 @Composable
 fun MapScreen(
     viewModel: MapViewModel,
+    onExplainBlocker: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
@@ -87,7 +88,8 @@ fun MapScreen(
         MapHud(
             state = state,
             onCapture = viewModel::onCaptureRequested,
-            onRetry = viewModel::onRetry
+            onRetry = viewModel::onRetry,
+            onExplainBlocker = onExplainBlocker
         )
     }
 }
