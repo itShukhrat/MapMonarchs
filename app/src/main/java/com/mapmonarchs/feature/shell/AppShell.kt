@@ -78,7 +78,7 @@ fun AppShell(modifier: Modifier = Modifier) {
         return
     }
 
-    BackHandler(enabled = navigator.commandMenuOpen || navigator.canGoBack) { navigator.back() }
+    BackHandler(enabled = navigator.canGoBack) { navigator.back() }
 
     Box(modifier = modifier.fillMaxSize()) {
         val route = navigator.current
@@ -178,28 +178,33 @@ fun AppShell(modifier: Modifier = Modifier) {
             route == Route.Safety -> SafetyScreen(onBack = { navigator.back() })
 
             route == Route.About -> AboutScreen(onBack = { navigator.back() })
+
+            route == Route.Command -> CommandCenterScreen(
+                onOpen = { navigator.navigateTo(it) },
+                onBack = { navigator.back() }
+            )
         }
 
-        // The command button belongs to the map only. On every other screen BACK
-        // is the navigation, and two competing affordances would be one too many.
+        // The bar is hidden during SIGN IN only. That flow is one decision at a
+        // time and a persistent navigation invites abandoning it half-finished,
+        // which in an email-code flow means an unused code and a second send.
+        // Everywhere else it stays, because a navigation that disappears is a
+        // navigation the player has to re-find.
         AnimatedVisibility(
-            visible = route == Route.Map && !navigator.commandMenuOpen,
+            visible = route != Route.SignIn,
             enter = fadeIn(),
             exit = fadeOut(),
             modifier = Modifier
-                .align(Alignment.BottomEnd)
+                .align(Alignment.BottomCenter)
                 .safeDrawingPadding()
-                .padding(end = 20.dp, bottom = 36.dp)
+                .padding(bottom = 12.dp)
         ) {
-            CommandButton(onClick = { navigator.openCommandMenu() })
+            CommandBar(
+                destinations = NAV_DESTINATIONS,
+                currentRoute = route,
+                onSelect = { navigator.navigateTo(it.route) }
+            )
         }
-
-        CommandMenu(
-            visible = navigator.commandMenuOpen,
-            current = route,
-            onSelect = { navigator.navigateTo(it) },
-            onDismiss = { navigator.closeCommandMenu() }
-        )
     }
 }
 

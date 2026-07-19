@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
@@ -88,15 +89,25 @@ fun CommandScreen(
                 .padding(horizontal = 20.dp)
         ) {
             content()
+            // Clears the floating command bar. Done HERE rather than in each
+            // screen because the bar is global: a per-screen spacer would be the
+            // same measurement copied eight times, and the one that got forgotten
+            // would trap its last row under the bar with no way to reach it.
+            Spacer(modifier = Modifier.height(COMMAND_BAR_CLEARANCE))
         }
     }
 }
 
+/**
+ * Vertical room reserved at the bottom of every command surface for the floating
+ * bar plus its inset. Lives here, next to the only thing that applies it.
+ */
+private val COMMAND_BAR_CLEARANCE = 104.dp
+
 object UiTags {
     const val BACK = "ui_back"
     const val SCREEN_TITLE = "ui_screen_title"
-    const val COMMAND_BUTTON = "ui_command_button"
-    const val COMMAND_MENU = "ui_command_menu"
+
     const val ERROR_STRIP = "ui_error_strip"
     const val RETRY = "ui_retry"
 }

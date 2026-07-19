@@ -74,3 +74,56 @@ val Typography = Typography(
         letterSpacing = 0.1.sp
     )
 )
+
+/**
+ * Roles Material's Typography has no slot for.
+ *
+ * These are not decoration. Each exists because a specific piece of this product
+ * reads wrongly without it:
+ *
+ *  - NavLabel: 9sp tracked, sitting under a 22dp glyph in a floating bar. At
+ *    labelSmall (10sp/2.5 tracking) five labels do not fit across a 360dp screen
+ *    without truncating, and a truncated navigation label is a broken control.
+ *  - Caption: the smallest readable prose. bodyMedium is too loud for a
+ *    secondary line under a status row.
+ *  - Badge: a count on a glyph. Tabular so 9 -> 10 does not shift the badge.
+ *  - Coordinate: monospace, because latitude and longitude are compared
+ *    character by character and proportional digits make that hostile. This is
+ *    the only monospace in the product and it is reserved for real coordinates.
+ */
+object MapMonarchsType {
+
+    val navLabel = TextStyle(
+        fontFamily = FontFamily.SansSerif,
+        fontWeight = FontWeight.SemiBold,
+        fontSize = 9.sp,
+        lineHeight = 11.sp,
+        letterSpacing = 1.2.sp
+    )
+
+    val caption = TextStyle(
+        fontFamily = FontFamily.SansSerif,
+        fontWeight = FontWeight.Normal,
+        fontSize = 13.sp,
+        lineHeight = 18.sp,
+        letterSpacing = 0.1.sp
+    )
+
+    val badge = TextStyle(
+        fontFamily = FontFamily.SansSerif,
+        fontWeight = FontWeight.Bold,
+        fontSize = 10.sp,
+        lineHeight = 10.sp,
+        letterSpacing = 0.sp,
+        fontFeatureSettings = Tabular
+    )
+
+    val coordinate = TextStyle(
+        fontFamily = FontFamily.Monospace,
+        fontWeight = FontWeight.Medium,
+        fontSize = 13.sp,
+        lineHeight = 18.sp,
+        letterSpacing = 0.5.sp,
+        fontFeatureSettings = Tabular
+    )
+}

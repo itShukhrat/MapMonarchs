@@ -1,6 +1,7 @@
 package com.mapmonarchs.feature.shell
 
 import com.mapmonarchs.domain.model.Blocker
+import com.mapmonarchs.ui.components.NavGlyph
 
 /**
  * A feature that exists in the design but cannot honestly be used yet.
@@ -36,6 +37,13 @@ sealed interface Route {
     data object Settings : Route { override val title = "SETTINGS" }
     data object SignIn : Route { override val title = "SIGN IN" }
 
+    /**
+     * The instrument deck. Replaced the old floating command MENU, which was an
+     * overlay reachable only from the map -- so every reference and settings
+     * surface was two taps deep and invisible until you found the button.
+     */
+    data object Command : Route { override val title = "COMMAND" }
+
     data object Help : Route { override val title = "HELP" }
     data object Safety : Route { override val title = "SAFETY & PRIVACY" }
     data object About : Route { override val title = "ABOUT" }
@@ -70,6 +78,18 @@ sealed interface Route {
         )
     }
 
+    data object Missions : Route {
+        override val title = "MISSIONS"
+        override val lock = FeatureLock(
+            why = "A mission is an instruction to go somewhere and hold it. With no " +
+                "capture, every objective would reduce to \"walk around\" -- which the " +
+                "map already asks you to do, without pretending it was assigned.",
+            unlocksWhen = "Capture is live, so an objective can have a real outcome.",
+            insteadNow = "Walk. That is the whole objective today, and it is the one " +
+                "being tested."
+        )
+    }
+
     data object Empire : Route {
         override val title = "EMPIRE"
         override val lock = FeatureLock(
@@ -93,7 +113,6 @@ sealed interface Route {
 
 /** Primary commands: things you actively do. Rendered at full weight. */
 val COMMAND_ROUTES: List<Route> = listOf(
-    Route.Map,
     Route.Identity,
     Route.Diagnostics,
     Route.Settings
@@ -115,10 +134,42 @@ val REFERENCE_ROUTES: List<Route> = listOf(
  */
 val LOCKED_ROUTES: List<Route> = listOf(
     Route.Territory,
+    Route.Missions,
     Route.Leaderboard,
     Route.Notifications,
     Route.Empire,
     Route.Shop
+)
+
+/**
+ * A destination in the floating command bar.
+ *
+ * FIVE, not six. Five is what a thumb reaches across a 360dp screen without the
+ * hand shifting grip, and this bar sits over a map the player is walking with.
+ * The sixth tab in the original sketch was PROFILE; identity lives inside
+ * COMMAND instead, because it is a place you visit occasionally, not a place you
+ * steer from.
+ *
+ * NAMING: these use each route's own title rather than a second set of nav
+ * labels. "CLAIMS" in the bar opening a screen headed "TERRITORY" is the same
+ * class of defect as the HUD and diagnostics disagreeing about a blocker -- one
+ * concept, two names, drifting independently.
+ */
+data class NavDestination(
+    val route: Route,
+    val glyph: NavGlyph,
+    /** Short enough to sit under a 22dp glyph without truncating. */
+    val label: String
+) {
+    val isLocked: Boolean get() = route.lock != null
+}
+
+val NAV_DESTINATIONS: List<NavDestination> = listOf(
+    NavDestination(Route.Map, NavGlyph.MAP, "MAP"),
+    NavDestination(Route.Territory, NavGlyph.CLAIMS, "TERRITORY"),
+    NavDestination(Route.Missions, NavGlyph.MISSIONS, "MISSIONS"),
+    NavDestination(Route.Empire, NavGlyph.SOCIAL, "EMPIRE"),
+    NavDestination(Route.Command, NavGlyph.COMMAND, "COMMAND")
 )
 
 val ALL_ROUTES: List<Route> = COMMAND_ROUTES + REFERENCE_ROUTES + LOCKED_ROUTES

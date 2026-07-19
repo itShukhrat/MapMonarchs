@@ -69,8 +69,12 @@ class FeatureLockTest {
     }
 
     @Test
-    fun `map is the only command route without a back destination`() {
-        assertTrue(COMMAND_ROUTES.contains(Route.Map))
+    fun `map lives in the bar and is not duplicated in the command list`() {
+        // Map moved from the command list to the floating bar. It must not appear
+        // in both: two entries for one destination is the same defect as two
+        // names for one concept, and it drifts the same way.
+        assertTrue(NAV_DESTINATIONS.any { it.route == Route.Map })
+        assertTrue("map must not also sit in the command list", !COMMAND_ROUTES.contains(Route.Map))
     }
 
     @Test
