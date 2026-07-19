@@ -41,6 +41,7 @@ object DiagnosticsTags {
     const val ANON_AUTH = "diag_anon_auth"
     const val DELIVERY = "diag_delivery"
     const val SIGN_IN_POSSIBLE = "diag_signin_possible"
+    const val AUTOCONFIRM = "diag_autoconfirm"
 }
 
 /**
@@ -221,6 +222,21 @@ private fun AuthCapabilityRows(diagnostics: DiagnosticsState) {
         value = readiness.label,
         valueColor = if (readiness == SignInReadiness.POSSIBLE) SovereignGlow else Contested,
         modifier = Modifier.testTag(DiagnosticsTags.SIGN_IN_POSSIBLE)
+    )
+    // Always rendered, in every probe state. This was previously visible ONLY as
+    // a note shown when autoconfirm was false -- so if the value flipped to true
+    // the fact did not change, it vanished. A fact you are shown only when it
+    // holds one particular value is not an observed fact.
+    StatusRow(
+        label = "Account confirmation",
+        value = when (probe) {
+            is CapabilitiesProbe.Observed ->
+                if (probe.capabilities.mailerAutoconfirm) "AUTOMATIC" else "CODE REQUIRED"
+            is CapabilitiesProbe.Probing -> "CHECKING"
+            else -> "UNKNOWN"
+        },
+        valueColor = TextMuted,
+        modifier = Modifier.testTag(DiagnosticsTags.AUTOCONFIRM)
     )
     if (readiness == SignInReadiness.UNPROVEN) {
         BodyNote(
