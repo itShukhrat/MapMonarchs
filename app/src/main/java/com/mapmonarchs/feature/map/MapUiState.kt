@@ -2,6 +2,7 @@ package com.mapmonarchs.feature.map
 
 import androidx.compose.ui.graphics.Color
 import com.mapmonarchs.domain.model.AppError
+import com.mapmonarchs.domain.model.Blocker
 import com.mapmonarchs.domain.model.HexOwnership
 import com.mapmonarchs.domain.model.Identity
 import com.mapmonarchs.domain.validation.RejectionReason
@@ -36,7 +37,6 @@ data class MapUiState(
     val identity: Identity,
     val territory: TerritoryLoad,
     val capture: CaptureState,
-    val hexesHeldDelta: Int = 0,
     /** Mirrors the OS permission so Settings can report it without re-querying. */
     val locationPermissionGranted: Boolean = false,
     /**
@@ -65,23 +65,63 @@ data class MapUiState(
      */
     val previewRings: List<List<PreviewPoint>> = emptyList()
 ) {
-    /**
-     * null means UNKNOWN and the UI must render it as such. Showing 0 before
-     * asking the server tells the player they own nothing -- a lie when
-     * territory merely failed to load. Stays null until ownership can be
-     * filtered by a real authenticated user.
-     */
-    val hexesHeld: Int? = null
-
     val isTerritoryFailed: Boolean get() = territory is TerritoryLoad.Failed
     val territoryError: AppError? get() = (territory as? TerritoryLoad.Failed)?.error
 }
 
-/** Holdings readout. Never fabricates a number it does not have. */
-fun MapUiState.holdingsLabel(): String = when {
-    previewMode -> (previewHeld ?: 0).toString()
-    else -> hexesHeld?.toString() ?: "--"
+/**
+ * Resolves the one reason the player cannot act. THE ordering, not an ordering:
+ * every surface renders [Blocker], none re-derives it. See [Blocker] for the two
+ * bugs that duplication caused.
+ *
+ * PRECEDENCE, and a reversal of an earlier decision: position outranks identity.
+ * An older comment on the capture label argued the opposite -- that identity
+ * wins because the server rejects unauthenticated captures regardless of GPS.
+ * That is true and still the wrong thing to say first. Permission is one tap and
+ * the map is visibly broken without it; signing in is an email round-trip. And
+ * in preview, position still matters while identity does not, so identity-first
+ * ordering cannot even describe preview correctly.
+ */
+fun resolveBlocker(state: MapUiState): Blocker = when {
+    !state.locationPermissionGranted -> Blocker.LocationPermissionMissing
+
+    state.capture is CaptureState.Blocked ->
+        Blocker.FixRejected((state.capture as CaptureState.Blocked).reason)
+
+    state.capture is CaptureState.AcquiringFix -> Blocker.AcquiringFix
+
+    // Past this point the position is usable. Identity only gates REAL claims,
+    // so preview -- which never leaves the device -- is genuinely unblocked.
+    state.previewMode -> Blocker.None
+
+    state.identity is Identity.Resolving -> Blocker.IdentityResolving
+
+    state.identity is Identity.Unavailable ->
+        Blocker.IdentityUnavailable((state.identity as Identity.Unavailable).error)
+
+    state.identity !is Identity.SignedIn -> Blocker.NotSignedIn
+
+    // Territory load state is deliberately absent: reading ownership and writing
+    // a capture are independent axes. A stale map does not stop the server
+    // arbitrating a claim, and pretending otherwise would collapse two axes this
+    // state model exists to keep apart.
+
+    // Terminal, and deliberately not "nothing is blocking you". attempt_capture()
+    // is not deployed, so a signed-in player standing still on a perfect fix is
+    // still blocked -- by the backend, which is worth saying out loud.
+    else -> Blocker.CaptureNotDeployed
 }
+
+/**
+ * Holdings readout.
+ *
+ * Outside preview this is ALWAYS unknown, and says so. There is no live source
+ * for it: hex_ownership does not exist on the server yet, so any number here
+ * would be invented. It previously read from a field that no caller could set --
+ * honest by accident rather than by construction.
+ */
+fun MapUiState.holdingsLabel(): String =
+    if (previewMode) (previewHeld ?: 0).toString() else "--"
 
 /**
  * Identity readout.
@@ -97,8 +137,6 @@ fun MapUiState.identityLabel(): String = when (val id = identity) {
     is Identity.SignedOut -> "NO IDENTITY"
     is Identity.Unavailable -> "IDENTITY UNAVAILABLE"
 }
-
-/** True only when identity is real. Drives the glyph fill vs. outline. */
 
 /**
  * Territory colour, or null when there is no identity to derive one from.
@@ -117,46 +155,28 @@ fun MapUiState.identityError(): AppError? = (identity as? Identity.Unavailable)?
 /**
  * The capture button always explains itself. A silent dead button in a game
  * where movement earns territory reads as a broken app, or as the game cheating
- * the player. Identity outranks GPS: without a session the server would reject
- * every capture with not_authenticated, so saying "CLAIM HEX" would be a lie.
+ * the player.
+ *
+ * In-flight and settled capture states are progress, not blockers, so they are
+ * reported before the blocker is consulted. Everything else is [Blocker]'s
+ * answer, verbatim -- this function no longer holds an opinion of its own.
  */
 fun MapUiState.captureLabel(): String {
-    // Preview simulates the loop locally, so the action is available -- but it is
-    // labelled differently so it can never read as a real claim.
-    if (previewMode) {
-        return when (capture) {
-            is CaptureState.PermissionRequired -> "LOCATION OFF"
-            is CaptureState.AcquiringFix -> "ACQUIRING GPS"
-            else -> "CLAIM (PREVIEW)"
-        }
+    when (val c = capture) {
+        is CaptureState.InFlight -> return "CLAIMING"
+        is CaptureState.Succeeded -> return "CLAIMED"
+        is CaptureState.Failed -> return "CAPTURE FAILED"
+        else -> Unit
     }
-    if (identity !is Identity.SignedIn) {
-        return when (identity) {
-            is Identity.Resolving -> "IDENTIFYING"
-            else -> "NO IDENTITY"
-        }
-    }
-    return when (val c = capture) {
-        is CaptureState.PermissionRequired -> "LOCATION OFF"
-        is CaptureState.AcquiringFix -> "ACQUIRING GPS"
-        is CaptureState.Ready -> "CLAIM HEX"
-        is CaptureState.InFlight -> "CLAIMING"
-        is CaptureState.Succeeded -> "CLAIMED"
-        is CaptureState.Failed -> "CAPTURE FAILED"
-        is CaptureState.Blocked -> when (c.reason) {
-            RejectionReason.MOCK_LOCATION -> "MOCK LOCATION"
-            RejectionReason.LOW_ACCURACY -> "GPS TOO WEAK"
-            RejectionReason.TOO_FAST -> "MOVING TOO FAST"
-            RejectionReason.TELEPORT -> "SIGNAL JUMPED"
-        }
-    }
+    val blocker = resolveBlocker(this)
+    if (blocker != Blocker.None) return blocker.hudLabel()
+    // None is reachable only in preview, and is labelled so it can never read as
+    // a real claim.
+    return if (previewMode) "CLAIM (PREVIEW)" else "CLAIM HEX"
 }
 
-/** Actionable only with a real identity AND a ready capture state. */
-fun MapUiState.isCaptureActionable(): Boolean = when {
-    previewMode -> capture is CaptureState.Ready || capture is CaptureState.Blocked
-    else -> identity is Identity.SignedIn && capture is CaptureState.Ready
-}
+/** Actionable only when nothing blocks. Blocked buttons stay tappable, but route. */
+fun MapUiState.isCaptureActionable(): Boolean = resolveBlocker(this) == Blocker.None
 
 /**
  * Preview never routes a claim to the server. This is the guard the rest of the

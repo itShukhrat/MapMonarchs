@@ -13,11 +13,24 @@ class MapUiStateTest {
 
     private val realUser = "6f2c1e4a-1111-4b2a-9c3d-000000000001"
 
+    /**
+     * Permission defaults to GRANTED so every state built here is COHERENT.
+     * Previously it defaulted to false while tests asserted on labels for
+     * accepted and rejected position fixes -- combinations the app cannot
+     * produce. Those tests passed only because the old label logic never
+     * consulted permission at all.
+     */
     private fun state(
         identity: Identity = Identity.from(realUser),
         territory: TerritoryLoad = TerritoryLoad.Loading,
-        capture: CaptureState = CaptureState.AcquiringFix
-    ) = MapUiState(identity = identity, territory = territory, capture = capture)
+        capture: CaptureState = CaptureState.AcquiringFix,
+        permission: Boolean = true
+    ) = MapUiState(
+        identity = identity,
+        territory = territory,
+        capture = capture,
+        locationPermissionGranted = permission
+    )
 
     // --- holdings honesty ---
 
@@ -87,12 +100,20 @@ class MapUiStateTest {
         // would be a lie the player pays for with a failed action.
         val s = state(identity = Identity.SignedOut, capture = CaptureState.Ready)
         assertFalse(s.isCaptureActionable())
-        assertEquals("NO IDENTITY", s.captureLabel())
+        // Names the remedy, not just the symptom.
+        assertEquals("SIGN IN TO CLAIM", s.captureLabel())
     }
 
+    /**
+     * REVERSED, and worth stating plainly: a signed-in player on an accepted fix
+     * is NOT actionable, because attempt_capture() is not deployed. This used to
+     * assert the opposite, which described an app that could claim ground. It
+     * cannot, and the button must not imply otherwise.
+     */
     @Test
-    fun `capture is actionable only when identity is real and state is ready`() {
-        assertTrue(state(capture = CaptureState.Ready).isCaptureActionable())
+    fun `a live claim is never actionable while the backend is undeployed`() {
+        assertFalse(state(capture = CaptureState.Ready).isCaptureActionable())
+        assertEquals("CLAIMING OFFLINE", state(capture = CaptureState.Ready).captureLabel())
         assertFalse(state(capture = CaptureState.AcquiringFix).isCaptureActionable())
         assertFalse(state(capture = CaptureState.InFlight).isCaptureActionable())
     }
@@ -122,10 +143,20 @@ class MapUiStateTest {
 
     // --- axis independence ---
 
+    /**
+     * Axis independence, asserted as INVARIANCE rather than as a boolean.
+     * The old form checked that capture was actionable with territory failing,
+     * which conflated "territory does not affect capture" with "capture is
+     * available" -- so it broke the moment capture became unavailable for an
+     * unrelated reason. What actually matters is that the territory axis does not
+     * move the capture answer.
+     */
     @Test
-    fun `territory failure does not disable capture - independent axes`() {
-        val s = state(territory = TerritoryLoad.Failed(AppError.Offline("x")), capture = CaptureState.Ready)
-        assertTrue(s.isCaptureActionable())
+    fun `territory failure does not change the capture blocker - independent axes`() {
+        val failed = state(territory = TerritoryLoad.Failed(AppError.Offline("x")), capture = CaptureState.Ready)
+        val loaded = state(territory = TerritoryLoad.Loaded(emptyList()), capture = CaptureState.Ready)
+        assertEquals(resolveBlocker(loaded), resolveBlocker(failed))
+        assertEquals(loaded.isCaptureActionable(), failed.isCaptureActionable())
     }
 
     @Test

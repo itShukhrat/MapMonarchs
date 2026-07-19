@@ -19,6 +19,12 @@ import org.junit.runner.RunWith
 /**
  * The HUD is tested in isolation from MapboxMap on purpose: the GL surface needs
  * a real map context, while the HUD carries the state logic worth asserting.
+ *
+ * Every state built here is COHERENT. An earlier version of this suite tested a
+ * "ready to claim" HUD while location permission was denied -- a combination the
+ * app can never produce -- and passed, because the old actionability check never
+ * consulted permission at all. A test that only holds in an impossible state
+ * proves nothing about the app.
  */
 @RunWith(AndroidJUnit4::class)
 class MapHudTest {
@@ -28,12 +34,22 @@ class MapHudTest {
 
     private val realUser = "6f2c1e4a-1111-4b2a-9c3d-000000000001"
 
+    /** Defaults to a fully healthy live state: signed in, permission held, fix accepted. */
     private fun state(
         identity: Identity = Identity.from(realUser),
         territory: TerritoryLoad = TerritoryLoad.Loaded(emptyList()),
         capture: CaptureState = CaptureState.Ready,
-        delta: Int = 0
-    ) = MapUiState(identity = identity, territory = territory, capture = capture, hexesHeldDelta = delta)
+        permission: Boolean = true,
+        previewMode: Boolean = false,
+        previewHeld: Int? = null
+    ) = MapUiState(
+        identity = identity,
+        territory = territory,
+        capture = capture,
+        locationPermissionGranted = permission,
+        previewMode = previewMode,
+        previewHeld = previewHeld
+    )
 
     @Test
     fun rendersDerivedCallsignForSignedInUser() {
@@ -91,18 +107,47 @@ class MapHudTest {
         assertEquals(1, retries)
     }
 
+    // --- what the button does, per real blocker -----------------------------
+
+    /**
+     * The honest current truth of a LIVE session: everything the player controls
+     * is correct, and claiming is still off because attempt_capture() is not
+     * deployed. The button says so and routes to the explanation rather than
+     * pretending to be ready.
+     */
     @Test
-    fun captureInvokesCaptureWhenReady() {
+    fun fullyHealthyLiveStateStillReportsTheUndeployedBackend() {
+        var captures = 0
+        var explains = 0
+        rule.setContent {
+            MapMonarchsTheme { MapHud(state(), { captures++ }, {}, { explains++ }) }
+        }
+        rule.onNodeWithTag(MapHudTags.CAPTURE)
+            .assertTextEquals("CLAIMING OFFLINE")
+            .performClick()
+        assertEquals("the client must never claim while the server cannot arbitrate", 0, captures)
+        assertEquals(1, explains)
+    }
+
+    /** Preview is the only place a claim actually fires, and it is labelled as simulated. */
+    @Test
+    fun previewClaimIsActionableAndLabelledAsSimulated() {
         var captures = 0
         var explains = 0
         rule.setContent {
             MapMonarchsTheme {
-                MapHud(state(capture = CaptureState.Ready), { captures++ }, {}, { explains++ })
+                MapHud(
+                    state(identity = Identity.preview(), previewMode = true, previewHeld = 3),
+                    { captures++ }, {}, { explains++ }
+                )
             }
         }
-        rule.onNodeWithTag(MapHudTags.CAPTURE).assertIsDisplayed().performClick()
+        rule.onNodeWithTag(MapHudTags.CAPTURE)
+            .assertTextEquals("CLAIM (PREVIEW)")
+            .performClick()
         assertEquals(1, captures)
-        assertEquals("ready state must not route to the explanation", 0, explains)
+        assertEquals("a ready preview must not route to the explanation", 0, explains)
+        rule.onNodeWithTag(MapHudTags.HELD).assertTextEquals("3")
     }
 
     // --- regression: a blocked button used to swallow the tap entirely ---
@@ -124,26 +169,42 @@ class MapHudTest {
         assertEquals("a dead tap is a dead end", 1, explains)
     }
 
+    /**
+     * Regression for the case that used to fall through every branch: signed out,
+     * everything else healthy. The HUD names the remedy rather than the symptom.
+     */
     @Test
-    fun missingIdentityAlsoRoutesToExplanation() {
+    fun signedOutNamesTheRemedyNotJustTheSymptom() {
         var captures = 0
         var explains = 0
         rule.setContent {
             MapMonarchsTheme {
                 MapHud(
-                    state(identity = Identity.SignedOut, capture = CaptureState.Ready),
+                    state(identity = Identity.SignedOut),
                     { captures++ }, {}, { explains++ }
                 )
             }
         }
-        rule.onNodeWithTag(MapHudTags.CAPTURE).assertTextEquals("NO IDENTITY").performClick()
+        rule.onNodeWithTag(MapHudTags.CAPTURE).assertTextEquals("SIGN IN TO CLAIM").performClick()
         assertEquals(0, captures)
         assertEquals(1, explains)
     }
 
+    /** Permission outranks identity: the one-tap fix is named before the email round-trip. */
     @Test
-    fun deltaHiddenWhenZero() {
-        rule.setContent { MapMonarchsTheme { MapHud(state(delta = 0), {}, {}, {}) } }
-        rule.onNodeWithTag(MapHudTags.DELTA).assertDoesNotExist()
+    fun deniedPermissionOutranksMissingIdentity() {
+        rule.setContent {
+            MapMonarchsTheme {
+                MapHud(
+                    state(
+                        identity = Identity.SignedOut,
+                        capture = CaptureState.PermissionRequired,
+                        permission = false
+                    ),
+                    {}, {}, {}
+                )
+            }
+        }
+        rule.onNodeWithTag(MapHudTags.CAPTURE).assertTextEquals("LOCATION OFF")
     }
 }

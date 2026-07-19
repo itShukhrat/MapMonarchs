@@ -46,7 +46,6 @@ object MapHudTags {
     const val PREVIEW_BANNER = "hud_preview_banner"
     const val HANDLE = "hud_handle"
     const val HELD = "hud_held"
-    const val DELTA = "hud_delta"
     const val CAPTURE = "hud_capture"
     const val ERROR = "hud_error"
 }
@@ -102,7 +101,6 @@ fun MapHud(
 
         Holdings(
             holdings = state.holdingsLabel(),
-            delta = state.hexesHeldDelta,
             modifier = Modifier
                 .align(Alignment.TopEnd)
                 .padding(end = 20.dp, top = 8.dp)
@@ -166,7 +164,7 @@ private fun IdentityChip(label: String, territoryColor: Color?, modifier: Modifi
 }
 
 @Composable
-private fun Holdings(holdings: String, delta: Int, modifier: Modifier = Modifier) {
+private fun Holdings(holdings: String, modifier: Modifier = Modifier) {
     Column(
         modifier = modifier,
         horizontalAlignment = Alignment.End,
@@ -184,16 +182,7 @@ private fun Holdings(holdings: String, delta: Int, modifier: Modifier = Modifier
                 }
         )
         Text(text = "HEXES HELD", style = MaterialTheme.typography.labelSmall, color = TextMuted)
-        if (delta != 0) {
-            Text(
-                text = if (delta > 0) "+$delta" else delta.toString(),
-                style = MaterialTheme.typography.labelMedium,
-                color = if (delta > 0) SovereignGlow else Contested,
-                modifier = Modifier
-                    .testTag(MapHudTags.DELTA)
-                    .semantics { contentDescription = "Change since last check: $delta hexes" }
-            )
-        }
+
     }
 }
 

@@ -17,7 +17,12 @@ import com.mapmonarchs.domain.preview.PreviewClaim
 import com.mapmonarchs.domain.preview.PreviewHexGrid
 import com.mapmonarchs.domain.preview.PreviewSession
 import com.mapmonarchs.domain.validation.MovementVerdict
+import com.mapmonarchs.data.local.DeliveryProofStore
 import com.mapmonarchs.data.local.TrackingMode
+import com.mapmonarchs.domain.model.CapabilitiesProbe
+import com.mapmonarchs.domain.model.DeliveryProof
+import com.mapmonarchs.domain.model.redactEmail
+import com.mapmonarchs.feature.diagnostics.DiagnosticsState
 import com.mapmonarchs.location.LocationTracker
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -32,7 +37,8 @@ class MapViewModel(
     private val locationTracker: LocationTracker,
     private val validator: MovementValidator,
     private val repository: TerritoryRepository,
-    private val authRepository: AuthRepository
+    private val authRepository: AuthRepository,
+    private val deliveryProofStore: DeliveryProofStore
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(
@@ -48,6 +54,9 @@ class MapViewModel(
 
     private val _signIn = MutableStateFlow<SignInState>(SignInState.EnteringEmail())
     val signIn: StateFlow<SignInState> = _signIn.asStateFlow()
+
+    private val _diagnostics = MutableStateFlow(DiagnosticsState())
+    val diagnostics: StateFlow<DiagnosticsState> = _diagnostics.asStateFlow()
 
     /** Last fix that passed local plausibility -- the baseline for teleport checks. */
     private var lastAcceptedFix: LocationFix? = null
@@ -65,6 +74,35 @@ class MapViewModel(
     init {
         resolveIdentity()
         loadTerritory()
+        // Read first: the persisted delivery record is what this install already
+        // knows, and it must be visible even if the network probe never answers.
+        _diagnostics.value = _diagnostics.value.copy(delivery = deliveryProofStore.read())
+        probeCapabilities()
+    }
+
+    /** Asks the backend what it permits, rather than assuming. */
+    fun probeCapabilities() {
+        viewModelScope.launch {
+            _diagnostics.value = _diagnostics.value.copy(capabilities = CapabilitiesProbe.Probing)
+            val probe = authRepository.probeCapabilities()
+            when (probe) {
+                is CapabilitiesProbe.Observed -> Log.i(
+                    TAG,
+                    "capabilities: email=${probe.capabilities.emailEnabled} " +
+                        "anonymous=${probe.capabilities.anonymousEnabled} " +
+                        "autoconfirm=${probe.capabilities.mailerAutoconfirm}"
+                )
+                is CapabilitiesProbe.Unavailable ->
+                    Log.w(TAG, "capabilities unknown: ${probe.error.technical}")
+                else -> Unit
+            }
+            _diagnostics.value = _diagnostics.value.copy(capabilities = probe)
+        }
+    }
+
+    private fun recordDelivery(proof: DeliveryProof) {
+        deliveryProofStore.write(proof)
+        _diagnostics.value = _diagnostics.value.copy(delivery = proof)
     }
 
     fun resolveIdentity() {
@@ -118,11 +156,20 @@ class MapViewModel(
         if (current.sending) return
         viewModelScope.launch {
             _signIn.value = current.copy(sending = true, error = null)
+            val hint = redactEmail(current.email)
             when (val result = authRepository.requestEmailCode(current.email)) {
-                is CodeRequest.Sent ->
+                is CodeRequest.Sent -> {
+                    // REQUESTED, not DELIVERED. The backend accepted the send; no
+                    // one has yet proven a code reached a human being.
+                    recordDelivery(DeliveryProof.Requested(hint, System.currentTimeMillis()))
                     _signIn.value = SignInState.EnteringCode(email = current.email.trim())
-                is CodeRequest.Failed ->
+                }
+                is CodeRequest.Failed -> {
+                    recordDelivery(
+                        DeliveryProof.Failed(hint, result.error, System.currentTimeMillis())
+                    )
                     _signIn.value = current.copy(sending = false, error = result.error)
+                }
             }
         }
     }
@@ -130,9 +177,18 @@ class MapViewModel(
     fun resendSignInCode() {
         val current = _signIn.value as? SignInState.EnteringCode ?: return
         viewModelScope.launch {
+            val hint = redactEmail(current.email)
             when (val result = authRepository.requestEmailCode(current.email)) {
-                is CodeRequest.Sent -> _signIn.value = current.copy(resent = true, error = null)
-                is CodeRequest.Failed -> _signIn.value = current.copy(error = result.error)
+                is CodeRequest.Sent -> {
+                    recordDelivery(DeliveryProof.Requested(hint, System.currentTimeMillis()))
+                    _signIn.value = current.copy(resent = true, error = null)
+                }
+                is CodeRequest.Failed -> {
+                    recordDelivery(
+                        DeliveryProof.Failed(hint, result.error, System.currentTimeMillis())
+                    )
+                    _signIn.value = current.copy(error = result.error)
+                }
             }
         }
     }
@@ -144,6 +200,13 @@ class MapViewModel(
             _signIn.value = current.copy(verifying = true, error = null)
             when (val result = authRepository.verifyEmailCode(current.email, current.code)) {
                 is CodeVerification.Succeeded -> {
+                    // A correct code was typed back, so mail demonstrably arrived.
+                    // This is the only transition that may claim delivery.
+                    recordDelivery(
+                        DeliveryProof.Delivered(
+                            redactEmail(current.email), System.currentTimeMillis()
+                        )
+                    )
                     // Identity comes from the SERVER's user id, derived -- never
                     // from anything typed into this screen.
                     _uiState.value = _uiState.value.copy(identity = result.identity)
@@ -176,6 +239,7 @@ class MapViewModel(
     fun onRetry() {
         if (_uiState.value.identity !is Identity.SignedIn) resolveIdentity()
         loadTerritory()
+        probeCapabilities()
     }
 
     fun onPermissionResult(granted: Boolean) {

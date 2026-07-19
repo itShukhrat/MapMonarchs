@@ -9,10 +9,14 @@ import androidx.compose.ui.unit.dp
 import com.mapmonarchs.BuildConfig
 import com.mapmonarchs.data.local.TrackingMode
 import com.mapmonarchs.domain.model.AppError
+import com.mapmonarchs.domain.model.CapabilitiesProbe
+import com.mapmonarchs.domain.model.DeliveryProof
 import com.mapmonarchs.domain.model.Identity
+import com.mapmonarchs.domain.model.signInPossible
 import com.mapmonarchs.feature.map.CaptureState
 import com.mapmonarchs.feature.map.MapUiState
 import com.mapmonarchs.feature.map.TerritoryLoad
+import com.mapmonarchs.feature.map.resolveBlocker
 import com.mapmonarchs.ui.components.BodyNote
 import com.mapmonarchs.ui.components.CommandAction
 import com.mapmonarchs.ui.components.CommandScreen
@@ -21,6 +25,9 @@ import com.mapmonarchs.ui.components.StatusRow
 import com.mapmonarchs.ui.theme.Contested
 import com.mapmonarchs.ui.theme.SovereignGlow
 import com.mapmonarchs.ui.theme.TextMuted
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 object DiagnosticsTags {
     const val BACKEND = "diag_backend"
@@ -29,6 +36,10 @@ object DiagnosticsTags {
     const val FIX = "diag_fix"
     const val BLOCKER = "diag_blocker"
     const val REFRESH = "diag_refresh"
+    const val EMAIL_AUTH = "diag_email_auth"
+    const val ANON_AUTH = "diag_anon_auth"
+    const val DELIVERY = "diag_delivery"
+    const val SIGN_IN_POSSIBLE = "diag_signin_possible"
 }
 
 /**
@@ -45,12 +56,15 @@ object DiagnosticsTags {
  * engineer -- every row names a subsystem in plain language and says what its
  * state means for what they can do right now.
  *
- * WHAT CAN GO WRONG: exposing internals invites confusion or scraping. Mitigated
- * by showing STATE, never raw technical strings, tokens, ids, or coordinates.
+ * THE RULE THIS SCREEN LIVES BY: it reports what was observed, or it reports
+ * UNKNOWN. It never prints a remembered fact as a current one. Provider status
+ * was previously hardcoded here, which meant this screen would have kept
+ * insisting anonymous sign-in was disabled long after someone enabled it.
  */
 @Composable
 fun DiagnosticsScreen(
     state: MapUiState,
+    diagnostics: DiagnosticsState,
     trackingMode: TrackingMode,
     onBack: () -> Unit,
     onRefresh: () -> Unit,
@@ -58,10 +72,11 @@ fun DiagnosticsScreen(
 ) {
     CommandScreen(title = "DIAGNOSTICS", onBack = onBack, modifier = modifier) {
 
-        // The single most useful line: what is stopping you right now.
+        // The single most useful line: what is stopping you right now. Derived
+        // from the one shared resolver, so it can never contradict the HUD.
         SectionHeader("PRIMARY BLOCKER")
         BodyNote(
-            text = primaryBlocker(state),
+            text = resolveBlocker(state).explanation(),
             modifier = Modifier.testTag(DiagnosticsTags.BLOCKER)
         )
 
@@ -109,13 +124,12 @@ fun DiagnosticsScreen(
             value = (state.identity as? Identity.SignedIn)?.callsign ?: "--",
             valueColor = TextMuted
         )
-        StatusRow(label = "Sign-in method", value = "EMAIL CODE", valueColor = TextMuted)
-        StatusRow(label = "Anonymous sign-in", value = "DISABLED", valueColor = TextMuted)
-        BodyNote(
-            "This project has anonymous sign-in switched off, so a session requires an " +
-                "email code. Delivery depends on the mail service configured for the " +
-                "project -- if no code arrives, that is where to look."
-        )
+
+        SectionHeader("SIGN-IN AVAILABILITY")
+        AuthCapabilityRows(diagnostics.capabilities)
+
+        SectionHeader("EMAIL DELIVERY")
+        DeliveryRows(diagnostics)
 
         SectionHeader("LOCATION")
         StatusRow(
@@ -185,35 +199,139 @@ fun DiagnosticsScreen(
     }
 }
 
-/**
- * Ordered by what actually blocks the player first.
- *
- * Permission, then identity, then backend, then fix quality. Reporting a GPS
- * accuracy problem to someone who never granted permission would be technically
- * true and completely useless.
- */
-internal fun primaryBlocker(state: MapUiState): String = when {
-    !state.locationPermissionGranted ->
-        "Location permission is not granted, so the app cannot tell which hex you are in. " +
-            "Grant it in SETTINGS."
+@Composable
+private fun AuthCapabilityRows(probe: CapabilitiesProbe) {
+    StatusRow(
+        label = "Email sign-in",
+        value = probe.readBoolean { it.emailEnabled },
+        valueColor = probe.colorFor { it.emailEnabled },
+        modifier = Modifier.testTag(DiagnosticsTags.EMAIL_AUTH)
+    )
+    StatusRow(
+        label = "Anonymous sign-in",
+        value = probe.readBoolean { it.anonymousEnabled },
+        valueColor = TextMuted,
+        modifier = Modifier.testTag(DiagnosticsTags.ANON_AUTH)
+    )
+    StatusRow(
+        label = "Sign-in possible here",
+        value = when (probe.signInPossible()) {
+            true -> "YES"
+            false -> "NO"
+            null -> "UNKNOWN"
+        },
+        valueColor = if (probe.signInPossible() == true) SovereignGlow else Contested,
+        modifier = Modifier.testTag(DiagnosticsTags.SIGN_IN_POSSIBLE)
+    )
+    when (probe) {
+        is CapabilitiesProbe.NotProbed ->
+            BodyNote("Sign-in configuration has not been checked yet. Press RE-CHECK.")
 
-    state.identity is Identity.Unavailable ->
-        "Sign-in is unavailable, so the server cannot attribute territory to you. " +
-            "Claiming stays disabled until a session exists."
+        is CapabilitiesProbe.Probing ->
+            BodyNote("Asking the server which sign-in methods it accepts.")
 
-    state.identity is Identity.Resolving ->
-        "Still establishing a session."
+        is CapabilitiesProbe.Unavailable ->
+            BodyNote(
+                "The server did not answer when asked how sign-in is configured, so these " +
+                    "rows read UNKNOWN rather than guessing. " + probe.error.playerMessage()
+            )
 
-    state.territory is TerritoryLoad.Failed ->
-        "The territory service is not answering, so the map cannot show who holds what."
-
-    state.capture is CaptureState.Blocked ->
-        "Your last position reading was rejected: " +
-            (state.capture as CaptureState.Blocked).reason.name.lowercase().replace('_', ' ') + "."
-
-    state.capture is CaptureState.AcquiringFix ->
-        "Waiting for a position accurate enough to act on."
-
-    else ->
-        "Nothing is blocking movement tracking. Claiming itself is disabled in this build."
+        is CapabilitiesProbe.Observed ->
+            if (!probe.capabilities.mailerAutoconfirm) {
+                BodyNote(
+                    "Accounts are not auto-confirmed on this project, so a code must " +
+                        "genuinely arrive by email before anyone can sign in. Mail delivery " +
+                        "is therefore required, not optional."
+                )
+            }
+    }
 }
+
+@Composable
+private fun DeliveryRows(diagnostics: DiagnosticsState) {
+    val delivery = diagnostics.delivery
+    StatusRow(
+        label = "Code delivery",
+        value = when (delivery) {
+            is DeliveryProof.NeverAttempted -> "NEVER ATTEMPTED"
+            is DeliveryProof.Requested -> "UNCONFIRMED"
+            is DeliveryProof.Delivered -> "CONFIRMED"
+            is DeliveryProof.Failed -> "FAILED"
+            is DeliveryProof.Unknown -> "UNKNOWN"
+        },
+        valueColor = if (delivery is DeliveryProof.Delivered) SovereignGlow else Contested,
+        modifier = Modifier.testTag(DiagnosticsTags.DELIVERY)
+    )
+    StatusRow(
+        label = "Recipient",
+        value = when (delivery) {
+            is DeliveryProof.Requested -> delivery.recipientHint
+            is DeliveryProof.Delivered -> delivery.recipientHint
+            is DeliveryProof.Failed -> delivery.recipientHint
+            else -> "--"
+        },
+        valueColor = TextMuted
+    )
+    StatusRow(
+        label = "Last attempt",
+        value = when (delivery) {
+            is DeliveryProof.Requested -> formatMoment(delivery.atEpochMillis)
+            is DeliveryProof.Delivered -> formatMoment(delivery.atEpochMillis)
+            is DeliveryProof.Failed -> formatMoment(delivery.atEpochMillis)
+            else -> "--"
+        },
+        valueColor = TextMuted
+    )
+
+    when (delivery) {
+        is DeliveryProof.NeverAttempted ->
+            BodyNote(
+                "No sign-in code has ever been requested from this install, so whether " +
+                    "email works here is still untested. Requesting one from the SIGN IN " +
+                    "screen is the test."
+            )
+
+        is DeliveryProof.Requested ->
+            BodyNote(
+                "The server accepted a request to send a code, but no code has been " +
+                    "successfully entered yet. That means delivery is UNPROVEN -- an " +
+                    "accepted request is not an arrived email. If nothing reached the " +
+                    "inbox, the mail service configured for this project is where to look."
+            )
+
+        is DeliveryProof.Delivered ->
+            BodyNote(
+                "A code reached this address and was accepted. Email delivery is proven " +
+                    "to work on this project."
+            )
+
+        is DeliveryProof.Failed ->
+            BodyNote("The last send attempt was refused. " + delivery.error.playerMessage())
+
+        is DeliveryProof.Unknown ->
+            BodyNote(
+                "A delivery record exists on this device but could not be read -- most " +
+                    "likely written by a different version of the app. Treat delivery as " +
+                    "unproven and request a fresh code."
+            )
+    }
+}
+
+/** Reads one boolean off a probe, or says UNKNOWN. Never defaults to a value. */
+private fun CapabilitiesProbe.readBoolean(
+    select: (com.mapmonarchs.domain.model.AuthCapabilities) -> Boolean
+): String = when (this) {
+    is CapabilitiesProbe.Observed -> if (select(capabilities)) "ENABLED" else "DISABLED"
+    is CapabilitiesProbe.Probing -> "CHECKING"
+    else -> "UNKNOWN"
+}
+
+private fun CapabilitiesProbe.colorFor(
+    select: (com.mapmonarchs.domain.model.AuthCapabilities) -> Boolean
+) = when (this) {
+    is CapabilitiesProbe.Observed -> if (select(capabilities)) SovereignGlow else Contested
+    else -> TextMuted
+}
+
+private fun formatMoment(epochMillis: Long): String =
+    SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault()).format(Date(epochMillis))

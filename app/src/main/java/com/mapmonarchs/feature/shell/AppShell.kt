@@ -139,15 +139,20 @@ fun AppShell(modifier: Modifier = Modifier) {
                 )
             }
 
-            route == Route.Diagnostics -> DiagnosticsScreen(
-                state = state,
-                trackingMode = trackingMode,
-                onBack = { navigator.back() },
-                onRefresh = {
-                    viewModel.resolveIdentity()
-                    viewModel.loadTerritory()
-                }
-            )
+            route == Route.Diagnostics -> {
+                val diagnostics by viewModel.diagnostics.collectAsState()
+                DiagnosticsScreen(
+                    state = state,
+                    diagnostics = diagnostics,
+                    trackingMode = trackingMode,
+                    onBack = { navigator.back() },
+                    onRefresh = {
+                        viewModel.resolveIdentity()
+                        viewModel.loadTerritory()
+                        viewModel.probeCapabilities()
+                    }
+                )
+            }
 
             route == Route.Settings -> SettingsScreen(
                 locationGranted = state.locationPermissionGranted,

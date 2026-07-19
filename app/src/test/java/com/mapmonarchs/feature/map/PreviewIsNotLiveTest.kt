@@ -138,12 +138,20 @@ class PreviewIsNotLiveTest {
         assertEquals("3", previewState.holdingsLabel())
     }
 
+    /**
+     * REVERSED. Preview used to stay actionable on a rejected fix, on the theory
+     * that a demo should not dead-end. That was wrong for a specific reason: the
+     * preview grid is anchored to the player's REAL position, so claiming on a
+     * reading we already judged untrustworthy would place a hex somewhere
+     * arbitrary. The demo would then teach a loop the live game does not have.
+     *
+     * Preview may simplify the loop. It may not misrepresent it.
+     */
     @Test
-    fun `preview claiming stays actionable even when a fix was rejected`() {
-        // The simulation is about teaching the loop, so a rejected GPS reading
-        // must not dead-end it -- but it still cannot submit anything real.
+    fun `preview respects position quality because its grid is anchored to real GPS`() {
         val s = state(preview = true, capture = CaptureState.Blocked(RejectionReason.LOW_ACCURACY))
-        assertTrue(s.isCaptureActionable())
+        assertFalse(s.isCaptureActionable())
+        assertEquals("GPS TOO WEAK", s.captureLabel())
         assertFalse(s.canSubmitRealClaim())
     }
 }

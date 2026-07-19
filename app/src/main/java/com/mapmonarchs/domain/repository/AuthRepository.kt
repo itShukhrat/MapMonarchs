@@ -1,6 +1,7 @@
 package com.mapmonarchs.domain.repository
 
 import com.mapmonarchs.domain.model.AppError
+import com.mapmonarchs.domain.model.CapabilitiesProbe
 import com.mapmonarchs.domain.model.Identity
 
 /** Result of asking the backend to email a sign-in code. */
@@ -24,8 +25,8 @@ sealed interface CodeVerification {
  * the app. For players outdoors on mobile data, that reliability difference is
  * the whole argument.
  *
- * Anonymous sign-in is NOT offered: the project reports anonymous_users=false,
- * and pretending otherwise would produce a failure we already know is coming.
+ * Anonymous sign-in is NOT offered. That is not hardcoded belief -- see
+ * [probeCapabilities], which asks the backend rather than asserting the answer.
  */
 interface AuthRepository {
 
@@ -43,4 +44,12 @@ interface AuthRepository {
 
     /** Ends the session and clears stored credentials. */
     suspend fun signOut(): AppError?
+
+    /**
+     * Asks the backend which sign-in methods it actually permits.
+     *
+     * Exists so diagnostics can report observed configuration instead of a
+     * literal that was true on the day someone checked by hand.
+     */
+    suspend fun probeCapabilities(): CapabilitiesProbe
 }

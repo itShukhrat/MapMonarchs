@@ -3,6 +3,7 @@ package com.mapmonarchs.feature.map
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import com.mapmonarchs.data.local.DeliveryProofStore
 import com.mapmonarchs.data.remote.SupabaseProvider
 import com.mapmonarchs.data.repository.SupabaseAuthRepository
 import com.mapmonarchs.data.repository.SupabaseTerritoryRepository
@@ -28,7 +29,8 @@ class MapViewModelFactory(context: Context) : ViewModelProvider.Factory {
             locationTracker = LocationTracker(appContext),
             validator = MovementValidator(),
             repository = SupabaseTerritoryRepository(client),
-            authRepository = SupabaseAuthRepository(client)
+            authRepository = SupabaseAuthRepository(client),
+            deliveryProofStore = DeliveryProofStore(appContext)
         ) as T
     }
 }

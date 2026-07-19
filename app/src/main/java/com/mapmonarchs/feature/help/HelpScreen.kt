@@ -6,7 +6,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
-import com.mapmonarchs.feature.diagnostics.primaryBlocker
+import com.mapmonarchs.feature.map.resolveBlocker
 import com.mapmonarchs.feature.map.MapUiState
 import com.mapmonarchs.ui.components.BodyNote
 import com.mapmonarchs.ui.components.CommandAction
@@ -40,7 +40,7 @@ fun HelpScreen(
 
         SectionHeader("RIGHT NOW")
         BodyNote(
-            text = primaryBlocker(state),
+            text = resolveBlocker(state).explanation(),
             modifier = Modifier.testTag(HelpTags.CURRENT)
         )
         CommandAction(
