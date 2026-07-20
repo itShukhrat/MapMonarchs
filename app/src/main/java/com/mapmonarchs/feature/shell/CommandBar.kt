@@ -42,6 +42,7 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.mapmonarchs.ui.components.NavIconGlyph
+import com.mapmonarchs.ui.motion.rememberAnimationsEnabled
 import com.mapmonarchs.ui.components.NavIconSize
 import com.mapmonarchs.ui.components.NavLockMark
 import com.mapmonarchs.ui.theme.FloatCore
@@ -95,8 +96,7 @@ fun CommandBar(
     modifier: Modifier = Modifier
 ) {
     val haptics = LocalHapticFeedback.current
-    val context = LocalContext.current
-    val animate = remember(context) { animationsEnabled(context) }
+    val animate = rememberAnimationsEnabled()
 
     val selectedIndex = destinations.indexOfFirst { it.route == currentRoute }
         .let { if (it >= 0) it.toFloat() else -1f }
@@ -261,29 +261,9 @@ private fun CommandBarItem(
 }
 
 /**
- * Whether the system wants animation at all.
- *
- * Reads the platform's own transition scale rather than inventing an in-app
- * toggle. A player who has turned animation off system-wide has already stated a
- * preference -- often for motion sensitivity or for battery -- and asking them to
- * state it again in our settings would be ignoring the answer they gave.
- *
- * Returns true on failure: a missing setting is not evidence that motion is
- * unwanted, and defaulting to "no animation" would silently degrade the product
- * for everyone whose device does not report it.
- */
-private fun animationsEnabled(context: android.content.Context): Boolean {
-    val scale = Settings.Global.getFloat(
-        context.contentResolver,
-        Settings.Global.TRANSITION_ANIMATION_SCALE,
-        1f
-    )
-    return scale != 0f
-}
-
-/**
  * Breathing room at the bar's ends, shared by the indicator canvas and the row so
- * they cannot drift apart.
+ * they cannot drift apart. The indicator's glow is wider than its hexagon, so
+ * without this the first and last seats were sliced flat by the rounded clip.
  */
 private val EDGE_INSET = 10.dp
 

@@ -58,7 +58,7 @@ object DiagnosticsTags {
  * to take that on faith. This screen is the receipt.
  *
  * WHY NOT GENERIC: it is not a debug dump behind a hidden gesture. It is a
- * first-class readout in the command menu, written for a player rather than an
+ * first-class destination in the command deck, written for a player rather than an
  * engineer -- every row names a subsystem in plain language and says what its
  * state means for what they can do right now.
  *

@@ -5,7 +5,10 @@ import android.content.Intent
 import android.net.Uri
 import android.provider.Settings
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.togetherWith
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.Box
@@ -39,6 +42,8 @@ import com.mapmonarchs.feature.map.MapViewModel
 import com.mapmonarchs.feature.map.MapViewModelFactory
 import com.mapmonarchs.feature.onboarding.OnboardingScreen
 import com.mapmonarchs.feature.safety.SafetyScreen
+import com.mapmonarchs.ui.motion.SCREEN_TRANSITION_MS
+import com.mapmonarchs.ui.motion.rememberAnimationsEnabled
 import com.mapmonarchs.feature.settings.AboutScreen
 import com.mapmonarchs.feature.settings.SettingsScreen
 
@@ -46,9 +51,14 @@ import com.mapmonarchs.feature.settings.SettingsScreen
  * The application shell.
  *
  * Composition rules this enforces:
- *  - The map is always the root; it is never popped and never sits behind a tab.
- *  - Navigation is a launcher (command menu), not persistent chrome, so the map
- *    keeps the full frame.
+ *  - The map is always the root and is never popped.
+ *  - Navigation IS persistent chrome: a floating dock over the map. This reverses
+ *    an earlier rule that said navigation must be a launcher so the map kept the
+ *    full frame. The launcher won on pixels and lost on comprehension -- one
+ *    unlabelled hex button in a corner meant a new player saw no evidence the
+ *    game contained territory, missions or an empire at all. The dock floats and
+ *    is inset on every side, so the map still runs underneath it rather than
+ *    being cut off by it.
  *  - Secondary screens replace the map rather than floating over it. A
  *    half-transparent sheet over a live GL map is expensive and reads as clutter.
  *  - Locked routes are real destinations, not disabled rows. A tap that does
@@ -80,8 +90,32 @@ fun AppShell(modifier: Modifier = Modifier) {
 
     BackHandler(enabled = navigator.canGoBack) { navigator.back() }
 
+    val animate = rememberAnimationsEnabled()
+
     Box(modifier = modifier.fillMaxSize()) {
-        val route = navigator.current
+        // A CROSSFADE, and nothing more.
+        //
+        // Screens here are peers or drill-downs, not layers -- a secondary screen
+        // REPLACES the map rather than sliding over it. Directional motion would
+        // imply a spatial relationship the shell does not have, and sliding a live
+        // GL map off-screen is expensive for a lie.
+        //
+        // Short on purpose: the player pressed a destination and wants to be there.
+        // Anything long enough to notice as an animation is long enough to be in
+        // the way on the twentieth use.
+        //
+        // COST WORTH NAMING: secondary screens replace the map, so the Mapbox
+        // surface is torn down on navigation and rebuilt on return. That was
+        // already true before this crossfade; the transition briefly overlaps the
+        // two rather than introducing the cost.
+        AnimatedContent(
+            targetState = navigator.current,
+            transitionSpec = {
+                val spec = tween<Float>(if (animate) SCREEN_TRANSITION_MS else 0)
+                fadeIn(spec) togetherWith fadeOut(spec)
+            },
+            label = "screen"
+        ) { route ->
         val lock = route.lock
 
         when {
@@ -185,13 +219,16 @@ fun AppShell(modifier: Modifier = Modifier) {
             )
         }
 
+        }
         // The bar is hidden during SIGN IN only. That flow is one decision at a
         // time and a persistent navigation invites abandoning it half-finished,
         // which in an email-code flow means an unused code and a second send.
         // Everywhere else it stays, because a navigation that disappears is a
         // navigation the player has to re-find.
+        // Reads navigator.current, NOT the crossfading route: the dock must track
+        // where the player IS going, not what is still fading out behind it.
         AnimatedVisibility(
-            visible = route != Route.SignIn,
+            visible = navigator.current != Route.SignIn,
             enter = fadeIn(),
             exit = fadeOut(),
             modifier = Modifier
@@ -201,7 +238,7 @@ fun AppShell(modifier: Modifier = Modifier) {
         ) {
             CommandBar(
                 destinations = NAV_DESTINATIONS,
-                currentRoute = route,
+                currentRoute = navigator.current,
                 onSelect = { navigator.navigateTo(it.route) }
             )
         }
