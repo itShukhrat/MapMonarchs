@@ -35,8 +35,18 @@ object IdentityDerivation {
      *  - no two adjacent entries rely on a red/green distinction alone, which
      *    would be invisible to the most common colour-vision deficiency
      */
+    /**
+     * NOTE ON WHAT IS NOT HERE: 0xFF4C8DFF, the electric blue that used to lead
+     * this list, is gone. It is `Sovereign` -- the single UI accent, byte for
+     * byte. One player in eight was therefore assigned the exact colour of every
+     * primary button, the command dock indicator, and now the national border
+     * itself. Their land was indistinguishable from the chrome describing it.
+     *
+     * Removing it is free today and expensive later: no hex is owned yet, so
+     * nobody's colour changes. Once territory exists this becomes a migration
+     * that silently re-skins players' land.
+     */
     val TERRITORY_PALETTE: List<Long> = listOf(
-        0xFF4C8DFFL, // electric blue
         0xFF22D3EEL, // cyan
         0xFFA855F7L, // violet
         0xFFF59E0BL, // amber

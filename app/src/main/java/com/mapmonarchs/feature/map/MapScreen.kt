@@ -14,13 +14,23 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
+import com.mapmonarchs.domain.identity.IdentityDerivation.TERRITORY_PALETTE
+import com.mapmonarchs.ui.theme.Fog
+import com.mapmonarchs.ui.theme.Sovereign
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
 import com.mapbox.geojson.Point
 import com.mapbox.maps.CameraOptions
 import com.mapbox.maps.dsl.cameraOptions
 import com.mapbox.maps.plugin.animation.MapAnimationOptions
+import com.mapbox.maps.extension.compose.MapEffect
 import com.mapbox.maps.extension.compose.MapboxMap
+import com.mapbox.maps.extension.style.expressions.generated.Expression
+import com.mapbox.maps.extension.style.layers.addLayer
+import com.mapbox.maps.extension.style.layers.generated.fillLayer
+import com.mapbox.maps.extension.style.layers.generated.lineLayer
+import com.mapbox.maps.extension.style.sources.addSource
+import com.mapbox.maps.extension.style.sources.generated.vectorSource
 import com.mapbox.maps.extension.compose.animation.viewport.rememberMapViewportState
 import com.mapbox.maps.extension.compose.annotation.generated.PolygonAnnotation
 import com.mapbox.maps.extension.compose.style.MapStyle
@@ -32,6 +42,14 @@ import com.mapbox.maps.extension.compose.style.MapStyle
  * screen" without territory on screen, so styling now would mean styling twice.
  */
 private const val MAPBOX_DARK = "mapbox://styles/mapbox/dark-v11"
+
+/** Layer and source ids, namespaced so a future style cannot collide with them. */
+private const val BOUNDARY_SOURCE = "mm-country-boundaries"
+private const val FOG_LAYER = "mm-outside-fog"
+private const val BORDER_LAYER = "mm-uz-border"
+
+/** The one playable country. ISO 3166-1 alpha-2, as published by Mapbox. */
+private const val PLAYABLE_ISO = "UZ"
 
 // Default camera until a real fix arrives.
 private val DEFAULT_CENTER: Point = Point.fromLngLat(69.2401, 41.2995)
@@ -72,7 +90,15 @@ fun MapScreen(
     val viewportState = rememberMapViewportState {
         setCameraOptions {
             center(DEFAULT_CENTER)
-            zoom(15.0)
+            // Country-level until a fix arrives, then flyTo street level.
+            //
+            // This used to open at zoom 15 -- a street in Tashkent that is not
+            // the player's street, chosen because it was the only coordinate on
+            // hand. The first thing a new player saw was an anonymous junction.
+            // Opening on the whole playable world instead teaches the shape of
+            // the board and the fact that it ends, in the one moment before we
+            // know anything about where they are.
+            zoom(5.4)
             // Flat, top-down. This is a legibility decision, not a performance
             // one: in a territory game you must read hex adjacency and ownership
             // across an area, and pitch trades that away for cinematics.
@@ -116,11 +142,78 @@ fun MapScreen(
             compass = {},
             style = { MapStyle(style = MAPBOX_DARK) }
         ) {
+            // ---- The playable world ------------------------------------------
+            //
+            // Everything outside Uzbekistan is fogged and the border is drawn as a
+            // lit edge. Not decoration: territory can only ever be claimed inside
+            // the country, so the map has to say where the board stops. A player
+            // who cannot see the edge will walk to it and find out by failing.
+            //
+            // THE DATA IS MAPBOX'S, NOT INVENTED. mapbox.country-boundaries-v1 is
+            // a published vector tileset already licensed under the token this app
+            // ships with. Verified against it before writing this: Tashkent and
+            // Samarkand return iso_3166_1 = UZ, Almaty returns KZ, Ashgabat
+            // returns TM. Hand-drawing a national border from memory would have
+            // been fabricated geography.
+            //
+            // The fog fills every country that is NOT Uzbekistan rather than
+            // masking a hole in a full-screen scrim, because Mapbox has no
+            // punch-out. Uzbekistan is landlocked and entirely ringed by
+            // neighbours, so filling not-UZ covers the whole approach to the
+            // border. The technique would leave gaps for a coastal country; it
+            // does not here.
+            MapEffect(Unit) { mapView ->
+                mapView.mapboxMap.getStyle { style ->
+                    if (style.styleSourceExists(BOUNDARY_SOURCE)) return@getStyle
+
+                    style.addSource(
+                        vectorSource(BOUNDARY_SOURCE) {
+                            url("mapbox://mapbox.country-boundaries-v1")
+                        }
+                    )
+
+                    // Fog first so the border edge draws on top of it.
+                    style.addLayer(
+                        fillLayer(FOG_LAYER, BOUNDARY_SOURCE) {
+                            sourceLayer("country_boundaries")
+                            filter(
+                                Expression.neq(
+                                    Expression.get("iso_3166_1"),
+                                    Expression.literal(PLAYABLE_ISO)
+                                )
+                            )
+                            fillColor(Fog.toArgb())
+                            // Not opaque. Outside must read as unreachable, not as
+                            // missing -- the world visibly continues and simply
+                            // cannot be played.
+                            fillOpacity(0.82)
+                        }
+                    )
+
+                    style.addLayer(
+                        lineLayer(BORDER_LAYER, BOUNDARY_SOURCE) {
+                            sourceLayer("country_boundaries")
+                            filter(
+                                Expression.eq(
+                                    Expression.get("iso_3166_1"),
+                                    Expression.literal(PLAYABLE_ISO)
+                                )
+                            )
+                            lineColor(Sovereign.toArgb())
+                            lineWidth(1.6)
+                            lineOpacity(0.9)
+                        }
+                    )
+                }
+            }
             // Preview territory only. Real territory is drawn from server-owned
             // ownership once the schema is deployed; this draws from an in-memory
             // simulation and never from anything the server said.
             if (state.previewMode) {
-                val fill = state.territoryColor() ?: Color(0xFF4C8DFF)
+                // Falls back to the palette, never to a literal. The literal here used to be
+                // the UI accent, so preview territory was drawn in the same colour
+                // as the buttons sitting on top of it.
+                val fill = state.territoryColor() ?: Color(TERRITORY_PALETTE.first())
                 state.previewRings.forEach { ring ->
                     PolygonAnnotation(points = listOf(ring.map { Point.fromLngLat(it.lng, it.lat) })) {
                         fillColor = fill

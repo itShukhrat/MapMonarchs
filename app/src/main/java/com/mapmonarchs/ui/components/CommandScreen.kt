@@ -248,8 +248,8 @@ sealed interface ActionState {
  * The primary action.
  *
  * WHY IT IS NO LONGER A SATURATED SLAB: the fill was `Sovereign`, which is
- * 0xFF4C8DFF -- byte for byte the first entry of TERRITORY_PALETTE. One player in
- * eight owns ground drawn in exactly the colour of every primary button in the
+ * 0xFF4C8DFF, which was then also the first entry of TERRITORY_PALETTE. One player in
+ * eight owned ground drawn in exactly the colour of every primary button in the
  * app, and on the map screen both are on screen at once. Colour.kt's own rule is
  * that territory must be the most saturated thing on screen; a full-bleed accent
  * button broke that rule and made a control indistinguishable from land.
