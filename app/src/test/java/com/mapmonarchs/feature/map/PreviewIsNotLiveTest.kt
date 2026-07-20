@@ -127,7 +127,7 @@ class PreviewIsNotLiveTest {
     fun `preview holdings are a simulated count, never the unknown dash of live state`() {
         // Live with no data shows "--" (unknown). Preview shows a real local count,
         // because in preview we genuinely do know the number.
-        assertEquals("--", state().holdingsLabel())
+        assertEquals(UNKNOWN_HOLDINGS, state().holdingsLabel())
         val previewState = MapUiState(
             identity = Identity.preview(),
             territory = TerritoryLoad.Loading,

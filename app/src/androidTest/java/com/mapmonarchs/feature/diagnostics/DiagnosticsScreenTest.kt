@@ -82,9 +82,18 @@ class DiagnosticsScreenTest {
         }
     }
 
-    /** StatusRow tags a Row holding a label Text and a value Text. */
+    /**
+     * StatusRow now MERGES its label and value into one semantics node, so a
+     * screen reader announces "Code delivery: UNCONFIRMED" as a single fact
+     * instead of two unrelated fragments. Merging removes the children this used
+     * to walk, so the assertion moved onto the merged node itself.
+     *
+     * This is the production change being correct and the test being stale, not
+     * the reverse -- Diagnostics alone was reading out roughly thirty orphaned
+     * strings before the merge.
+     */
     private fun assertRowValue(tag: String, expected: String) {
-        rule.onNodeWithTag(tag).onChildren().assertAny(hasText(expected))
+        rule.onNodeWithTag(tag).assert(hasText(expected, substring = true))
     }
 
     // --- observed configuration ---------------------------------------------
@@ -201,7 +210,7 @@ class DiagnosticsScreenTest {
         // REGRESSION: Identity.SignedOut used to fall through every branch of the
         // old blocker chain and land on "Nothing is blocking movement tracking".
         show(state = mapState(identity = Identity.SignedOut))
-        rule.onNodeWithTag(DiagnosticsTags.SESSION).onChildren().assertAny(hasText("NONE"))
+        assertRowValue(DiagnosticsTags.SESSION, "NONE")
         // The blocker must name the remedy, not just the symptom.
         rule.onNodeWithTag(DiagnosticsTags.BLOCKER)
             .assert(hasText("You are not signed in", substring = true))
@@ -210,8 +219,7 @@ class DiagnosticsScreenTest {
     @Test
     fun previewIsReportedAsActiveAndNamedAsSimulated() {
         show(state = mapState(identity = Identity.preview(), previewMode = true))
-        rule.onNodeWithTag(DiagnosticsTags.SESSION).onChildren()
-            .assertAny(hasText("PREVIEW (NOT SIGNED IN)"))
+        assertRowValue(DiagnosticsTags.SESSION, "PREVIEW (NOT SIGNED IN)")
         rule.onNodeWithText(
             "Preview mode is active. Everything you claim is simulated on this device, " +
                 "held in memory, and discarded when you leave. Nothing is sent to the " +

@@ -82,7 +82,7 @@ class MapHudTest {
     @Test
     fun holdingsShowUnknownRatherThanZero() {
         rule.setContent { MapMonarchsTheme { MapHud(state(), {}, {}, {}) } }
-        rule.onNodeWithTag(MapHudTags.HELD).assertTextEquals("--")
+        rule.onNodeWithTag(MapHudTags.HELD).assertTextEquals(UNKNOWN_HOLDINGS)
     }
 
     @Test

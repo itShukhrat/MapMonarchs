@@ -36,12 +36,12 @@ class MapUiStateTest {
 
     @Test
     fun `holdings render as unknown rather than a confident zero`() {
-        assertEquals("--", state().holdingsLabel())
+        assertEquals(UNKNOWN_HOLDINGS, state().holdingsLabel())
     }
 
     @Test
     fun `holdings stay unknown when loaded because ownership filtering is not real yet`() {
-        assertEquals("--", state(territory = TerritoryLoad.Loaded(emptyList())).holdingsLabel())
+        assertEquals(UNKNOWN_HOLDINGS, state(territory = TerritoryLoad.Loaded(emptyList())).holdingsLabel())
     }
 
     // --- identity honesty ---

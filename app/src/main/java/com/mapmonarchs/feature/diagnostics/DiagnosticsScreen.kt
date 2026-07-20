@@ -17,6 +17,7 @@ import com.mapmonarchs.domain.model.signInReadiness
 import com.mapmonarchs.feature.map.CaptureState
 import com.mapmonarchs.feature.map.MapUiState
 import com.mapmonarchs.feature.map.TerritoryLoad
+import com.mapmonarchs.feature.map.UNKNOWN_HOLDINGS
 import com.mapmonarchs.feature.map.resolveBlocker
 import com.mapmonarchs.ui.components.BodyNote
 import com.mapmonarchs.ui.components.CommandAction
@@ -100,7 +101,7 @@ fun DiagnosticsScreen(
         )
         StatusRow(
             label = "Hexes returned",
-            value = (state.territory as? TerritoryLoad.Loaded)?.hexes?.size?.toString() ?: "--",
+            value = (state.territory as? TerritoryLoad.Loaded)?.hexes?.size?.toString() ?: UNKNOWN_HOLDINGS,
             valueColor = TextMuted
         )
         if (state.territory is TerritoryLoad.Failed) {
@@ -123,7 +124,7 @@ fun DiagnosticsScreen(
         )
         StatusRow(
             label = "Callsign",
-            value = (state.identity as? Identity.SignedIn)?.callsign ?: "--",
+            value = (state.identity as? Identity.SignedIn)?.callsign ?: UNKNOWN_HOLDINGS,
             valueColor = TextMuted
         )
 
@@ -290,7 +291,7 @@ private fun DeliveryRows(diagnostics: DiagnosticsState) {
             is DeliveryProof.Requested -> delivery.recipientHint
             is DeliveryProof.Delivered -> delivery.recipientHint
             is DeliveryProof.Failed -> delivery.recipientHint
-            else -> "--"
+            else -> UNKNOWN_HOLDINGS
         },
         valueColor = TextMuted
     )
@@ -300,7 +301,7 @@ private fun DeliveryRows(diagnostics: DiagnosticsState) {
             is DeliveryProof.Requested -> formatMoment(delivery.atEpochMillis)
             is DeliveryProof.Delivered -> formatMoment(delivery.atEpochMillis)
             is DeliveryProof.Failed -> formatMoment(delivery.atEpochMillis)
-            else -> "--"
+            else -> UNKNOWN_HOLDINGS
         },
         valueColor = TextMuted
     )

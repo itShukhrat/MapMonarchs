@@ -121,7 +121,16 @@ fun resolveBlocker(state: MapUiState): Blocker = when {
  * honest by accident rather than by construction.
  */
 fun MapUiState.holdingsLabel(): String =
-    if (previewMode) (previewHeld ?: 0).toString() else "--"
+    if (previewMode) (previewHeld ?: 0).toString() else UNKNOWN_HOLDINGS
+
+/**
+ * One em dash, not two hyphens.
+ *
+ * At displayLarge the type scale applies -1.5sp tracking, which pulled "--"
+ * apart into two detached strokes that read as a font-loading failure rather
+ * than as "unknown". A single glyph cannot come apart.
+ */
+const val UNKNOWN_HOLDINGS = "—"
 
 /**
  * Identity readout.

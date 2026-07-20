@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
@@ -194,7 +195,19 @@ fun StatusRow(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier)
+            .heightIn(min = 48.dp)
+            .then(
+                if (onClick != null) {
+                    Modifier.clickable(role = Role.Button, onClick = onClick)
+                } else {
+                    Modifier
+                }
+            )
+            // Merged so a screen reader says "Email sign-in: ENABLED" as one fact.
+            // Unmerged, Diagnostics alone read out roughly thirty orphaned
+            // fragments -- every label and every value announced as unrelated
+            // text, in an order that made none of them mean anything.
+            .semantics(mergeDescendants = true) { contentDescription = "$label: $value" }
             .padding(vertical = 14.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
@@ -331,9 +344,14 @@ fun ChoiceRow(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .clickable(onClick = onClick)
-            .padding(vertical = 14.dp)
-            .semantics { contentDescription = "$label. $detail" },
+            .heightIn(min = 48.dp)
+            // selectable, not clickable: this is a choice among peers, and
+            // Role.RadioButton is what makes assistive tech announce WHICH cadence
+            // is active. The filled hex is the sighted cue; without this the
+            // non-sighted equivalent simply did not exist.
+            .selectable(selected = selected, role = Role.RadioButton, onClick = onClick)
+            .semantics { contentDescription = "$label. $detail" }
+            .padding(vertical = 14.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Box(

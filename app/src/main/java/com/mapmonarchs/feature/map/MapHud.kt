@@ -21,6 +21,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Stroke
@@ -29,8 +33,11 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.mapmonarchs.feature.shell.CommandBarHeight
 import com.mapmonarchs.ui.components.ErrorStrip
 import com.mapmonarchs.ui.components.HexagonShape
+import com.mapmonarchs.ui.components.TextCommand
+import com.mapmonarchs.ui.theme.Obsidian
 import com.mapmonarchs.ui.theme.Contested
 import com.mapmonarchs.ui.theme.Slate
 import com.mapmonarchs.ui.theme.SlateEdge
@@ -115,7 +122,7 @@ fun MapHud(
                 onExit = onExitPreview,
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
-                    .padding(bottom = 104.dp)
+                    .padding(bottom = CommandBarHeight + 98.dp)
             )
         }
 
@@ -126,7 +133,10 @@ fun MapHud(
             onBlockedClick = onExplainBlocker,
             modifier = Modifier
                 .align(Alignment.BottomCenter)
-                .padding(bottom = 32.dp)
+                // Clears the floating dock. Without this the primary action of
+                // the entire game sits UNDERNEATH the navigation -- which is what
+                // shipped for one build, and which no test could see.
+                .padding(bottom = CommandBarHeight + 26.dp)
         )
     }
 }
@@ -173,12 +183,12 @@ private fun Holdings(holdings: String, modifier: Modifier = Modifier) {
         Text(
             text = holdings,
             style = MaterialTheme.typography.displayLarge,
-            color = if (holdings == "--") TextMuted else TextPrimary,
+            color = if (holdings == UNKNOWN_HOLDINGS) TextMuted else TextPrimary,
             modifier = Modifier
                 .testTag(MapHudTags.HELD)
                 .semantics {
                     contentDescription =
-                        if (holdings == "--") "Hexes held: unknown" else "Hexes held: $holdings"
+                        if (holdings == UNKNOWN_HOLDINGS) "Hexes held: unknown" else "Hexes held: $holdings"
                 }
         )
         Text(text = "HEXES HELD", style = MaterialTheme.typography.labelSmall, color = TextMuted)
@@ -208,13 +218,33 @@ private fun CaptureAction(
     modifier: Modifier = Modifier
 ) {
     val shape = RoundedCornerShape(14.dp)
+    val haptics = LocalHapticFeedback.current
     Box(
         modifier = modifier
             .clip(shape)
-            .background(if (ready) Sovereign else Slate)
-            .border(1.dp, if (ready) SovereignGlow else Contested.copy(alpha = 0.45f), shape)
-            .clickable(onClick = if (ready) onReadyClick else onBlockedClick)
-            .padding(horizontal = 44.dp, vertical = 18.dp)
+            // THE WORST INSTANCE OF THE PALETTE COLLISION, and the last one fixed.
+            // This used to fill with Sovereign -- 0xFF4C8DFF, byte for byte
+            // TERRITORY_PALETTE[0]. It sits ON the map, inches from the player's
+            // own hexes, so for one player in eight the claim button and their
+            // ground were the same colour in the same frame. CommandAction had the
+            // same bug and was fixed first, which was backwards: that one lives on
+            // a plain dark screen where nothing competes.
+            .background(if (ready) Obsidian.copy(alpha = 0.94f) else Slate.copy(alpha = 0.94f))
+            .border(
+                if (ready) 1.5.dp else 1.dp,
+                if (ready) Sovereign else Contested.copy(alpha = 0.45f),
+                shape
+            )
+            .clickable(
+                role = Role.Button,
+                onClick = {
+                    // Blocked taps get feedback too: the press DID something, it
+                    // opened the explanation. Silence would read as a dead control.
+                    haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                    if (ready) onReadyClick() else onBlockedClick()
+                }
+            )
+            .padding(horizontal = 40.dp, vertical = 18.dp)
             .testTag(MapHudTags.CAPTURE)
             .semantics {
                 contentDescription = if (ready) {
@@ -225,11 +255,23 @@ private fun CaptureAction(
             },
         contentAlignment = Alignment.Center
     ) {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.labelLarge,
-            color = if (ready) Void else TextMuted
-        )
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            // Same live-state mark as every other command in the product.
+            Box(
+                modifier = Modifier
+                    .size(11.dp)
+                    .rotate(90f)
+                    .clip(HexagonShape)
+                    .background(if (ready) Sovereign else Color.Transparent)
+                    .border(1.dp, if (ready) Sovereign else Contested.copy(alpha = 0.6f), HexagonShape)
+            )
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelLarge,
+                color = if (ready) SovereignGlow else TextMuted,
+                modifier = Modifier.padding(start = 12.dp)
+            )
+        }
     }
 }
 
@@ -253,13 +295,11 @@ private fun PreviewBanner(onExit: () -> Unit, modifier: Modifier = Modifier) {
             style = MaterialTheme.typography.labelSmall,
             color = SovereignGlow
         )
-        Text(
-            text = "EXIT",
-            style = MaterialTheme.typography.labelMedium,
+        TextCommand(
+            label = "EXIT",
+            onClick = onExit,
             color = TextPrimary,
-            modifier = Modifier
-                .padding(start = 16.dp)
-                .clickable(onClick = onExit)
+            modifier = Modifier.padding(start = 6.dp)
         )
     }
 }

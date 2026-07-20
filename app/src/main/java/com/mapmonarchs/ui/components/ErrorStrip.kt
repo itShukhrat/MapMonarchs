@@ -2,7 +2,6 @@ package com.mapmonarchs.ui.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
@@ -20,7 +19,6 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.mapmonarchs.ui.theme.Contested
-import com.mapmonarchs.ui.theme.SovereignGlow
 import com.mapmonarchs.ui.theme.TextPrimary
 import com.mapmonarchs.ui.theme.Void
 
@@ -68,13 +66,14 @@ fun ErrorStrip(
                 .weight(1f, fill = false)
                 .padding(start = 10.dp)
         )
-        Text(
-            text = retryLabel,
-            style = MaterialTheme.typography.labelMedium,
-            color = SovereignGlow,
+        // The last bare clickable Text in the product. RETRY is the recovery
+        // control on a failure strip -- the one a frustrated player jabs at,
+        // often walking -- and its target was the width of the word.
+        TextCommand(
+            label = retryLabel,
+            onClick = onRetry,
             modifier = Modifier
-                .padding(start = 14.dp)
-                .clickable(onClick = onRetry)
+                .padding(start = 8.dp)
                 .testTag(UiTags.RETRY)
         )
     }
