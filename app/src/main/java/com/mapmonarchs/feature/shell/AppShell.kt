@@ -92,6 +92,13 @@ fun AppShell(modifier: Modifier = Modifier) {
 
     val animate = rememberAnimationsEnabled()
 
+    // Location tracking follows the MAP, not the app. SETTINGS promises "location
+    // is only read while the map is open"; before this the ViewModel outlived
+    // MapScreen and kept the stream running behind Settings, Help and About.
+    LaunchedEffect(navigator.current) {
+        viewModel.onMapVisible(navigator.current == Route.Map)
+    }
+
     Box(modifier = modifier.fillMaxSize()) {
         // A CROSSFADE, and nothing more.
         //

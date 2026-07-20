@@ -257,6 +257,27 @@ class MapViewModel(
         }
     }
 
+
+    /**
+     * Tracking follows the MAP, not the app.
+     *
+     * SETTINGS states "location is only read while the map is open", and until
+     * now that was simply untrue: MapViewModel is scoped to the shell rather than
+     * to MapScreen, so navigating to Settings, Help or About left the location
+     * stream running behind them. A privacy claim the code contradicts is worse
+     * than no claim at all, so the code changed rather than the sentence.
+     *
+     * It is also correct on its own merits. This is a walking game read with the
+     * screen on; collecting fixes while somebody reads the About page spends
+     * battery to learn nothing.
+     */
+    fun onMapVisible(visible: Boolean) {
+        if (visible) {
+            if (_uiState.value.locationPermissionGranted) startTracking()
+        } else {
+            stopTracking()
+        }
+    }
     /**
      * Applies a new cadence immediately by restarting the stream. Deferring it
      * until the next app launch would make the setting feel broken -- the player

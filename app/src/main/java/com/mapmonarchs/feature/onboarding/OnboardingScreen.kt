@@ -87,8 +87,9 @@ fun OnboardingScreen(onContinue: () -> Unit, modifier: Modifier = Modifier) {
         )
 
         Text(
-            text = "We do not track you in the background, and we never share your " +
-                "location with other players.",
+            text = "We do not track you in the background. Other players can see " +
+                "which ground you hold -- never where you are now, and never where " +
+                "you have been.",
             style = MaterialTheme.typography.bodyMedium,
             color = TextMuted,
             modifier = Modifier.padding(top = 14.dp)

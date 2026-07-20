@@ -85,7 +85,8 @@ fun SettingsScreen(
 
         BodyNote(
             "Location is only read while the map is open. There is no background tracking, " +
-                "no location history shared with other players, and no advertising identifier."
+                "and no advertising identifier. Other players can see which ground you hold -- " +
+                "never your live position, and never the route you walked to reach it."
         )
 
         Box(modifier = Modifier.padding(bottom = 40.dp))
