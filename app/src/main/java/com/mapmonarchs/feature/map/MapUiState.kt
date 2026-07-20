@@ -5,6 +5,7 @@ import com.mapmonarchs.domain.model.AppError
 import com.mapmonarchs.domain.model.Blocker
 import com.mapmonarchs.domain.model.HexOwnership
 import com.mapmonarchs.domain.model.Identity
+import com.mapmonarchs.domain.model.WorldPosition
 import com.mapmonarchs.domain.validation.RejectionReason
 
 /** A drawable vertex. Deliberately not a Mapbox type -- state stays SDK-free. */
@@ -55,6 +56,12 @@ data class MapUiState(
     val playerLat: Double? = null,
     val playerLng: Double? = null,
     /**
+     * Whether the last accepted fix is inside the playable world. Defaults to
+     * NotChecked rather than Inside -- assuming a player is in bounds until told
+     * otherwise would show a claim button to someone standing in Kazakhstan.
+     */
+    val worldPosition: WorldPosition = WorldPosition.NotChecked,
+    /**
      * Preview territory as ready-to-draw rings.
      *
      * These live in STATE rather than being pulled from the ViewModel by the
@@ -92,7 +99,16 @@ fun resolveBlocker(state: MapUiState): Blocker = when {
 
     // Past this point the position is usable. Identity only gates REAL claims,
     // so preview -- which never leaves the device -- is genuinely unblocked.
+    // Preview is checked BEFORE the world boundary because a simulation that
+    // never touches the server is legitimate anywhere on earth.
     state.previewMode -> Blocker.None
+
+    // Geography outranks identity: signing in does not move you into the country.
+    // A player in Kazakhstan who is also signed out has two problems and only one
+    // worth naming -- routing them to an email form would repeat the wrong-remedy
+    // bug that once made a LOCATION OFF button open a sign-in screen.
+    state.worldPosition is WorldPosition.Outside ->
+        Blocker.OutsidePlayableWorld((state.worldPosition as WorldPosition.Outside).country)
 
     state.identity is Identity.Resolving -> Blocker.IdentityResolving
 

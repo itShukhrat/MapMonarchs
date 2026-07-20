@@ -3,6 +3,7 @@ package com.mapmonarchs.feature.map
 import com.mapmonarchs.domain.model.AppError
 import com.mapmonarchs.domain.model.Blocker
 import com.mapmonarchs.domain.model.Identity
+import com.mapmonarchs.domain.model.WorldPosition
 import com.mapmonarchs.domain.validation.RejectionReason
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
@@ -28,13 +29,15 @@ class BlockerResolutionTest {
         identity: Identity = Identity.from("user-a"),
         territory: TerritoryLoad = TerritoryLoad.Loaded(emptyList()),
         capture: CaptureState = CaptureState.Ready,
-        previewMode: Boolean = false
+        previewMode: Boolean = false,
+        worldPosition: WorldPosition = WorldPosition.Inside
     ) = MapUiState(
         identity = identity,
         territory = territory,
         capture = capture,
         locationPermissionGranted = permission,
-        previewMode = previewMode
+        previewMode = previewMode,
+        worldPosition = worldPosition
     )
 
     @Test
@@ -184,6 +187,8 @@ class BlockerResolutionTest {
             Blocker.IdentityResolving,
             Blocker.IdentityUnavailable(AppError.AuthUnavailable("x")),
             Blocker.NotSignedIn,
+            Blocker.OutsidePlayableWorld("Kazakhstan"),
+            Blocker.OutsidePlayableWorld(null),
             Blocker.CaptureNotDeployed
         )
         blockers.forEach {
@@ -199,6 +204,53 @@ class BlockerResolutionTest {
         )
     }
 
+
+    // --- the playable world -------------------------------------------------
+
+    /**
+     * Geography outranks identity. A player in Kazakhstan who is also signed out
+     * has two problems, and sending them to an email form would repeat the
+     * wrong-remedy bug that once made a LOCATION OFF button open a sign-in
+     * screen -- signing in does not move you into the country.
+     */
+    @Test
+    fun `being outside the world outranks having no session`() {
+        val s = state(
+            identity = Identity.SignedOut,
+            worldPosition = WorldPosition.Outside("Kazakhstan")
+        )
+        assertEquals(Blocker.OutsidePlayableWorld("Kazakhstan"), resolveBlocker(s))
+    }
+
+    @Test
+    fun `an unknown world position never blocks the player`() {
+        // A failed lookup is not evidence the player left the country. Blocking
+        // on Unknown would lock someone out of their own game over a dropped call.
+        val s = state(worldPosition = WorldPosition.Unknown("network"))
+        assertEquals(Blocker.CaptureNotDeployed, resolveBlocker(s))
+    }
+
+    @Test
+    fun `preview is playable anywhere on earth`() {
+        // A simulation that never touches the server is legitimate outside the
+        // playable world; nothing it does becomes real territory.
+        val s = state(
+            identity = Identity.preview(),
+            previewMode = true,
+            worldPosition = WorldPosition.Outside("Kazakhstan")
+        )
+        assertEquals(Blocker.None, resolveBlocker(s))
+    }
+
+    @Test
+    fun `the outside explanation names the country when it is known`() {
+        val named = Blocker.OutsidePlayableWorld("Kazakhstan").explanation()
+        assertTrue("should name where they actually are", named.contains("Kazakhstan"))
+        assertTrue("should name where the game is", named.contains("Uzbekistan"))
+
+        val unnamed = Blocker.OutsidePlayableWorld(null).explanation()
+        assertTrue("must still be useful with no country", unnamed.contains("Uzbekistan"))
+    }
     @Test
     fun `explanations never leak technical detail`() {
         val s = state(

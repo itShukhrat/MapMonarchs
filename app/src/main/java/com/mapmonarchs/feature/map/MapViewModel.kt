@@ -11,7 +11,9 @@ import com.mapmonarchs.domain.repository.CodeRequest
 import com.mapmonarchs.domain.repository.CodeVerification
 import com.mapmonarchs.domain.repository.Outcome
 import com.mapmonarchs.feature.auth.SignInState
+import com.mapmonarchs.domain.model.WorldPosition
 import com.mapmonarchs.domain.repository.TerritoryRepository
+import com.mapmonarchs.domain.repository.WorldBoundaryRepository
 import com.mapmonarchs.domain.validation.MovementValidator
 import com.mapmonarchs.domain.preview.PreviewClaim
 import com.mapmonarchs.domain.preview.PreviewHexGrid
@@ -30,15 +32,24 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.launch
+import kotlin.math.asin
+import kotlin.math.cos
+import kotlin.math.pow
+import kotlin.math.sin
+import kotlin.math.sqrt
 
 private const val TAG = "MapViewModel"
+
+/** Re-ask the boundary service only after the player has moved this far. */
+private const val CHECK_AFTER_METRES = 500.0
 
 class MapViewModel(
     private val locationTracker: LocationTracker,
     private val validator: MovementValidator,
     private val repository: TerritoryRepository,
     private val authRepository: AuthRepository,
-    private val deliveryProofStore: DeliveryProofStore
+    private val deliveryProofStore: DeliveryProofStore,
+    private val worldBoundaryRepository: WorldBoundaryRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(
@@ -70,6 +81,9 @@ class MapViewModel(
     private var previewGrid: PreviewHexGrid? = null
     private var previewSession: PreviewSession? = null
     private var lastFix: LocationFix? = null
+
+    /** Last position a boundary lookup was made for. Drives the distance throttle. */
+    private var lastBoundaryCheck: LocationFix? = null
 
     init {
         resolveIdentity()
@@ -301,6 +315,7 @@ class MapViewModel(
                     playerLat = fix.latitude,
                     playerLng = fix.longitude
                 )
+                checkWorldPosition(fix)
             }
             is MovementVerdict.Implausible -> {
                 // Deliberately does NOT update lastAcceptedFix: a rejected fix must
@@ -398,6 +413,48 @@ class MapViewModel(
         }
     }
 
+
+    /**
+     * Where the player is relative to the playable world.
+     *
+     * Throttled by distance rather than by time. A walking player produces a fix
+     * every few seconds and the answer only changes when they cross a border, so
+     * re-asking on every fix would be hundreds of identical lookups per walk. It
+     * re-checks after CHECK_AFTER_METRES, which near a border is a couple of
+     * minutes on foot and everywhere else is free.
+     *
+     * ADVISORY ONLY. attempt_capture() must run its own containment check when it
+     * exists; a client that lies about coordinates will lie about this too.
+     */
+    private fun checkWorldPosition(fix: LocationFix) {
+        val last = lastBoundaryCheck
+        if (last != null && metresBetween(last, fix) < CHECK_AFTER_METRES) return
+        lastBoundaryCheck = fix
+
+        viewModelScope.launch {
+            val position = worldBoundaryRepository.positionOf(fix.latitude, fix.longitude)
+            // Unknown never overwrites a known answer. A dropped call while walking
+            // must not blank out a position we already established.
+            if (position is WorldPosition.Unknown &&
+                _uiState.value.worldPosition !is WorldPosition.NotChecked
+            ) {
+                Log.w(TAG, "boundary unknown, keeping previous: ${position.reason}")
+                return@launch
+            }
+            _uiState.value = _uiState.value.copy(worldPosition = position)
+        }
+    }
+
+    /** Haversine, metres. Only used to decide whether to re-ask. */
+    private fun metresBetween(a: LocationFix, b: LocationFix): Double {
+        val r = 6_371_000.0
+        val dLat = Math.toRadians(b.latitude - a.latitude)
+        val dLng = Math.toRadians(b.longitude - a.longitude)
+        val h = sin(dLat / 2).pow(2) +
+            cos(Math.toRadians(a.latitude)) * cos(Math.toRadians(b.latitude)) *
+            sin(dLng / 2).pow(2)
+        return 2 * r * asin(sqrt(h))
+    }
     override fun onCleared() {
         stopTracking()
         super.onCleared()

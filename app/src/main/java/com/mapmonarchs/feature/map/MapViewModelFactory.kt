@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.mapmonarchs.data.local.DeliveryProofStore
 import com.mapmonarchs.data.remote.SupabaseProvider
+import com.mapmonarchs.data.repository.MapboxWorldBoundaryRepository
 import com.mapmonarchs.data.repository.SupabaseAuthRepository
 import com.mapmonarchs.data.repository.SupabaseTerritoryRepository
 import com.mapmonarchs.domain.validation.MovementValidator
@@ -30,7 +31,8 @@ class MapViewModelFactory(context: Context) : ViewModelProvider.Factory {
             validator = MovementValidator(),
             repository = SupabaseTerritoryRepository(client),
             authRepository = SupabaseAuthRepository(client),
-            deliveryProofStore = DeliveryProofStore(appContext)
+            deliveryProofStore = DeliveryProofStore(appContext),
+            worldBoundaryRepository = MapboxWorldBoundaryRepository()
         ) as T
     }
 }

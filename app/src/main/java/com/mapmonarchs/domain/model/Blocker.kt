@@ -43,6 +43,16 @@ sealed interface Blocker {
 
     data class FixRejected(val reason: RejectionReason) : Blocker
 
+    /**
+     * Standing outside the playable world.
+     *
+     * Ranked ABOVE identity on purpose. A player in Kazakhstan who is also signed
+     * out has two problems, and only one of them is worth telling them about --
+     * sending them to a sign-in form would be the same wrong-remedy bug that made
+     * a LOCATION OFF button open an email screen.
+     */
+    data class OutsidePlayableWorld(val country: String?) : Blocker
+
     data object IdentityResolving : Blocker
 
     data class IdentityUnavailable(val error: AppError) : Blocker
@@ -71,6 +81,7 @@ sealed interface Blocker {
             RejectionReason.TOO_FAST -> "MOVING TOO FAST"
             RejectionReason.TELEPORT -> "SIGNAL JUMPED"
         }
+        is OutsidePlayableWorld -> "OUTSIDE $PLAYABLE_COUNTRY_NAME".uppercase()
         is IdentityResolving -> "IDENTIFYING"
         is IdentityUnavailable -> "NO IDENTITY"
         is NotSignedIn -> "SIGN IN TO CLAIM"
@@ -106,6 +117,21 @@ sealed interface Blocker {
             RejectionReason.TELEPORT ->
                 "Your position jumped further than you could have walked. The reading " +
                     "was discarded rather than trusted."
+        }
+
+        is OutsidePlayableWorld -> buildString {
+            append("MapMonarchs is played in ")
+            append(PLAYABLE_COUNTRY_NAME)
+            append(". ")
+            if (country != null) {
+                append("You are currently in ")
+                append(country)
+                append(", which is outside the playable world, so no ground here " +
+                    "can be claimed by anyone.")
+            } else {
+                append("You are outside the playable world, so no ground here can " +
+                    "be claimed by anyone.")
+            }
         }
 
         is IdentityResolving ->

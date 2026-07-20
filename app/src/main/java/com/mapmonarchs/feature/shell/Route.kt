@@ -210,6 +210,9 @@ fun remedyRouteFor(blocker: Blocker): Route = when (blocker) {
     // established, a fix being acquired, a reading rejected, or a backend
     // function that was never deployed. Status is the honest destination; a
     // sign-in form would imply an action that would not help.
+    // Nothing to act on and nothing to sign into -- the explanation IS the
+    // remedy, and diagnostics is where it lives alongside the rest of the truth.
+    is Blocker.OutsidePlayableWorld,
     is Blocker.IdentityResolving,
     is Blocker.AcquiringFix,
     is Blocker.FixRejected,
