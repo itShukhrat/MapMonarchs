@@ -175,6 +175,14 @@ fun MapScreen(
                     // Fog first so the border edge draws on top of it.
                     style.addLayer(
                         fillLayer(FOG_LAYER, BOUNDARY_SOURCE) {
+                            // SLOT MATTERS MORE THAN OPACITY HERE. dark-v11 is a
+                            // slotted style: addLayer without a slot lands BENEATH
+                            // the symbol layers, so the fog was darkening terrain
+                            // while every place name punched straight through it.
+                            // I first tried raising opacity 0.82 -> 0.93 and the
+                            // screenshot was almost identical -- which is what
+                            // proved the layer was underneath rather than weak.
+                            slot("top")
                             sourceLayer("country_boundaries")
                             filter(
                                 Expression.neq(
@@ -183,15 +191,20 @@ fun MapScreen(
                                 )
                             )
                             fillColor(Fog.toArgb())
-                            // Not opaque. Outside must read as unreachable, not as
-                            // missing -- the world visibly continues and simply
-                            // cannot be played.
-                            fillOpacity(0.82)
+                            // Not opaque, now that the slot puts this above labels.
+                            // Outside must read as CONTINUING and unreachable rather
+                            // than as missing: terrain and place names stay faintly
+                            // present, so a player can still orient themselves, but
+                            // nothing out there competes with the playable world.
+                            fillOpacity(0.86)
                         }
                     )
 
                     style.addLayer(
                         lineLayer(BORDER_LAYER, BOUNDARY_SOURCE) {
+                            // Same slot, added after the fog, so the edge stays lit
+                            // on top of it rather than being dimmed by it.
+                            slot("top")
                             sourceLayer("country_boundaries")
                             filter(
                                 Expression.eq(
