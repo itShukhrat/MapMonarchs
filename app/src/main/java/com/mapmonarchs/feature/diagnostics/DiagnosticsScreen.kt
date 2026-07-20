@@ -12,6 +12,8 @@ import com.mapmonarchs.domain.model.AppError
 import com.mapmonarchs.domain.model.CapabilitiesProbe
 import com.mapmonarchs.domain.model.DeliveryProof
 import com.mapmonarchs.domain.model.Identity
+import com.mapmonarchs.domain.model.PLAYABLE_COUNTRY_NAME
+import com.mapmonarchs.domain.model.WorldPosition
 import com.mapmonarchs.domain.model.SignInReadiness
 import com.mapmonarchs.domain.model.signInReadiness
 import com.mapmonarchs.feature.map.CaptureState
@@ -43,6 +45,7 @@ object DiagnosticsTags {
     const val DELIVERY = "diag_delivery"
     const val SIGN_IN_POSSIBLE = "diag_signin_possible"
     const val AUTOCONFIRM = "diag_autoconfirm"
+    const val WORLD = "diag_world"
 }
 
 /**
@@ -134,6 +137,55 @@ fun DiagnosticsScreen(
         SectionHeader("EMAIL DELIVERY")
         DeliveryRows(diagnostics)
 
+
+        SectionHeader("PLAYABLE WORLD")
+        StatusRow(
+            label = "Game world",
+            value = PLAYABLE_COUNTRY_NAME.uppercase(),
+            valueColor = TextMuted
+        )
+        StatusRow(
+            label = "Your position",
+            value = when (state.worldPosition) {
+                is WorldPosition.Inside -> "INSIDE"
+                is WorldPosition.Outside -> "OUTSIDE"
+                is WorldPosition.Unknown -> "UNKNOWN"
+                is WorldPosition.NotChecked -> "NOT CHECKED"
+            },
+            valueColor = if (state.worldPosition is WorldPosition.Inside) SovereignGlow else Contested,
+            modifier = Modifier.testTag(DiagnosticsTags.WORLD)
+        )
+        when (val w = state.worldPosition) {
+            is WorldPosition.Inside -> BodyNote(
+                "You are inside the playable world. Ground here can be claimed once the " +
+                    "capture service is deployed."
+            )
+
+            is WorldPosition.Outside -> BodyNote(
+                if (w.country != null) {
+                    "You are in ${w.country}. Territory can only be claimed inside " +
+                        "$PLAYABLE_COUNTRY_NAME, so the map is dimmed here and claiming is off."
+                } else {
+                    "You are outside $PLAYABLE_COUNTRY_NAME, so the map is dimmed here " +
+                        "and claiming is off."
+                }
+            )
+
+            // The reason this row exists. Unknown deliberately does NOT block the
+            // player -- a dropped lookup is not evidence they left the country --
+            // which means that without saying so here, a failing boundary service
+            // would be completely invisible. A fact that can change must be
+            // observed or marked unknown; this is the marking.
+            is WorldPosition.Unknown -> BodyNote(
+                "The boundary service did not answer, so we cannot confirm whether you " +
+                    "are inside $PLAYABLE_COUNTRY_NAME. Claiming is not blocked by this -- " +
+                    "a failed check is not proof you left. " + w.reason
+            )
+
+            is WorldPosition.NotChecked -> BodyNote(
+                "Not checked yet. This resolves once a position fix is accepted."
+            )
+        }
         SectionHeader("LOCATION")
         StatusRow(
             label = "Permission",

@@ -16,6 +16,7 @@ import com.mapmonarchs.domain.model.AuthCapabilities
 import com.mapmonarchs.domain.model.CapabilitiesProbe
 import com.mapmonarchs.domain.model.DeliveryProof
 import com.mapmonarchs.domain.model.Identity
+import com.mapmonarchs.domain.model.WorldPosition
 import com.mapmonarchs.feature.map.CaptureState
 import com.mapmonarchs.feature.map.MapUiState
 import com.mapmonarchs.feature.map.TerritoryLoad
@@ -55,13 +56,15 @@ class DiagnosticsScreenTest {
         territory: TerritoryLoad = TerritoryLoad.Failed(AppError.SchemaMissing("42P01")),
         capture: CaptureState = CaptureState.Ready,
         permission: Boolean = true,
-        previewMode: Boolean = false
+        previewMode: Boolean = false,
+        worldPosition: WorldPosition = WorldPosition.Inside
     ) = MapUiState(
         identity = identity,
         territory = territory,
         capture = capture,
         locationPermissionGranted = permission,
-        previewMode = previewMode
+        previewMode = previewMode,
+        worldPosition = worldPosition
     )
 
     private fun show(
@@ -197,6 +200,44 @@ class DiagnosticsScreenTest {
         rule.onNodeWithText("Recipient").assertExists()
     }
 
+
+    // --- the playable world -------------------------------------------------
+
+    @Test
+    fun beingInsideTheWorldIsReported() {
+        show(state = mapState(worldPosition = WorldPosition.Inside))
+        assertRowValue(DiagnosticsTags.WORLD, "INSIDE")
+    }
+
+    @Test
+    fun beingOutsideNamesTheCountryAndSaysClaimingIsOff() {
+        show(state = mapState(worldPosition = WorldPosition.Outside("Kazakhstan")))
+        assertRowValue(DiagnosticsTags.WORLD, "OUTSIDE")
+        rule.onNodeWithText("You are in Kazakhstan.", substring = true).assertExists()
+    }
+
+    /**
+     * THE ROW THIS SECTION EXISTS FOR. Unknown deliberately does not block the
+     * player, so without an explicit readout a boundary service that had stopped
+     * answering would be completely invisible -- the app would simply behave as
+     * though it knew where they were.
+     */
+    @Test
+    fun anUnknownWorldPositionIsStatedRatherThanHidden() {
+        show(state = mapState(worldPosition = WorldPosition.Unknown("timed out")))
+        assertRowValue(DiagnosticsTags.WORLD, "UNKNOWN")
+        rule.onNodeWithText("cannot confirm whether you", substring = true).assertExists()
+        rule.onNodeWithText("timed out", substring = true).assertExists()
+    }
+
+    @Test
+    fun anUncheckedPositionIsDistinctFromAnUnknownOne() {
+        // "nobody has looked yet" and "we looked and could not tell" are
+        // different facts, and a player debugging a dark map needs to tell them
+        // apart.
+        show(state = mapState(worldPosition = WorldPosition.NotChecked))
+        assertRowValue(DiagnosticsTags.WORLD, "NOT CHECKED")
+    }
     // --- the rest of the screen still tells the truth ------------------------
 
     @Test
