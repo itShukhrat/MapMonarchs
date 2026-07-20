@@ -66,13 +66,23 @@ sealed class AppError(val technical: String) {
      */
     class MailNotDelivered(technical: String) : AppError(technical)
 
-    /** Genuinely unclassified. Still carries the cause; still shown. */
+    /**
+     * Genuinely unclassified. Still carries the cause; still shown.
+     *
+     * ITS MESSAGE MUST NOT NAME A DOMAIN. It used to read "Something went wrong
+     * loading territory", which was true when this class only wrapped territory
+     * reads. It is now constructed in three places and NONE of them is a
+     * territory read: a persisted email-delivery failure, the generic mapper
+     * fallback for any unclassified error including auth, and the location stream
+     * dying. A player whose GPS had failed was being told territory would not
+     * load. The class was reused and the sentence stayed put.
+     */
     class Unexpected(technical: String) : AppError(technical)
 
     /** Short, calm, non-blaming. No stack traces, no jargon, no dead ends. */
     fun playerMessage(): String = when (this) {
         is Offline -> "No connection. Territory may be out of date."
-        is SchemaMissing -> "Territory service unavailable."
+        is SchemaMissing -> "Territory service is not deployed yet."
         is Unauthorized -> "Access refused. Sign-in may have expired."
         is Malformed -> "Territory data could not be read."
         is BackendFailure -> "Territory service error."
@@ -81,7 +91,7 @@ sealed class AppError(val technical: String) {
         is InvalidCode -> "That code is not valid. It may have expired."
         is RateLimited -> "Too many attempts. Wait a minute and try again."
         is MailNotDelivered -> "The code could not be sent. Email delivery is not configured."
-        is Unexpected -> "Something went wrong loading territory."
+        is Unexpected -> "Something went wrong."
     }
 }
 
