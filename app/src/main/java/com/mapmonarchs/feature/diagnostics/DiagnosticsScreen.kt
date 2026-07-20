@@ -250,7 +250,6 @@ fun DiagnosticsScreen(
                 .testTag(DiagnosticsTags.REFRESH)
         )
 
-        Box(modifier = Modifier.padding(bottom = 40.dp))
     }
 }
 

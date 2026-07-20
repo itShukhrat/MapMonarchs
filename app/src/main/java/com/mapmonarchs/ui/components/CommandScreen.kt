@@ -47,6 +47,10 @@ import com.mapmonarchs.ui.theme.SovereignGlow
 import com.mapmonarchs.ui.theme.TextMuted
 import com.mapmonarchs.ui.theme.TextPrimary
 import com.mapmonarchs.ui.theme.Void
+// Bottom clearance for the floating command dock, defined here rather than
+// imported from feature.shell so ui.components does not depend up into the
+// shell. Tracks the dock geometry: 78dp tall + 12dp inset, plus margin.
+private val DOCK_CLEARANCE = 104.dp
 
 /**
  * Every non-map screen uses this.
@@ -97,6 +101,13 @@ fun CommandScreen(
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 20.dp)
+                // Clears the floating command dock so the last row of any screen
+                // is never trapped under it. The dock is persistent chrome (~90dp:
+                // 78dp tall, 12dp inset) drawn over every screen except SIGN IN, and
+                // six screens each used to carry their own 40dp spacer that did not
+                // clear it -- the same defect the capture button had. One inset here
+                // fixes all of them and stops the next screen inheriting the bug.
+                .padding(bottom = DOCK_CLEARANCE)
         ) {
             content()
             // Clears the floating command bar. Done HERE rather than in each

@@ -89,6 +89,5 @@ fun SettingsScreen(
                 "never your live position, and never the route you walked to reach it."
         )
 
-        Box(modifier = Modifier.padding(bottom = 40.dp))
     }
 }

@@ -169,6 +169,5 @@ fun IdentityScreen(
             }
         }
 
-        Box(modifier = Modifier.padding(bottom = 40.dp))
     }
 }

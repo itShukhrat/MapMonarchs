@@ -83,7 +83,5 @@ fun CommandCenterScreen(
                 )
             }
 
-        // Clears the floating bar so the last row is never trapped under it.
-        Box(modifier = Modifier.padding(bottom = CommandBarHeight + 24.dp))
     }
 }

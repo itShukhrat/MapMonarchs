@@ -95,6 +95,5 @@ fun HelpScreen(
             modifier = Modifier.padding(top = 8.dp)
         )
 
-        Box(modifier = Modifier.padding(bottom = 40.dp))
     }
 }

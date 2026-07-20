@@ -74,7 +74,6 @@ fun SignInScreen(
             is SignInState.EnteringCode -> CodeStep(state, onCodeChanged, onVerifyCode, onResend, onChangeEmail)
             is SignInState.Complete -> BodyNote("Signed in.")
         }
-        Box(modifier = Modifier.padding(bottom = 40.dp))
     }
 }
 

@@ -69,6 +69,5 @@ fun SafetyScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
                 "in this app."
         )
 
-        Box(modifier = Modifier.padding(bottom = 40.dp))
     }
 }

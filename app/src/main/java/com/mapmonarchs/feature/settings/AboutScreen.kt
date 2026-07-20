@@ -43,6 +43,5 @@ fun AboutScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
                 "side of the capture system is still being brought up."
         )
 
-        Box(modifier = Modifier.padding(bottom = 40.dp))
     }
 }
