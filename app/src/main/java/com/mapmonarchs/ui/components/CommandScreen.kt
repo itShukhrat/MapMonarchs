@@ -33,6 +33,8 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.stateDescription
+import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.disabled
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
@@ -361,7 +363,16 @@ fun ChoiceRow(
             // is active. The filled hex is the sighted cue; without this the
             // non-sighted equivalent simply did not exist.
             .selectable(selected = selected, role = Role.RadioButton, onClick = onClick)
-            .semantics { contentDescription = "$label. $detail" }
+            // stateDescription is what actually reaches the accessibility tree:
+            // .selectable sets the role, but on a merged node with an explicit
+            // contentDescription the selected flag was not surfacing -- verified
+            // on device, every cadence row read "not selected". TalkBack now
+            // announces the active one, matching the filled-hex cue.
+            .semantics {
+                this.selected = selected
+                stateDescription = if (selected) "Selected" else "Not selected"
+                contentDescription = "$label. $detail"
+            }
             .padding(vertical = 14.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
