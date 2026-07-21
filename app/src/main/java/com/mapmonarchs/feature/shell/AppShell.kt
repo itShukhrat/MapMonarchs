@@ -1,4 +1,7 @@
 package com.mapmonarchs.feature.shell
+import android.Manifest
+import android.content.pm.PackageManager
+import androidx.core.content.ContextCompat
 
 import android.content.Context
 import android.content.Intent
@@ -18,6 +21,9 @@ import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -29,6 +35,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.mapmonarchs.data.local.FirstRunStore
 import com.mapmonarchs.data.local.TrackingPreferences
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.DisposableEffect
 import com.mapmonarchs.domain.model.Identity
 import com.mapmonarchs.feature.auth.SignInScreen
 import com.mapmonarchs.feature.auth.SignInState
@@ -97,6 +104,28 @@ fun AppShell(modifier: Modifier = Modifier) {
     // MapScreen and kept the stream running behind Settings, Help and About.
     LaunchedEffect(navigator.current) {
         viewModel.onMapVisible(navigator.current == Route.Map)
+    }
+
+    // Location permission is re-read on every ON_RESUME, at the SHELL level so it
+    // works from any screen. The map's own prompt handles the first ask; this
+    // handles RECOVERY: a player who grants permission in system settings -- from
+    // the SETTINGS deep link, from the map's LOCATION OFF button, from anywhere --
+    // gets picked up the moment they return, and the SETTINGS permission row and
+    // the capture button both refresh. Putting this on the map only would leave
+    // the SETTINGS screen -- the very place we send them to grant it -- unable to
+    // notice they came back having done so.
+    val lifecycleOwner = LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                val granted = ContextCompat.checkSelfPermission(
+                    context, Manifest.permission.ACCESS_FINE_LOCATION
+                ) == PackageManager.PERMISSION_GRANTED
+                viewModel.onPermissionResult(granted)
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
 
     Box(modifier = modifier.fillMaxSize()) {

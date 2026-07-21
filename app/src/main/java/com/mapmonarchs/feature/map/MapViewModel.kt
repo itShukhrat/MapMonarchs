@@ -72,6 +72,9 @@ class MapViewModel(
     /** Last fix that passed local plausibility -- the baseline for teleport checks. */
     private var lastAcceptedFix: LocationFix? = null
     private var trackingJob: Job? = null
+
+    /** True only while MAP is the visible screen. Half of the tracking condition. */
+    private var mapVisible: Boolean = false
     private var trackingMode: TrackingMode = TrackingMode.BALANCED
 
     /**
@@ -253,20 +256,27 @@ class MapViewModel(
         probeCapabilities()
     }
 
+    /**
+     * The OS permission state, reported from wherever it was observed -- the map's
+     * first-launch prompt, or AppShell re-reading it on resume after the player
+     * granted it in system settings from ANY screen.
+     *
+     * Idempotent, so it is safe on every resume. It updates the flag and lets
+     * syncTracking decide whether the stream should run, so reporting a grant
+     * while on SETTINGS refreshes the permission row without starting tracking
+     * behind it.
+     */
     fun onPermissionResult(granted: Boolean) {
-        if (granted) {
-            _uiState.value = _uiState.value.copy(
-                capture = CaptureState.AcquiringFix,
-                locationPermissionGranted = true
-            )
-            startTracking()
-        } else {
-            stopTracking()
-            _uiState.value = _uiState.value.copy(
-                capture = CaptureState.PermissionRequired,
-                locationPermissionGranted = false
-            )
-        }
+        _uiState.value = _uiState.value.copy(
+            locationPermissionGranted = granted,
+            capture = when {
+                !granted -> CaptureState.PermissionRequired
+                // Do not knock an already-accepted fix back to AcquiringFix.
+                _uiState.value.capture is CaptureState.PermissionRequired -> CaptureState.AcquiringFix
+                else -> _uiState.value.capture
+            }
+        )
+        syncTracking()
     }
 
 
@@ -284,11 +294,19 @@ class MapViewModel(
      * battery to learn nothing.
      */
     fun onMapVisible(visible: Boolean) {
-        if (visible) {
-            if (_uiState.value.locationPermissionGranted) startTracking()
-        } else {
-            stopTracking()
-        }
+        mapVisible = visible
+        syncTracking()
+    }
+
+    /**
+     * The single owner of whether the location stream runs. Both inputs --
+     * permission and map visibility -- funnel through here, so the two callers
+     * can never leave the stream in a state neither of them intended. It is what
+     * lets AppShell report a permission grant from SETTINGS without that grant
+     * starting tracking on a screen that is not the map.
+     */
+    private fun syncTracking() {
+        if (mapVisible && _uiState.value.locationPermissionGranted) startTracking() else stopTracking()
     }
     /**
      * Applies a new cadence immediately by restarting the stream. Deferring it

@@ -10,13 +10,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleEventObserver
-import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
@@ -78,48 +74,26 @@ fun MapScreen(
         ActivityResultContracts.RequestPermission()
     ) { granted -> viewModel.onPermissionResult(granted) }
 
-    // Permission is re-checked on every ON_RESUME, not just first composition.
+    // MapScreen owns only the FIRST-LAUNCH PROMPT. Recovery -- re-reading the
+    // permission after the player grants it in system settings -- lives in
+    // AppShell's ON_RESUME handler, which is active on every screen, not just this
+    // one. Prompting is the map's job because the map is where location is first
+    // needed; recovery is the shell's job because the player might grant it while
+    // looking at SETTINGS.
     //
-    // THE TRAP THIS AVOIDS: the app tells a player who denied location to grant it
-    // in system settings (the capture button routes there). They do, and return --
-    // and with a one-shot LaunchedEffect(Unit) the map would still read LOCATION
-    // OFF, because Unit never changes and the effect never re-runs. They did
-    // exactly what we asked and the app stayed broken until a force-restart. That
-    // is the "never trap the user in silence" failure. ON_RESUME fires when they
-    // come back, so a permission granted outside the app is picked up at once.
-    //
-    // The first-launch prompt still fires: on the very first resume, if permission
-    // has never been granted, we ask. On later resumes we only re-read state --
-    // asking again would be the nagging the permission guidance forbids.
-    val lifecycleOwner = LocalLifecycleOwner.current
+    // Asked once: Android stops showing the dialog after two denials anyway, and
+    // the recovery path from there is the system-settings deep link in SETTINGS,
+    // not another dialog the OS will silently swallow.
     var hasPrompted by rememberSaveable { mutableStateOf(false) }
-    DisposableEffect(lifecycleOwner) {
-        val observer = LifecycleEventObserver { _, event ->
-            if (event == Lifecycle.Event.ON_RESUME) {
-                val granted = ContextCompat.checkSelfPermission(
-                    context, Manifest.permission.ACCESS_FINE_LOCATION
-                ) == PackageManager.PERMISSION_GRANTED
-
-                if (granted) {
-                    viewModel.onPermissionResult(true)
-                } else if (!hasPrompted) {
-                    // Asked once, immediately, because the map is useless without
-                    // it. A priming screen explaining WHY belongs here before
-                    // release -- denial rate is a top-of-funnel killer in location
-                    // games. Not re-asked on later resumes: Android stops showing
-                    // the dialog after two denials anyway, and the recovery path is
-                    // the system-settings deep link in SETTINGS.
-                    hasPrompted = true
-                    permissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
-                } else {
-                    viewModel.onPermissionResult(false)
-                }
-            }
+    LaunchedEffect(Unit) {
+        val granted = ContextCompat.checkSelfPermission(
+            context, Manifest.permission.ACCESS_FINE_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED
+        if (!granted && !hasPrompted) {
+            hasPrompted = true
+            permissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
         }
-        lifecycleOwner.lifecycle.addObserver(observer)
-        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
-
     val viewportState = rememberMapViewportState {
         setCameraOptions {
             center(DEFAULT_CENTER)
