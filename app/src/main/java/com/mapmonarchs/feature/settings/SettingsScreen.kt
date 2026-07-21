@@ -10,6 +10,7 @@ import com.mapmonarchs.data.local.TrackingMode
 import com.mapmonarchs.ui.components.BodyNote
 import com.mapmonarchs.ui.components.ChoiceRow
 import com.mapmonarchs.ui.components.CommandAction
+import com.mapmonarchs.ui.components.CommandCard
 import com.mapmonarchs.ui.components.CommandScreen
 import com.mapmonarchs.ui.components.SectionHeader
 import com.mapmonarchs.ui.components.StatusRow
@@ -41,19 +42,24 @@ fun SettingsScreen(
 ) {
     CommandScreen(title = "SETTINGS", onBack = onBack, modifier = modifier) {
 
-        SectionHeader("LOCATION")
-
-        StatusRow(
-            label = "Permission",
-            value = if (locationGranted) "GRANTED" else "DENIED",
-            valueColor = if (locationGranted) SovereignGlow else Contested,
-            modifier = Modifier.testTag(SettingsTags.PERMISSION_STATE)
-        )
+        // The permission state is a live readout, so it lives in a panel. The
+        // remediation (note + deep link) sits BELOW the panel rather than inside
+        // it: the card is the status, the action is the response to it, and the
+        // action carries its own accent shadow that a card clip would cut.
+        CommandCard(title = "LOCATION") {
+            StatusRow(
+                label = "Permission",
+                value = if (locationGranted) "GRANTED" else "DENIED",
+                valueColor = if (locationGranted) SovereignGlow else Contested,
+                modifier = Modifier.testTag(SettingsTags.PERMISSION_STATE)
+            )
+        }
 
         if (!locationGranted) {
             BodyNote(
                 "Android will not ask again once permission has been denied. It has to be " +
-                    "granted from system settings, or the map cannot tell which hex you are in."
+                    "granted from system settings, or the map cannot tell which hex you are in.",
+                modifier = Modifier.padding(top = 12.dp)
             )
             CommandAction(
                 label = "OPEN SYSTEM SETTINGS",
@@ -64,21 +70,23 @@ fun SettingsScreen(
             )
         }
 
-        SectionHeader("TRACKING CADENCE")
-
-        BodyNote(
-            "How often the app asks for a position while the map is open. Faster updates " +
-                "make claiming feel more responsive and cost more battery."
-        )
-
-        TrackingMode.entries.forEach { mode ->
-            ChoiceRow(
-                label = mode.label,
-                detail = mode.detail,
-                selected = mode == trackingMode,
-                onClick = { onTrackingModeChange(mode) },
-                modifier = Modifier.testTag("tracking_${mode.name}")
+        // The cadence choices are a control group, so they share one panel. The
+        // caption leads the panel because it is what the choices below it mean.
+        CommandCard(title = "TRACKING CADENCE") {
+            BodyNote(
+                "How often the app asks for a position while the map is open. Faster updates " +
+                    "make claiming feel more responsive and cost more battery.",
+                modifier = Modifier.padding(top = 8.dp)
             )
+            TrackingMode.entries.forEach { mode ->
+                ChoiceRow(
+                    label = mode.label,
+                    detail = mode.detail,
+                    selected = mode == trackingMode,
+                    onClick = { onTrackingModeChange(mode) },
+                    modifier = Modifier.testTag("tracking_${mode.name}")
+                )
+            }
         }
 
         SectionHeader("WHAT WE DO NOT DO")

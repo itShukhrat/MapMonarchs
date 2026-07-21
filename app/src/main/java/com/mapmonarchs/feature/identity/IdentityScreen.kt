@@ -18,6 +18,7 @@ import androidx.compose.ui.unit.dp
 import com.mapmonarchs.domain.model.Identity
 import com.mapmonarchs.ui.components.BodyNote
 import com.mapmonarchs.ui.components.CommandAction
+import com.mapmonarchs.ui.components.CommandCard
 import com.mapmonarchs.ui.components.CommandScreen
 import com.mapmonarchs.ui.components.HexagonShape
 import com.mapmonarchs.ui.components.SectionHeader
@@ -83,7 +84,7 @@ fun IdentityScreen(
             )
         }
 
-        SectionHeader("SESSION")
+        CommandCard(title = "SESSION") {
 
         StatusRow(
             label = "State",
@@ -103,6 +104,7 @@ fun IdentityScreen(
             value = if (colour != null) "ASSIGNED" else "NONE",
             valueColor = colour ?: TextMuted
         )
+        }
 
         when (identity) {
             is Identity.SignedIn -> {

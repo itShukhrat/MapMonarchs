@@ -7,6 +7,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.mapmonarchs.BuildConfig
 import com.mapmonarchs.ui.components.BodyNote
+import com.mapmonarchs.ui.components.CommandCard
 import com.mapmonarchs.ui.components.CommandScreen
 import com.mapmonarchs.ui.components.SectionHeader
 import com.mapmonarchs.ui.components.StatusRow
@@ -23,11 +24,11 @@ import com.mapmonarchs.ui.components.StatusRow
 fun AboutScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
     CommandScreen(title = "ABOUT", onBack = onBack, modifier = modifier) {
 
-        SectionHeader("BUILD")
-
-        StatusRow(label = "Version", value = BuildConfig.VERSION_NAME)
-        StatusRow(label = "Build", value = BuildConfig.VERSION_CODE.toString())
-        StatusRow(label = "Type", value = if (BuildConfig.DEBUG) "DEBUG" else "RELEASE")
+        CommandCard(title = "BUILD") {
+            StatusRow(label = "Version", value = BuildConfig.VERSION_NAME)
+            StatusRow(label = "Build", value = BuildConfig.VERSION_CODE.toString())
+            StatusRow(label = "Type", value = if (BuildConfig.DEBUG) "DEBUG" else "RELEASE")
+        }
 
         SectionHeader("MAP DATA")
 

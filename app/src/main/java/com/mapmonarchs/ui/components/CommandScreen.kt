@@ -6,6 +6,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -52,6 +53,7 @@ import com.mapmonarchs.ui.theme.SovereignHalo
 import com.mapmonarchs.ui.theme.SovereignGlow
 import com.mapmonarchs.ui.theme.TextMuted
 import com.mapmonarchs.ui.theme.TextPrimary
+import com.mapmonarchs.ui.theme.EdgeLit
 import com.mapmonarchs.ui.theme.MapMonarchsBrush
 import com.mapmonarchs.ui.theme.Void
 // Bottom clearance for the floating command dock, defined here rather than
@@ -203,6 +205,44 @@ fun SectionHeader(text: String, modifier: Modifier = Modifier) {
                         1f to Color.Transparent
                     )
                 )
+        )
+    }
+}
+
+/**
+ * A dashboard panel.
+ *
+ * The premium refresh's "card" half: SectionHeader draws a rule under a label;
+ * this gives the group a BODY with depth and a lit edge, so related readouts read
+ * as one instrument rather than loose text on black. The title sits above the
+ * panel (tracked, muted) so the eye gets hierarchy before detail.
+ *
+ * Additive: SectionHeader still exists for a single note or one-line status a
+ * full panel would over-format.
+ */
+@Composable
+fun CommandCard(
+    title: String? = null,
+    modifier: Modifier = Modifier,
+    content: @Composable ColumnScope.() -> Unit
+) {
+    Column(modifier = modifier.padding(top = 24.dp)) {
+        if (title != null) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.labelSmall,
+                color = TextMuted,
+                modifier = Modifier.padding(start = 4.dp, bottom = 10.dp)
+            )
+        }
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(16.dp))
+                .background(MapMonarchsBrush.card)
+                .border(1.dp, EdgeLit, RoundedCornerShape(16.dp))
+                .padding(horizontal = 16.dp, vertical = 4.dp),
+            content = content
         )
     }
 }
