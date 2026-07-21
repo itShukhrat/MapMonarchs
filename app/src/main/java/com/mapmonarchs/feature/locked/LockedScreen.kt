@@ -13,6 +13,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import com.mapmonarchs.feature.shell.FeatureLock
 import com.mapmonarchs.ui.components.BodyNote
+import com.mapmonarchs.ui.components.ActionEmphasis
 import com.mapmonarchs.ui.components.CommandAction
 import com.mapmonarchs.ui.components.CommandScreen
 import com.mapmonarchs.ui.components.LockMotifMark
@@ -121,6 +122,7 @@ fun LockedScreen(
             CommandAction(
                 label = "OPEN DIAGNOSTICS",
                 onClick = onOpenDiagnostics,
+                emphasis = ActionEmphasis.SECONDARY,
                 modifier = Modifier.padding(top = 16.dp)
             )
         }

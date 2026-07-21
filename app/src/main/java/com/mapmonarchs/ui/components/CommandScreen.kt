@@ -1,5 +1,15 @@
 package com.mapmonarchs.ui.components
 
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.ui.draw.scale
+import com.mapmonarchs.ui.motion.rememberAnimationsEnabled
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -170,12 +180,31 @@ fun TextCommand(
     color: Color = SovereignGlow
 ) {
     val haptics = LocalHapticFeedback.current
+    val interaction = remember { MutableInteractionSource() }
+    val pressed by interaction.collectIsPressedAsState()
+    val animate = rememberAnimationsEnabled()
+    // A word-sized control gives the weakest press signal in the product, so it
+    // gets the strongest proportional response: it dims as well as compresses.
+    // Without this, BACK -- the control every screen depends on to get out --
+    // acknowledged a tap only by the screen having already changed.
+    val press by animateFloatAsState(
+        targetValue = if (pressed) 0.92f else 1f,
+        animationSpec = if (animate) {
+            spring(dampingRatio = 0.6f, stiffness = Spring.StiffnessHigh)
+        } else {
+            tween(durationMillis = 0)
+        },
+        label = "textCommandPress"
+    )
     Box(
         modifier = modifier
             .heightIn(min = 48.dp)
+            .scale(press)
             .clip(RoundedCornerShape(8.dp))
             .clickable(
                 role = Role.Button,
+                interactionSource = interaction,
+                indication = null,
                 onClick = {
                     haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                     onClick()
@@ -184,7 +213,11 @@ fun TextCommand(
             .padding(horizontal = 10.dp, vertical = 14.dp),
         contentAlignment = Alignment.Center
     ) {
-        Text(text = label, style = MaterialTheme.typography.labelMedium, color = color)
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelMedium,
+            color = if (pressed) color.copy(alpha = 0.65f) else color
+        )
     }
 }
 
@@ -319,6 +352,24 @@ sealed interface ActionState {
 }
 
 /**
+ * How much weight an action carries on its screen.
+ *
+ * WHY THIS EXISTS: every action in the product rendered identically, so a screen
+ * offering two of them offered no opinion about which one to press. On the locked
+ * TERRITORY screen, ENTER PREVIEW -- the one action that actually shows the
+ * player something -- looked exactly like OPEN DIAGNOSTICS, a navigation to a
+ * status page. Emphasis is what makes a screen mean something rather than merely
+ * list what is possible.
+ */
+enum class ActionEmphasis {
+    /** The thing to press. Lit edge, accent shadow, filled mark. */
+    PRIMARY,
+
+    /** Available, and quieter about it. Grounded, no glow, hollow mark. */
+    SECONDARY
+}
+
+/**
  * The primary action.
  *
  * WHY IT IS NO LONGER A SATURATED SLAB: the fill was `Sovereign`, which is
@@ -333,6 +384,10 @@ sealed interface ActionState {
  * is the active one" in ChoiceRow and in the command dock indicator, so the
  * product has one selection language rather than three.
  *
+ * PRESSING IT DOES SOMETHING VISIBLE. The control compresses slightly under the
+ * finger, so the press is acknowledged by the button itself rather than only by
+ * whatever happens next -- which on a slow network is nothing, for a while.
+ *
  * Unavailable actions stay legible and announce their reason. They do not stay
  * tappable -- unlike the capture button, whose blocker lives on a server the
  * player cannot see, these are gated by something visible directly above them
@@ -343,14 +398,33 @@ fun CommandAction(
     label: String,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    state: ActionState = ActionState.Ready
+    state: ActionState = ActionState.Ready,
+    emphasis: ActionEmphasis = ActionEmphasis.PRIMARY
 ) {
     val ready = state is ActionState.Ready
+    val primary = emphasis == ActionEmphasis.PRIMARY && ready
     val shape = RoundedCornerShape(14.dp)
     val haptics = LocalHapticFeedback.current
 
-    val edge = if (ready) Sovereign else SlateEdge
-    val labelColor = if (ready) SovereignGlow else DisabledFg
+    val interaction = remember { MutableInteractionSource() }
+    val pressed by interaction.collectIsPressedAsState()
+    val animate = rememberAnimationsEnabled()
+    val press by animateFloatAsState(
+        targetValue = if (pressed && ready) 0.97f else 1f,
+        animationSpec = if (animate) {
+            spring(dampingRatio = 0.6f, stiffness = Spring.StiffnessHigh)
+        } else {
+            tween(durationMillis = 0)
+        },
+        label = "commandActionPress"
+    )
+
+    val edge = if (primary) Sovereign else SlateEdge
+    val labelColor = when {
+        primary -> SovereignGlow
+        ready -> TextPrimary
+        else -> DisabledFg
+    }
 
     Box(
         modifier = modifier
@@ -358,20 +432,28 @@ fun CommandAction(
             // 52dp floor including padding: this is the largest, most-used control
             // in the product and it is pressed outdoors, one-handed, walking.
             .heightIn(min = 52.dp)
-            // A ready action lifts off the surface with an accent-tinted shadow, so
-            // the primary move on any screen reads as high-value and tactile. An
-            // unavailable one stays flat and grounded -- the depth itself signals
-            // "this is the thing to press".
+            .scale(press)
+            // Only a PRIMARY action lifts off the surface. A secondary one that
+            // glowed just as hard would put the screen back where it started:
+            // two controls, and no opinion about which one matters.
             .then(
-                if (ready) Modifier.shadow(12.dp, shape, ambientColor = SovereignHalo, spotColor = SovereignHalo)
-                else Modifier
+                if (primary) {
+                    Modifier.shadow(12.dp, shape, ambientColor = SovereignHalo, spotColor = SovereignHalo)
+                } else {
+                    Modifier
+                }
             )
             .clip(shape)
-            .background(if (ready) MapMonarchsBrush.actionReady else androidx.compose.ui.graphics.SolidColor(Slate))
-            .border(if (ready) 1.5.dp else 1.dp, edge, shape)
+            .background(
+                if (primary) MapMonarchsBrush.actionReady
+                else androidx.compose.ui.graphics.SolidColor(Slate)
+            )
+            .border(if (primary) 1.5.dp else 1.dp, edge, shape)
             .clickable(
                 enabled = ready,
                 role = Role.Button,
+                interactionSource = interaction,
+                indication = null,
                 onClick = {
                     haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                     onClick()
@@ -388,7 +470,9 @@ fun CommandAction(
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             // Non-colour cue for the live state, so emphasis survives greyscale
-            // and colour-vision deficiency.
+            // and colour-vision deficiency. Filled on the primary action, hollow
+            // on a secondary one -- the same filled/hollow language the dock and
+            // ChoiceRow already use.
             Box(
                 modifier = Modifier
                     // 11dp, not 9: below about 10dp the six sides stop resolving
@@ -397,8 +481,16 @@ fun CommandAction(
                     .size(11.dp)
                     .rotate(90f)
                     .clip(HexagonShape)
-                    .background(if (ready) Sovereign else Color.Transparent)
-                    .border(1.dp, if (ready) Sovereign else DisabledFg, HexagonShape)
+                    .background(if (primary) Sovereign else Color.Transparent)
+                    .border(
+                        1.dp,
+                        when {
+                            primary -> Sovereign
+                            ready -> SlateEdge
+                            else -> DisabledFg
+                        },
+                        HexagonShape
+                    )
             )
             Text(
                 text = label,
@@ -423,6 +515,18 @@ fun ChoiceRow(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    // The mark springs up as it fills. Choosing a cadence changed three colours
+    // instantly, which read as a repaint rather than as a choice landing.
+    val animate = rememberAnimationsEnabled()
+    val markScale by animateFloatAsState(
+        targetValue = if (selected) 1f else 0.82f,
+        animationSpec = if (animate) {
+            spring(dampingRatio = 0.45f, stiffness = Spring.StiffnessMedium)
+        } else {
+            tween(durationMillis = 0)
+        },
+        label = "choiceMark"
+    )
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -448,6 +552,7 @@ fun ChoiceRow(
         Box(
             modifier = Modifier
                 .size(12.dp)
+                .scale(markScale)
                 .rotate(90f)
                 .clip(HexagonShape)
                 .background(if (selected) Sovereign else Color.Transparent)

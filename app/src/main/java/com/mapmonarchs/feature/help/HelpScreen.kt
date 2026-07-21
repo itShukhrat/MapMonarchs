@@ -9,6 +9,7 @@ import androidx.compose.ui.unit.dp
 import com.mapmonarchs.feature.map.resolveBlocker
 import com.mapmonarchs.feature.map.MapUiState
 import com.mapmonarchs.ui.components.BodyNote
+import com.mapmonarchs.ui.components.ActionEmphasis
 import com.mapmonarchs.ui.components.CommandAction
 import com.mapmonarchs.ui.components.CommandScreen
 import com.mapmonarchs.ui.components.SectionHeader
@@ -92,6 +93,7 @@ fun HelpScreen(
         CommandAction(
             label = "OPEN SETTINGS",
             onClick = onOpenSettings,
+            emphasis = ActionEmphasis.SECONDARY,
             modifier = Modifier.padding(top = 8.dp)
         )
 

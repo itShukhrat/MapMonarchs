@@ -17,6 +17,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import com.mapmonarchs.domain.model.Identity
 import com.mapmonarchs.ui.components.BodyNote
+import com.mapmonarchs.ui.components.ActionEmphasis
 import com.mapmonarchs.ui.components.CommandAction
 import com.mapmonarchs.ui.components.CommandCard
 import com.mapmonarchs.ui.components.CommandScreen
@@ -118,6 +119,7 @@ fun IdentityScreen(
                 CommandAction(
                     label = "SIGN OUT",
                     onClick = onSignOut,
+                    emphasis = ActionEmphasis.SECONDARY,
                     modifier = Modifier
                         .padding(top = 16.dp)
                         .testTag(IdentityTags.SIGN_OUT)
