@@ -75,12 +75,19 @@ fun CommandScreen(
     title: String,
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
+    /**
+     * The surface wash. Defaults to the standard command background; a locked
+     * destination that is WITHHELD rather than undeployed passes the prestige
+     * wash instead, so "not yet" can read as withheld power rather than as an
+     * outage. Still the one accent -- only the amount of it changes.
+     */
+    background: Brush = MapMonarchsBrush.screen,
     content: @Composable () -> Unit
 ) {
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(MapMonarchsBrush.screen)
+            .background(background)
             .safeDrawingPadding()
     ) {
         Row(

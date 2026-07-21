@@ -1,27 +1,23 @@
 package com.mapmonarchs.feature.locked
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import com.mapmonarchs.feature.shell.FeatureLock
 import com.mapmonarchs.ui.components.BodyNote
 import com.mapmonarchs.ui.components.CommandAction
 import com.mapmonarchs.ui.components.CommandScreen
-import com.mapmonarchs.ui.components.HexagonShape
+import com.mapmonarchs.ui.components.LockMotifMark
 import com.mapmonarchs.ui.components.SectionHeader
-import com.mapmonarchs.ui.theme.SlateEdge
+import com.mapmonarchs.ui.theme.MapMonarchsBrush
 import com.mapmonarchs.ui.theme.TextMuted
 
 object LockedTags {
@@ -57,29 +53,43 @@ fun LockedScreen(
     onEnterPreview: (() -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
-    CommandScreen(title = title, onBack = onBack, modifier = modifier) {
+    CommandScreen(
+        title = title,
+        onBack = onBack,
+        modifier = modifier,
+        // Withheld destinations get the warmer wash; undeployed ones do not.
+        // See LockMotif.isWithheld for why that distinction is worth drawing.
+        background = if (lock.motif.isWithheld) {
+            MapMonarchsBrush.prestige
+        } else {
+            MapMonarchsBrush.screen
+        }
+    ) {
 
-        Row(
-            modifier = Modifier.padding(top = 8.dp),
-            verticalAlignment = Alignment.CenterVertically
+        // The motif carries the character of the destination. It replaced a small
+        // hollow hexagon that was identical on all six locked screens, which made
+        // six genuinely different ideas read as one screen shown six times.
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 12.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Hollow hex: the same shape used for territory you do not hold, and
-            // for identity you do not have. Unowned is unowned.
-            Box(
-                modifier = Modifier
-                    .size(34.dp)
-                    .clip(HexagonShape)
-                    .background(Color.Transparent)
-                    .border(1.dp, SlateEdge, HexagonShape)
-            )
-            Text(
-                text = "LOCKED",
-                style = MaterialTheme.typography.labelLarge,
-                color = TextMuted,
-                modifier = Modifier
-                    .padding(start = 16.dp)
-                    .testTag(LockedTags.STATUS)
-            )
+            LockMotifMark(motif = lock.motif)
+
+            Row(
+                modifier = Modifier.padding(top = 18.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // The status word stays plain and stays first. Whatever the motif
+                // suggests, the fact is that this is shut.
+                Text(
+                    text = "LOCKED",
+                    style = MaterialTheme.typography.labelLarge,
+                    color = TextMuted,
+                    modifier = Modifier.testTag(LockedTags.STATUS)
+                )
+            }
         }
 
         SectionHeader("WHY")

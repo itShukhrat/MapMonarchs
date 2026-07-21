@@ -1,6 +1,7 @@
 package com.mapmonarchs.feature.shell
 
 import com.mapmonarchs.domain.model.Blocker
+import com.mapmonarchs.ui.components.LockMotif
 import com.mapmonarchs.ui.components.NavGlyph
 
 /**
@@ -31,7 +32,24 @@ data class FeatureLock(
      * player would read NOT DEPLOYED and conclude, wrongly, that a deployment is
      * all that stands between them and an empire.
      */
-    val diagnosticsExplainsThis: Boolean
+    val diagnosticsExplainsThis: Boolean,
+
+
+    /**
+
+     * The visual character of this destination.
+
+     *
+
+     * Mandatory like every other field here. Six locked surfaces that all render
+
+     * identically read as one "not yet" repeated, rather than as a product with
+
+     * shape -- and a motif that could be omitted would be omitted.
+
+     */
+
+    val motif: LockMotif
 )
 
 /**
@@ -70,7 +88,8 @@ sealed interface Route {
                 "a hex has not been deployed, so there is nothing to inspect.",
             unlocksWhen = "The territory schema is applied to the backend.",
             insteadNow = "Open DIAGNOSTICS to see the exact backend status.",
-            diagnosticsExplainsThis = true
+            diagnosticsExplainsThis = true,
+            motif = LockMotif.WORLD
         )
     }
 
@@ -81,7 +100,8 @@ sealed interface Route {
                 "Ranking players on zero captured hexes would rank nobody against nobody.",
             unlocksWhen = "Capture is live and the first season of territory data exists.",
             insteadNow = "Nothing to compare yet. The map is the whole game today.",
-            diagnosticsExplainsThis = true
+            diagnosticsExplainsThis = true,
+            motif = LockMotif.RANKING
         )
     }
 
@@ -92,7 +112,8 @@ sealed interface Route {
                 "is under attack -- until capture exists, an inbox would only ever be empty.",
             unlocksWhen = "Capture and decay are live, so territory can change hands.",
             insteadNow = "Nothing is happening to your territory, because you have none.",
-            diagnosticsExplainsThis = true
+            diagnosticsExplainsThis = true,
+            motif = LockMotif.SIGNAL
         )
     }
 
@@ -105,7 +126,8 @@ sealed interface Route {
             unlocksWhen = "Capture is live, so an objective can have a real outcome.",
             insteadNow = "Walk. That is the whole objective today, and it is the one " +
                 "being tested.",
-            diagnosticsExplainsThis = true
+            diagnosticsExplainsThis = true,
+            motif = LockMotif.QUEST
         )
     }
 
@@ -116,7 +138,8 @@ sealed interface Route {
                 "the solo loop is proven fun would hide whether the loop is fun at all.",
             unlocksWhen = "The walk-claim-hold loop is proven on real walks by real players.",
             insteadNow = "Hold ground alone first. That is the part that has to work.",
-            diagnosticsExplainsThis = false
+            diagnosticsExplainsThis = false,
+            motif = LockMotif.PRESTIGE
         )
     }
 
@@ -127,7 +150,8 @@ sealed interface Route {
                 "before the game is good is just a way to take money for an unproven product.",
             unlocksWhen = "The loop is proven and cosmetics exist worth owning.",
             insteadNow = "Nothing here will ever affect who wins ground. Cosmetics only.",
-            diagnosticsExplainsThis = false
+            diagnosticsExplainsThis = false,
+            motif = LockMotif.VAULT
         )
     }
 }
