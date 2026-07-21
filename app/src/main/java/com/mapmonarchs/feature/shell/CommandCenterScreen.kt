@@ -7,8 +7,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import com.mapmonarchs.ui.components.BodyNote
+import com.mapmonarchs.ui.components.CommandCard
 import com.mapmonarchs.ui.components.CommandScreen
-import com.mapmonarchs.ui.components.SectionHeader
 import com.mapmonarchs.ui.components.StatusRow
 import com.mapmonarchs.ui.theme.LockedFg
 import com.mapmonarchs.ui.theme.SovereignGlow
@@ -45,43 +45,55 @@ fun CommandCenterScreen(
 ) {
     CommandScreen(title = "COMMAND", onBack = onBack, modifier = modifier.testTag(CommandCenterTags.SCREEN)) {
 
-        SectionHeader("YOUR SESSION")
-        COMMAND_ROUTES.forEach { route ->
-            StatusRow(
-                label = route.title,
-                value = "OPEN",
-                valueColor = SovereignGlow,
-                onClick = { onOpen(route) },
-                modifier = Modifier.testTag(CommandCenterTags.row(route.title))
-            )
-        }
-
-        SectionHeader("REFERENCE")
-        REFERENCE_ROUTES.forEach { route ->
-            StatusRow(
-                label = route.title,
-                value = "READ",
-                valueColor = TextMuted,
-                onClick = { onOpen(route) },
-                modifier = Modifier.testTag(CommandCenterTags.row(route.title))
-            )
-        }
-
-        SectionHeader("NOT OPEN YET")
-        BodyNote(
-            "These are real systems with real unlock conditions, not placeholders. " +
-                "Each one states what has to be true before it works."
-        )
-        LOCKED_ROUTES.filter { locked -> NAV_DESTINATIONS.none { it.route == locked } }
-            .forEach { route ->
+        // Panelled like every other dashboard surface. These rows carry a
+        // right-aligned state per destination -- OPEN, READ, LOCKED -- which is
+        // the same readout shape the panel language exists for. The deck is the
+        // hub those screens hang off, so leaving it as loose rows made the hub
+        // the least finished thing in its own hierarchy.
+        CommandCard(title = "YOUR SESSION") {
+            COMMAND_ROUTES.forEach { route ->
                 StatusRow(
                     label = route.title,
-                    value = "LOCKED",
-                    valueColor = LockedFg,
+                    value = "OPEN",
+                    valueColor = SovereignGlow,
                     onClick = { onOpen(route) },
                     modifier = Modifier.testTag(CommandCenterTags.row(route.title))
                 )
             }
+        }
+
+        CommandCard(title = "REFERENCE") {
+            REFERENCE_ROUTES.forEach { route ->
+                StatusRow(
+                    label = route.title,
+                    value = "READ",
+                    valueColor = TextMuted,
+                    onClick = { onOpen(route) },
+                    modifier = Modifier.testTag(CommandCenterTags.row(route.title))
+                )
+            }
+        }
+
+        // The caption sits INSIDE this panel because it is what the rows below it
+        // mean -- the same call made for the cadence group in SETTINGS. Elsewhere
+        // prose stays outside a panel; here it is the label for the group.
+        CommandCard(title = "NOT OPEN YET") {
+            BodyNote(
+                "These are real systems with real unlock conditions, not placeholders. " +
+                    "Each one states what has to be true before it works.",
+                modifier = Modifier.padding(top = 8.dp)
+            )
+            LOCKED_ROUTES.filter { locked -> NAV_DESTINATIONS.none { it.route == locked } }
+                .forEach { route ->
+                    StatusRow(
+                        label = route.title,
+                        value = "LOCKED",
+                        valueColor = LockedFg,
+                        onClick = { onOpen(route) },
+                        modifier = Modifier.testTag(CommandCenterTags.row(route.title))
+                    )
+                }
+        }
 
     }
 }

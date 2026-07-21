@@ -122,7 +122,15 @@ fun LockedScreen(
             CommandAction(
                 label = "OPEN DIAGNOSTICS",
                 onClick = onOpenDiagnostics,
-                emphasis = ActionEmphasis.SECONDARY,
+                // Secondary ONLY when it is competing with ENTER PREVIEW. On the locks
+                // that offer no preview this is the sole action on the screen, and a
+                // screen whose only action is muted has no primary at all -- which is
+                // how MISSIONS shipped for one build, verified by screenshot.
+                emphasis = if (onEnterPreview != null) {
+                    ActionEmphasis.SECONDARY
+                } else {
+                    ActionEmphasis.PRIMARY
+                },
                 modifier = Modifier.padding(top = 16.dp)
             )
         }
