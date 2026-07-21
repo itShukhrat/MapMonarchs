@@ -47,6 +47,7 @@ import com.mapmonarchs.feature.map.MapScreen
 import com.mapmonarchs.feature.map.resolveBlocker
 import com.mapmonarchs.feature.map.MapViewModel
 import com.mapmonarchs.feature.map.MapViewModelFactory
+import com.mapmonarchs.feature.onboarding.BrandIntro
 import com.mapmonarchs.feature.onboarding.OnboardingScreen
 import com.mapmonarchs.feature.safety.SafetyScreen
 import com.mapmonarchs.ui.motion.SCREEN_TRANSITION_MS
@@ -78,11 +79,21 @@ fun AppShell(modifier: Modifier = Modifier) {
     val firstRunStore = remember { FirstRunStore(context) }
     val trackingPrefs = remember { TrackingPreferences(context) }
 
+    // The brand moment runs on every cold start, not just first run: it is the
+    // handover into a strategy surface, and a player who opens the app to walk
+    // should get the same beat every time. It costs under two seconds and any
+    // tap skips it.
+    var introDone by remember { mutableStateOf(false) }
     var onboardingComplete by remember { mutableStateOf(firstRunStore.hasCompletedOnboarding()) }
     var trackingMode by remember { mutableStateOf(trackingPrefs.mode) }
 
     val viewModel: MapViewModel = viewModel(factory = MapViewModelFactory(context))
     val state by viewModel.uiState.collectAsState()
+
+    if (!introDone) {
+        BrandIntro(onDone = { introDone = true }, modifier = modifier)
+        return
+    }
 
     if (!onboardingComplete) {
         OnboardingScreen(
