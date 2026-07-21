@@ -21,12 +21,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.contentDescription
@@ -43,6 +45,8 @@ import com.mapmonarchs.ui.theme.Slate
 import com.mapmonarchs.ui.theme.SlateEdge
 import com.mapmonarchs.ui.theme.Sovereign
 import com.mapmonarchs.ui.theme.SovereignGlow
+import com.mapmonarchs.ui.theme.SovereignHalo
+import com.mapmonarchs.ui.theme.MapMonarchsBrush
 import com.mapmonarchs.ui.theme.TextMuted
 import com.mapmonarchs.ui.theme.TextPrimary
 import com.mapmonarchs.ui.theme.Void
@@ -221,6 +225,31 @@ private fun CaptureAction(
     val haptics = LocalHapticFeedback.current
     Box(
         modifier = modifier
+            // A READY claim lifts off the map on an accent-tinted shadow. This is
+            // the single most valuable action in the product and it was rendered
+            // as a thin outlined pill sitting flat on the basemap -- lower visual
+            // priority than the error strip above it.
+            //
+            // Depth is what carries the weight, not fill: the button still must
+            // not wear a saturated slab, because that colour is TERRITORY_PALETTE
+            // and this control sits inches from a player who may own ground drawn
+            // in exactly that colour.
+            //
+            // Blocked stays grounded and flat on purpose. The difference between
+            // "press this" and "this will not work yet" is legible before a single
+            // word is read.
+            .then(
+                if (ready) {
+                    Modifier.shadow(
+                        elevation = 18.dp,
+                        shape = shape,
+                        ambientColor = SovereignHalo,
+                        spotColor = SovereignHalo
+                    )
+                } else {
+                    Modifier
+                }
+            )
             .clip(shape)
             // THE WORST INSTANCE OF THE PALETTE COLLISION, and the last one fixed.
             // This used to fill with Sovereign -- 0xFF4C8DFF, byte for byte
@@ -229,7 +258,7 @@ private fun CaptureAction(
             // ground were the same colour in the same frame. CommandAction had the
             // same bug and was fixed first, which was backwards: that one lives on
             // a plain dark screen where nothing competes.
-            .background(if (ready) Obsidian.copy(alpha = 0.94f) else Slate.copy(alpha = 0.94f))
+            .background(if (ready) MapMonarchsBrush.actionReady else SolidColor(Slate.copy(alpha = 0.94f)))
             .border(
                 if (ready) 1.5.dp else 1.dp,
                 if (ready) Sovereign else Contested.copy(alpha = 0.45f),

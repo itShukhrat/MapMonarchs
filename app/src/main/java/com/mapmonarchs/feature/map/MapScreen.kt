@@ -15,6 +15,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.draw.drawWithCache
+import androidx.compose.ui.geometry.center
+import androidx.compose.ui.graphics.Brush
+import com.mapbox.maps.extension.style.layers.generated.circleLayer
+import com.mapbox.maps.extension.style.sources.generated.GeoJsonSource
+import com.mapbox.maps.extension.style.sources.generated.geoJsonSource
+import com.mapbox.maps.extension.style.sources.getSourceAs
+import com.mapmonarchs.ui.theme.SovereignGlow
+import com.mapmonarchs.ui.theme.Void
 import androidx.compose.ui.graphics.toArgb
 import com.mapmonarchs.domain.identity.IdentityDerivation.TERRITORY_PALETTE
 import com.mapmonarchs.ui.theme.Fog
@@ -29,6 +38,7 @@ import com.mapbox.maps.extension.compose.MapEffect
 import com.mapbox.maps.extension.compose.MapboxMap
 import com.mapbox.maps.extension.style.expressions.generated.Expression
 import com.mapbox.maps.extension.style.layers.addLayer
+import com.mapbox.maps.extension.style.layers.addPersistentLayer
 import com.mapbox.maps.extension.style.layers.generated.fillLayer
 import com.mapbox.maps.extension.style.layers.generated.lineLayer
 import com.mapbox.maps.extension.style.sources.addSource
@@ -48,7 +58,11 @@ private const val MAPBOX_DARK = "mapbox://styles/mapbox/dark-v11"
 /** Layer and source ids, namespaced so a future style cannot collide with them. */
 private const val BOUNDARY_SOURCE = "mm-country-boundaries"
 private const val FOG_LAYER = "mm-outside-fog"
+private const val BORDER_GLOW_LAYER = "mm-uz-border-glow"
 private const val BORDER_LAYER = "mm-uz-border"
+private const val PLAYER_SOURCE = "mm-player"
+private const val PLAYER_HALO_LAYER = "mm-player-halo"
+private const val PLAYER_CORE_LAYER = "mm-player-core"
 
 /** The one playable country. ISO 3166-1 alpha-2, as published by Mapbox. */
 private const val PLAYABLE_ISO = "UZ"
@@ -207,6 +221,35 @@ fun MapScreen(
                         }
                     )
 
+                    // A WIDE, SOFT UNDERLAY beneath the crisp border line.
+                    //
+                    // One hairline reads as a cartographic boundary -- the kind
+                    // every map has. Two lines, a blurred wide one under a sharp
+                    // narrow one, read as an edge that is LIT: the board has a
+                    // rim, and the rim is powered. That is the whole difference
+                    // between "this map has a country outline on it" and "this is
+                    // where the playable world stops".
+                    //
+                    // Still the one accent. Depth here comes from blur and width,
+                    // not from introducing a second hue -- the same move the
+                    // command surfaces make with glow instead of colour.
+                    style.addLayer(
+                        lineLayer(BORDER_GLOW_LAYER, BOUNDARY_SOURCE) {
+                            slot("top")
+                            sourceLayer("country_boundaries")
+                            filter(
+                                Expression.eq(
+                                    Expression.get("iso_3166_1"),
+                                    Expression.literal(PLAYABLE_ISO)
+                                )
+                            )
+                            lineColor(Sovereign.toArgb())
+                            lineWidth(7.0)
+                            lineBlur(6.0)
+                            lineOpacity(0.35)
+                        }
+                    )
+
                     style.addLayer(
                         lineLayer(BORDER_LAYER, BOUNDARY_SOURCE) {
                             // Same slot, added after the fog, so the edge stays lit
@@ -242,7 +285,107 @@ fun MapScreen(
                     }
                 }
             }
+
+            // ---- You are here ------------------------------------------------
+            //
+            // There was NO position marker at all before this. The camera flew to
+            // the player and then showed them an anonymous stretch of street with
+            // nothing on it, which is why the map read as a basemap with a button
+            // rather than as a board someone is standing on.
+            //
+            // WHY A CIRCLE, IN AN APP MADE OF HEXAGONS. A hexagon here would be
+            // read as "the hex you are standing in", and that is a claim this
+            // client is not entitled to make: real cells are H3 and the SERVER
+            // decides which one contains you. PreviewHexGrid is explicitly not H3
+            // and must never be drawn as if it were. A circle cannot be mistaken
+            // for a claimable cell, so the shape itself keeps the map honest.
+            //
+            // WHY A STYLE LAYER RATHER THAN CircleAnnotation. The annotation API
+            // was tried first and drew nothing at all -- verified by scanning the
+            // rendered frame for accent pixels, of which there were none anywhere
+            // on the map even with the marker cranked to a 90px opaque disc. A
+            // style layer added here renders correctly, and addPersistentLayer
+            // keeps it alive across the style reloads that MapStyle triggers.
+            //
+            // NOTE ON slot(): dark-v11 is a CLASSIC style and has no slots. The
+            // fog and border layers above ask for slot("top") and the SDK logs
+            // "Slot 'top' missing" for each of them. It is harmless -- addLayer
+            // appends to the end of the layer list, which is already the top --
+            // so those layers render correctly despite the warning. The marker
+            // therefore does not ask for a slot it cannot get.
+            //
+            // Radius is in SCREEN pixels, so this stays a puck at every zoom
+            // instead of swelling into something that looks like territory.
+            MapEffect(state.playerLat, state.playerLng) { mapView ->
+                val lat = state.playerLat
+                val lng = state.playerLng
+                if (lat == null || lng == null) return@MapEffect
+                val here = Point.fromLngLat(lng, lat)
+
+                mapView.mapboxMap.getStyle { style ->
+                    val existing = style.getSourceAs<GeoJsonSource>(PLAYER_SOURCE)
+                    if (existing != null) {
+                        existing.geometry(here)
+                        return@getStyle
+                    }
+                    style.addSource(geoJsonSource(PLAYER_SOURCE) { geometry(here) })
+                    // Soft halo. Presence, not precision -- deliberately not scaled
+                    // to GPS accuracy, because this state carries no accuracy value
+                    // and a halo sized from nothing would be a fabricated
+                    // confidence reading.
+                    style.addPersistentLayer(
+                        circleLayer(PLAYER_HALO_LAYER, PLAYER_SOURCE) {
+                            circleRadius(26.0)
+                            circleColor(Sovereign.toArgb())
+                            circleOpacity(0.20)
+                            circleBlur(0.9)
+                        }
+                    )
+                    style.addPersistentLayer(
+                        circleLayer(PLAYER_CORE_LAYER, PLAYER_SOURCE) {
+                            circleRadius(7.0)
+                            circleColor(SovereignGlow.toArgb())
+                            circleStrokeWidth(2.0)
+                            circleStrokeColor(Void.toArgb())
+                            circleStrokeOpacity(0.85)
+                        }
+                    )
+                }
+
+            }
         }
+
+        // ---- Vignette --------------------------------------------------------
+        //
+        // The map is the hero, and a hero surface needs a frame. Stock dark-v11 is
+        // lit uniformly corner to corner, so the eye had nothing to settle on and
+        // the HUD sat on top of competing road detail.
+        //
+        // This darkens the edges toward Void and leaves the centre clear: the board
+        // reads as lit from the middle, the identity chip and the capture action
+        // land on darkness rather than on streets, and the frame stops looking like
+        // a basemap screenshot.
+        //
+        // drawWithCache, not a background brush: a radial gradient needs the real
+        // pixel size to place its centre and radius. Built from Offset fractions it
+        // would anchor at the top-left corner and shade the whole screen.
+        //
+        // NO POINTER MODIFIER, deliberately: Compose only routes gestures to nodes
+        // that ask for them, so this draws over the map without stealing a single
+        // pan or pinch.
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .drawWithCache {
+                    val vignette = Brush.radialGradient(
+                        0.30f to Color.Transparent,
+                        1f to Void.copy(alpha = 0.92f),
+                        center = size.center,
+                        radius = size.maxDimension * 0.62f
+                    )
+                    onDrawBehind { drawRect(vignette) }
+                }
+        )
 
         MapHud(
             state = state,
