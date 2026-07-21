@@ -85,4 +85,51 @@ class FeatureLockTest {
             assertTrue(LOCKED_ROUTES.contains(it))
         }
     }
+
+    /**
+     * A lock offers DIAGNOSTICS only when Diagnostics can actually explain it.
+     *
+     * Territory, Missions, Leaderboard and Notifications are gated on backend
+     * state that Diagnostics surfaces (schema deployment, capture presence), so
+     * routing there answers the player's question. Empire and Shop are held back
+     * by a product judgement -- "the loop is proven fun" -- that no probe reports.
+     * Sending those to a backend status page would have the player read NOT
+     * DEPLOYED and conclude a deployment is all that stands between them and an
+     * empire, which is the wrong remedy.
+     */
+    @Test
+    fun `diagnostics is offered only for locks it can explain`() {
+        listOf(Route.Territory, Route.Missions, Route.Leaderboard, Route.Notifications).forEach {
+            assertTrue(
+                "${it.title} is backend-gated; Diagnostics should explain it",
+                it.lock!!.diagnosticsExplainsThis
+            )
+        }
+        listOf(Route.Empire, Route.Shop).forEach {
+            assertFalse(
+                "${it.title} is a product decision Diagnostics cannot show; must not route there",
+                it.lock!!.diagnosticsExplainsThis
+            )
+        }
+    }
+
+    /**
+     * A backend-explained lock must not be worded as a pure product decision, and
+     * vice versa -- the flag and the prose have to agree, or the flag is a lie the
+     * copy will contradict.
+     */
+    @Test
+    fun `the diagnostics flag matches how the unlock is worded`() {
+        LOCKED_ROUTES.forEach { route ->
+            val unlock = route.lock!!.unlocksWhen.lowercase()
+            val mentionsBackend = unlock.contains("schema") || unlock.contains("capture") ||
+                unlock.contains("backend") || unlock.contains("deployed")
+            if (route.lock!!.diagnosticsExplainsThis) {
+                assertTrue(
+                    "${route.title} claims Diagnostics explains it, but its unlock names no backend condition",
+                    mentionsBackend
+                )
+            }
+        }
+    }
 }

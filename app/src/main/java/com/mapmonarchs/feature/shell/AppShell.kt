@@ -130,7 +130,12 @@ fun AppShell(modifier: Modifier = Modifier) {
                 title = route.title,
                 lock = lock,
                 onBack = { navigator.back() },
-                onOpenDiagnostics = { navigator.navigateTo(Route.Diagnostics) },
+                // Only when DIAGNOSTICS can actually explain this lock. Empire and Shop
+                // are held back by a product decision no probe reports, so pointing them
+                // at a backend status page is the wrong remedy -- see FeatureLock.
+                onOpenDiagnostics = if (lock.diagnosticsExplainsThis) {
+                    { navigator.navigateTo(Route.Diagnostics) }
+                } else null,
                 // Preview is offered only from TERRITORY: it demonstrates the
                 // claim loop, and nothing else. Offering it from SHOP or EMPIRE
                 // would imply it simulates those too.

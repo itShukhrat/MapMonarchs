@@ -16,7 +16,22 @@ data class FeatureLock(
     /** The precise condition that unlocks it. No vague timelines. */
     val unlocksWhen: String,
     /** Something useful the player can actually do right now instead. */
-    val insteadNow: String
+    val insteadNow: String,
+
+    /**
+     * Whether DIAGNOSTICS can actually explain this lock.
+     *
+     * True when the blocker is a BACKEND fact the diagnostics screen surfaces --
+     * schema not deployed, capture absent. Routing there answers "why is this
+     * off and when does it change".
+     *
+     * False when the lock is a PRODUCT decision -- Empire and Shop are held back
+     * until the solo loop is proven fun, which is a judgement no probe reports.
+     * Sending those to a backend status page is routing to the wrong remedy: the
+     * player would read NOT DEPLOYED and conclude, wrongly, that a deployment is
+     * all that stands between them and an empire.
+     */
+    val diagnosticsExplainsThis: Boolean
 )
 
 /**
@@ -54,7 +69,8 @@ sealed interface Route {
             why = "No territory exists yet. The server function that decides who holds " +
                 "a hex has not been deployed, so there is nothing to inspect.",
             unlocksWhen = "The territory schema is applied to the backend.",
-            insteadNow = "Open DIAGNOSTICS to see the exact backend status."
+            insteadNow = "Open DIAGNOSTICS to see the exact backend status.",
+            diagnosticsExplainsThis = true
         )
     }
 
@@ -64,7 +80,8 @@ sealed interface Route {
             why = "A ranking is only meaningful once territory can be won and lost. " +
                 "Ranking players on zero captured hexes would rank nobody against nobody.",
             unlocksWhen = "Capture is live and the first season of territory data exists.",
-            insteadNow = "Nothing to compare yet. The map is the whole game today."
+            insteadNow = "Nothing to compare yet. The map is the whole game today.",
+            diagnosticsExplainsThis = true
         )
     }
 
@@ -74,7 +91,8 @@ sealed interface Route {
             why = "There are no events to report. Notifications matter when your ground " +
                 "is under attack -- until capture exists, an inbox would only ever be empty.",
             unlocksWhen = "Capture and decay are live, so territory can change hands.",
-            insteadNow = "Nothing is happening to your territory, because you have none."
+            insteadNow = "Nothing is happening to your territory, because you have none.",
+            diagnosticsExplainsThis = true
         )
     }
 
@@ -86,7 +104,8 @@ sealed interface Route {
                 "map already asks you to do, without pretending it was assigned.",
             unlocksWhen = "Capture is live, so an objective can have a real outcome.",
             insteadNow = "Walk. That is the whole objective today, and it is the one " +
-                "being tested."
+                "being tested.",
+            diagnosticsExplainsThis = true
         )
     }
 
@@ -96,7 +115,8 @@ sealed interface Route {
             why = "Teams and empires are deliberately held back. Alliances built before " +
                 "the solo loop is proven fun would hide whether the loop is fun at all.",
             unlocksWhen = "The walk-claim-hold loop is proven on real walks by real players.",
-            insteadNow = "Hold ground alone first. That is the part that has to work."
+            insteadNow = "Hold ground alone first. That is the part that has to work.",
+            diagnosticsExplainsThis = false
         )
     }
 
@@ -106,7 +126,8 @@ sealed interface Route {
             why = "There is nothing to sell, and nothing worth buying. A shop opened " +
                 "before the game is good is just a way to take money for an unproven product.",
             unlocksWhen = "The loop is proven and cosmetics exist worth owning.",
-            insteadNow = "Nothing here will ever affect who wins ground. Cosmetics only."
+            insteadNow = "Nothing here will ever affect who wins ground. Cosmetics only.",
+            diagnosticsExplainsThis = false
         )
     }
 }
