@@ -102,3 +102,26 @@ val LockedEdge = Color(0xFF1F2531)
 val FloatCore = Color(0xFF0B0F16)
 val FloatEdge = Color(0xFF232C3A)
 val FloatShadow = Color(0xCC000000)
+
+// ============================================================================
+// DEPTH & GLOW  (premium refresh)
+//
+// The palette stays single-accent, but flat fills read as "raw utility". These
+// give surfaces DEPTH -- a lifted card tier, a horizon-lit background, and an
+// accent glow -- without adding a second hue that would compete with territory
+// for saturation. Everything luminous here is the Sovereign accent at low alpha,
+// so the map remains the most saturated thing on screen.
+// ============================================================================
+
+/** A card tier lifted above Obsidian -- grouped readouts sit on this, not on bare black. */
+val ObsidianRaised = Color(0xFF141B26)
+
+/** Top-of-screen horizon tint: the app has a light source above, like a control room. */
+val HorizonTop = Color(0xFF121A28)
+
+/** Accent glow at usable alphas, for luminous edges and action halos. */
+val SovereignHalo = Color(0x334C8DFF)
+val SovereignEdge = Color(0x804C8DFF)
+
+/** A hairline that catches accent light, for section dividers and card tops. */
+val EdgeLit = Color(0x332F5C8F)

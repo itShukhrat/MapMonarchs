@@ -25,7 +25,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
@@ -45,9 +47,12 @@ import com.mapmonarchs.ui.theme.DisabledFg
 import com.mapmonarchs.ui.theme.Obsidian
 import com.mapmonarchs.ui.theme.SlateEdge
 import com.mapmonarchs.ui.theme.Sovereign
+import com.mapmonarchs.ui.theme.SovereignEdge
+import com.mapmonarchs.ui.theme.SovereignHalo
 import com.mapmonarchs.ui.theme.SovereignGlow
 import com.mapmonarchs.ui.theme.TextMuted
 import com.mapmonarchs.ui.theme.TextPrimary
+import com.mapmonarchs.ui.theme.MapMonarchsBrush
 import com.mapmonarchs.ui.theme.Void
 // Bottom clearance for the floating command dock, defined here rather than
 // imported from feature.shell so ui.components does not depend up into the
@@ -73,7 +78,7 @@ fun CommandScreen(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(Void)
+            .background(MapMonarchsBrush.screen)
             .safeDrawingPadding()
     ) {
         Row(
@@ -183,12 +188,21 @@ fun SectionHeader(text: String, modifier: Modifier = Modifier) {
             style = MaterialTheme.typography.labelSmall,
             color = TextMuted
         )
+        // A luminous divider: accent-lit at the left where the label anchors,
+        // fading to nothing. Reads as an instrument rule catching light, not a
+        // flat grey line.
         Box(
             modifier = Modifier
                 .padding(top = 8.dp)
                 .fillMaxWidth()
                 .height(1.dp)
-                .background(SlateEdge)
+                .background(
+                    Brush.horizontalGradient(
+                        0f to SovereignEdge,
+                        0.5f to SlateEdge,
+                        1f to Color.Transparent
+                    )
+                )
         )
     }
 }
@@ -297,8 +311,16 @@ fun CommandAction(
             // 52dp floor including padding: this is the largest, most-used control
             // in the product and it is pressed outdoors, one-handed, walking.
             .heightIn(min = 52.dp)
+            // A ready action lifts off the surface with an accent-tinted shadow, so
+            // the primary move on any screen reads as high-value and tactile. An
+            // unavailable one stays flat and grounded -- the depth itself signals
+            // "this is the thing to press".
+            .then(
+                if (ready) Modifier.shadow(12.dp, shape, ambientColor = SovereignHalo, spotColor = SovereignHalo)
+                else Modifier
+            )
             .clip(shape)
-            .background(if (ready) Obsidian else Slate)
+            .background(if (ready) MapMonarchsBrush.actionReady else androidx.compose.ui.graphics.SolidColor(Slate))
             .border(if (ready) 1.5.dp else 1.dp, edge, shape)
             .clickable(
                 enabled = ready,
