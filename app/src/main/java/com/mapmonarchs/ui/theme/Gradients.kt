@@ -72,4 +72,17 @@ object MapMonarchsBrush {
         0.5f to FloatCore,
         1f to Color(0xFF070A10)
     )
+
+    /**
+     * A HUD panel floating over the map.
+     *
+     * Deliberately not opaque: the map is the hero and must continue underneath
+     * its own instruments, so these read as glass laid on the board rather than
+     * as boxes cut out of it. Dark enough that white type clears the brightest
+     * terrain the style can produce.
+     */
+    val hudPanel: Brush = Brush.verticalGradient(
+        0f to Color(0xE6141C29),
+        1f to Color(0xE6070A10)
+    )
 }

@@ -20,7 +20,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.mapmonarchs.ui.theme.Contested
 import com.mapmonarchs.ui.theme.TextPrimary
-import com.mapmonarchs.ui.theme.Void
+import com.mapmonarchs.ui.theme.MapMonarchsBrush
 
 /**
  * The single error treatment for the whole app.
@@ -42,10 +42,20 @@ fun ErrorStrip(
 ) {
     Row(
         modifier = modifier
-            .clip(RoundedCornerShape(8.dp))
-            .background(Void.copy(alpha = 0.82f))
-            .border(1.dp, Contested.copy(alpha = 0.55f), RoundedCornerShape(8.dp))
-            .padding(horizontal = 12.dp, vertical = 8.dp)
+            .clip(RoundedCornerShape(12.dp))
+
+            // The same glass the other HUD instruments are made of, so a failure
+
+            // reads as part of the panel system rather than as a foreign box
+
+            // pasted over it. Only the EDGE says something is wrong -- Contested
+
+            // on the border, nowhere else, so the strip never competes with
+
+            // territory colour for saturation.
+            .background(MapMonarchsBrush.hudPanel)
+            .border(1.dp, Contested.copy(alpha = 0.55f), RoundedCornerShape(12.dp))
+            .padding(horizontal = 14.dp, vertical = 10.dp)
             .testTag(UiTags.ERROR_STRIP)
             .semantics { contentDescription = "Error: $message" },
         verticalAlignment = Alignment.CenterVertically

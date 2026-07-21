@@ -46,6 +46,7 @@ import com.mapmonarchs.ui.theme.SlateEdge
 import com.mapmonarchs.ui.theme.Sovereign
 import com.mapmonarchs.ui.theme.SovereignGlow
 import com.mapmonarchs.ui.theme.SovereignHalo
+import com.mapmonarchs.ui.theme.EdgeLit
 import com.mapmonarchs.ui.theme.MapMonarchsBrush
 import com.mapmonarchs.ui.theme.TextMuted
 import com.mapmonarchs.ui.theme.TextPrimary
@@ -156,9 +157,13 @@ fun MapHud(
 private fun IdentityChip(label: String, territoryColor: Color?, modifier: Modifier = Modifier) {
     Row(
         modifier = modifier
-            .clip(RoundedCornerShape(8.dp))
-            .background(Void.copy(alpha = 0.72f))
-            .padding(horizontal = 12.dp, vertical = 8.dp)
+            .clip(RoundedCornerShape(12.dp))
+            // Glass, not a black box. A flat fill read as a rectangle punched out
+            // of the map; a lit edge over a gradient reads as an instrument
+            // resting on it, which is the whole point of a map-first HUD.
+            .background(MapMonarchsBrush.hudPanel)
+            .border(1.dp, EdgeLit, RoundedCornerShape(12.dp))
+            .padding(horizontal = 14.dp, vertical = 10.dp)
             .semantics {
                 contentDescription =
                     if (territoryColor != null) "Your callsign: $label" else "Identity: $label"
@@ -177,26 +182,45 @@ private fun IdentityChip(label: String, territoryColor: Color?, modifier: Modifi
     }
 }
 
+/**
+ * The holdings readout.
+ *
+ * WHY UNKNOWN IS NOT SET AT displayLarge. The unknown value is a single em dash,
+ * chosen so the type scale tracking could not pull "--" into two detached
+ * strokes. That reasoning holds, but at displayLarge one em dash is a 40dp
+ * horizontal bar floating over the map, and on screen it reads as a rendering
+ * artefact rather than as "we do not know". A number earns the big scale because
+ * a number is a quantity; unknown is a STATE, so it is set at the same weight as
+ * the label it sits above and stops shouting.
+ */
 @Composable
 private fun Holdings(holdings: String, modifier: Modifier = Modifier) {
+    val unknown = holdings == UNKNOWN_HOLDINGS
     Column(
-        modifier = modifier,
+        modifier = modifier
+            .clip(RoundedCornerShape(12.dp))
+            .background(MapMonarchsBrush.hudPanel)
+            .border(1.dp, EdgeLit, RoundedCornerShape(12.dp))
+            .padding(horizontal = 16.dp, vertical = 10.dp),
         horizontalAlignment = Alignment.End,
         verticalArrangement = Arrangement.spacedBy(2.dp)
     ) {
         Text(
             text = holdings,
-            style = MaterialTheme.typography.displayLarge,
-            color = if (holdings == UNKNOWN_HOLDINGS) TextMuted else TextPrimary,
+            style = if (unknown) {
+                MaterialTheme.typography.headlineSmall
+            } else {
+                MaterialTheme.typography.displayLarge
+            },
+            color = if (unknown) TextMuted else TextPrimary,
             modifier = Modifier
                 .testTag(MapHudTags.HELD)
                 .semantics {
                     contentDescription =
-                        if (holdings == UNKNOWN_HOLDINGS) "Hexes held: unknown" else "Hexes held: $holdings"
+                        if (unknown) "Hexes held: unknown" else "Hexes held: $holdings"
                 }
         )
         Text(text = "HEXES HELD", style = MaterialTheme.typography.labelSmall, color = TextMuted)
-
     }
 }
 

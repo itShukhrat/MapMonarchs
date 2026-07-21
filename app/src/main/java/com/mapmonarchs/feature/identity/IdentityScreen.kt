@@ -21,7 +21,7 @@ import com.mapmonarchs.ui.components.ActionEmphasis
 import com.mapmonarchs.ui.components.CommandAction
 import com.mapmonarchs.ui.components.CommandCard
 import com.mapmonarchs.ui.components.CommandScreen
-import com.mapmonarchs.ui.components.HexagonShape
+import com.mapmonarchs.ui.components.IdentityCrest
 import com.mapmonarchs.ui.components.SectionHeader
 import com.mapmonarchs.ui.components.StatusRow
 import com.mapmonarchs.ui.theme.Contested
@@ -58,53 +58,52 @@ fun IdentityScreen(
 
         val colour: Color? = (identity as? Identity.SignedIn)?.let { Color(it.territoryColorArgb) }
 
-        Row(
-            modifier = Modifier.padding(top = 8.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(40.dp)
-                    .clip(HexagonShape)
-                    .background(colour ?: Color.Transparent)
-                    .border(1.dp, colour ?: SlateEdge, HexagonShape)
-            )
-            Text(
-                text = when (identity) {
-                    is Identity.SignedIn -> identity.callsign
-                    is Identity.Preview -> identity.callsign
-                    is Identity.Resolving -> "IDENTIFYING"
-                    is Identity.SignedOut -> "NO IDENTITY"
-                    is Identity.Unavailable -> "UNAVAILABLE"
-                },
-                style = MaterialTheme.typography.displayMedium,
-                color = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier
-                    .padding(start = 18.dp)
-                    .testTag(IdentityTags.CALLSIGN)
-            )
-        }
+        // The crest replaced a 40dp swatch beside a name. In a game about holding
+        // ground the player colour is the one thing that is unarguably theirs, and
+        // it was carrying less visual weight than the build number on ABOUT.
+        IdentityCrest(
+            callsign = when (identity) {
+                is Identity.SignedIn -> identity.callsign
+                is Identity.Preview -> identity.callsign
+                is Identity.Resolving -> "IDENTIFYING"
+                is Identity.SignedOut -> "NO IDENTITY"
+                is Identity.Unavailable -> "UNAVAILABLE"
+            },
+            stateLabel = when (identity) {
+                is Identity.SignedIn -> "SOVEREIGN CALLSIGN"
+                // Never dressed up. A preview callsign is a placeholder and the
+                // label says so, because the crest makes it look consequential.
+                is Identity.Preview -> "PLACEHOLDER - NOT A SESSION"
+                is Identity.Resolving -> "ESTABLISHING SESSION"
+                is Identity.SignedOut -> "NO SESSION"
+                is Identity.Unavailable -> "SESSION UNAVAILABLE"
+            },
+            territoryColor = colour,
+            modifier = Modifier
+                .padding(top = 12.dp)
+                .testTag(IdentityTags.CALLSIGN)
+        )
 
         CommandCard(title = "SESSION") {
 
-        StatusRow(
-            label = "State",
-            value = when (identity) {
-                is Identity.SignedIn -> "ACTIVE"
-                is Identity.Preview -> "PREVIEW"
-                is Identity.Resolving -> "RESOLVING"
-                is Identity.SignedOut -> "SIGNED OUT"
-                is Identity.Unavailable -> "UNAVAILABLE"
-            },
-            valueColor = if (identity is Identity.Unavailable) Contested else MaterialTheme.colorScheme.onSurface,
-            modifier = Modifier.testTag(IdentityTags.STATE)
-        )
+            StatusRow(
+                label = "State",
+                value = when (identity) {
+                    is Identity.SignedIn -> "ACTIVE"
+                    is Identity.Preview -> "PREVIEW"
+                    is Identity.Resolving -> "RESOLVING"
+                    is Identity.SignedOut -> "SIGNED OUT"
+                    is Identity.Unavailable -> "UNAVAILABLE"
+                },
+                valueColor = if (identity is Identity.Unavailable) Contested else MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.testTag(IdentityTags.STATE)
+            )
 
-        StatusRow(
-            label = "Territory colour",
-            value = if (colour != null) "ASSIGNED" else "NONE",
-            valueColor = colour ?: TextMuted
-        )
+            StatusRow(
+                label = "Territory colour",
+                value = if (colour != null) "ASSIGNED" else "NONE",
+                valueColor = colour ?: TextMuted
+            )
         }
 
         when (identity) {
