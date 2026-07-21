@@ -3,6 +3,8 @@ package com.mapmonarchs.feature.onboarding
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -20,6 +22,7 @@ import com.mapmonarchs.ui.components.CommandAction
 import com.mapmonarchs.ui.components.HexagonShape
 import com.mapmonarchs.ui.theme.Sovereign
 import com.mapmonarchs.ui.theme.TextMuted
+import com.mapmonarchs.domain.model.PLAYABLE_COUNTRY_NAME
 import com.mapmonarchs.ui.theme.TextPrimary
 import com.mapmonarchs.ui.theme.Void
 
@@ -52,6 +55,7 @@ fun OnboardingScreen(onContinue: () -> Unit, modifier: Modifier = Modifier) {
             .fillMaxSize()
             .background(Void)
             .safeDrawingPadding()
+            .verticalScroll(rememberScrollState())
             .padding(horizontal = 28.dp)
             .testTag(OnboardingTags.ROOT),
         verticalArrangement = androidx.compose.foundation.layout.Arrangement.Center
@@ -75,6 +79,14 @@ fun OnboardingScreen(onContinue: () -> Unit, modifier: Modifier = Modifier) {
             style = MaterialTheme.typography.titleLarge,
             color = TextPrimary,
             modifier = Modifier.padding(top = 14.dp)
+        )
+
+        Text(
+            text = "The playable world is $PLAYABLE_COUNTRY_NAME. Only ground inside the " +
+                "country can be claimed; the map is dimmed everywhere else.",
+            style = MaterialTheme.typography.bodyMedium,
+            color = TextMuted,
+            modifier = Modifier.padding(top = 20.dp)
         )
 
         Text(
