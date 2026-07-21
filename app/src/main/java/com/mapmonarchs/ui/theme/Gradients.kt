@@ -61,4 +61,15 @@ object MapMonarchsBrush {
         0.6f to Obsidian,
         1f to Void
     )
+
+    /**
+     * The command dock. A milled instrument catches light on its top face and
+     * falls away below -- a flat fill reads as a plastic tab bar, which is the
+     * one reference this product is trying not to resemble.
+     */
+    val dock: Brush = Brush.verticalGradient(
+        0f to Color(0xFF161D29),
+        0.5f to FloatCore,
+        1f to Color(0xFF070A10)
+    )
 }

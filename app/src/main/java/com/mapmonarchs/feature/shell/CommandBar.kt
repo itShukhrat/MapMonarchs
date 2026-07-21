@@ -3,6 +3,7 @@ package com.mapmonarchs.feature.shell
 import android.provider.Settings
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
@@ -17,6 +18,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.sizeIn
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
@@ -26,10 +29,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.Stroke
@@ -41,11 +46,13 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
+import com.mapmonarchs.ui.theme.EdgeLit
 import com.mapmonarchs.ui.components.NavIconGlyph
 import com.mapmonarchs.ui.motion.rememberAnimationsEnabled
 import com.mapmonarchs.ui.components.NavIconSize
 import com.mapmonarchs.ui.components.NavLockMark
 import com.mapmonarchs.ui.theme.FloatCore
+import com.mapmonarchs.ui.theme.MapMonarchsBrush
 import com.mapmonarchs.ui.theme.FloatEdge
 import com.mapmonarchs.ui.theme.FloatShadow
 import com.mapmonarchs.ui.theme.LockedFg
@@ -123,10 +130,27 @@ fun CommandBar(
             .padding(horizontal = 16.dp)
             .shadow(elevation = 22.dp, shape = shape, ambientColor = FloatShadow, spotColor = FloatShadow)
             .clip(shape)
-            .background(FloatCore)
+            .background(MapMonarchsBrush.dock)
             .border(1.dp, FloatEdge, shape)
             .testTag(CommandBarTags.BAR)
     ) {
+        // A lit hairline along the top face. Instruments catch light on the edge
+        // that faces the user; without it the dock is a dark slab with a border.
+        Box(
+            modifier = Modifier
+                .align(Alignment.TopCenter)
+                .fillMaxWidth()
+                .padding(horizontal = 18.dp)
+                .height(1.dp)
+                .background(
+                    Brush.horizontalGradient(
+                        0f to Color.Transparent,
+                        0.5f to EdgeLit,
+                        1f to Color.Transparent
+                    )
+                )
+        )
+
         // The indicator is drawn BEHIND the row in a single canvas rather than as
         // a per-item background. One moving shape reads as one object travelling;
         // five fading backgrounds read as five things blinking.
@@ -204,6 +228,32 @@ private fun CommandBarItem(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val interaction = remember { MutableInteractionSource() }
+    val pressed by interaction.collectIsPressedAsState()
+    val animate = rememberAnimationsEnabled()
+
+    // Two pieces of motion, both on the glyph rather than the whole seat: a seat
+    // that moves drags its label around with it and reads as jitter.
+    //
+    //  - PRESS gives the tap somewhere to land. A dock that only responds by
+    //    changing screen leaves the press itself feeling unacknowledged.
+    //  - SELECTED lifts the current glyph slightly proud of its neighbours, so
+    //    "where am I" survives a glance, greyscale, and the indicator being
+    //    hidden on screens the dock does not contain.
+    val glyphScale by animateFloatAsState(
+        targetValue = when {
+            pressed -> 0.88f
+            selected -> 1.12f
+            else -> 1f
+        },
+        animationSpec = if (animate) {
+            spring(dampingRatio = 0.55f, stiffness = Spring.StiffnessMedium)
+        } else {
+            tween(durationMillis = 0)
+        },
+        label = "commandBarGlyph"
+    )
+
     val tint = when {
         selected -> SovereignGlow
         destination.isLocked -> LockedFg
@@ -227,6 +277,8 @@ private fun CommandBarItem(
             .selectable(
                 selected = selected,
                 role = Role.Tab,
+                interactionSource = interaction,
+                indication = null,
                 onClick = onClick
             )
             .semantics { contentDescription = description }
@@ -240,7 +292,7 @@ private fun CommandBarItem(
                 glyph = destination.glyph,
                 color = tint,
                 filled = selected,
-                modifier = Modifier.size(NavIconSize)
+                modifier = Modifier.size(NavIconSize).scale(glyphScale)
             )
             if (destination.isLocked) {
                 NavLockMark(
