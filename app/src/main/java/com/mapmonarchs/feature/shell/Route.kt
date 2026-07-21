@@ -18,7 +18,6 @@ data class FeatureLock(
     val unlocksWhen: String,
     /** Something useful the player can actually do right now instead. */
     val insteadNow: String,
-
     /**
      * Whether DIAGNOSTICS can actually explain this lock.
      *
@@ -33,23 +32,31 @@ data class FeatureLock(
      * all that stands between them and an empire.
      */
     val diagnosticsExplainsThis: Boolean,
-
-
     /**
-
      * The visual character of this destination.
-
      *
-
      * Mandatory like every other field here. Six locked surfaces that all render
-
      * identically read as one "not yet" repeated, rather than as a product with
-
      * shape -- and a motif that could be omitted would be omitted.
-
      */
-
-    val motif: LockMotif
+    val motif: LockMotif,
+    /**
+     * A promise about money, for the locks where money is the point.
+     *
+     * NULLABLE, WHICH THE OTHER FIELDS DELIBERATELY ARE NOT. The three strings
+     * above are mandatory because a lock that cannot say why it is shut is a
+     * "coming soon" screen in a nicer font. This one is different: it only means
+     * something on a surface that will one day take money, and inventing a
+     * monetisation promise for MISSIONS would be noise.
+     *
+     * WHY IT EXISTS AT ALL WITH NO STORE TO SHOW. There is no billing
+     * integration in this app, no product catalogue, and nothing purchasable --
+     * so the honest maximum a shop surface can offer today is the RULE it will
+     * be bound by when it opens. Stating that before there is anything to sell
+     * is worth more than stating it beside a checkout, because it cannot be
+     * read as a sales pitch.
+     */
+    val commitment: String? = null
 )
 
 /**
@@ -151,7 +158,15 @@ sealed interface Route {
             unlocksWhen = "The loop is proven and cosmetics exist worth owning.",
             insteadNow = "Nothing here will ever affect who wins ground. Cosmetics only.",
             diagnosticsExplainsThis = false,
-            motif = LockMotif.VAULT
+            motif = LockMotif.VAULT,
+
+            commitment = "Cosmetics only, forever. Nothing sold here will ever affect who " +
+
+                "holds ground, how fast you claim it, or how far you can walk. Ground is " +
+
+                "won on foot or it is not won. That rule is the reason this surface is " +
+
+                "still shut: a store is easy, and a store worth trusting is not."
         )
     }
 }

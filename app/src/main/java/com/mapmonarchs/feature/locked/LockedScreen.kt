@@ -26,6 +26,7 @@ object LockedTags {
     const val WHY = "locked_why"
     const val UNLOCK = "locked_unlock"
     const val PREVIEW = "locked_enter_preview"
+    const val COMMITMENT = "locked_commitment"
 }
 
 /**
@@ -101,6 +102,14 @@ fun LockedScreen(
 
         SectionHeader("FOR NOW")
         BodyNote(lock.insteadNow)
+
+        // Only the surfaces that will one day take money carry this. It is set
+        // apart from FOR NOW because it is not a workaround for today -- it is
+        // the rule the surface will still be bound by after it opens.
+        lock.commitment?.let { commitment ->
+            SectionHeader("WHAT WILL NEVER BE SOLD")
+            BodyNote(commitment, modifier = Modifier.testTag(LockedTags.COMMITMENT))
+        }
 
         if (onEnterPreview != null) {
             SectionHeader("SEE HOW IT WORKS")
