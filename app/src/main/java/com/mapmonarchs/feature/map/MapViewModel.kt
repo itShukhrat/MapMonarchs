@@ -206,9 +206,21 @@ class MapViewModel(
                 ?.let { recordDelivery(it) }
             when (result) {
                 is CodeVerification.Succeeded -> {
+                    // A real session supersedes any preview. Signing in from
+                    // preview mode (the Identity screen offers exactly that) must
+                    // not leave the simulation running underneath a real identity --
+                    // that is the preview/live confusion the whole design forbids.
+                    previewSession?.clear()
+                    previewSession = null
+                    previewGrid = null
                     // Identity comes from the SERVER's user id, derived -- never
                     // from anything typed into this screen.
-                    _uiState.value = _uiState.value.copy(identity = result.identity)
+                    _uiState.value = _uiState.value.copy(
+                        identity = result.identity,
+                        previewMode = false,
+                        previewHeld = null,
+                        previewRings = emptyList()
+                    )
                     _signIn.value = SignInState.Complete
                     Log.i(TAG, "signed in as ${result.identity.callsign}")
                 }

@@ -159,8 +159,16 @@ fun IdentityScreen(
                         "cannot hold real territory."
                 )
                 BodyNote(
-                    "When sign-in becomes available you will get a real callsign derived " +
-                        "from your account -- stable across devices and reinstalls."
+                    "Sign-in is available now. Sign in with an email code and your " +
+                        "callsign and colour become a real one, derived from your account -- " +
+                        "stable across devices and reinstalls, and able to hold territory."
+                )
+                CommandAction(
+                    label = "SIGN IN",
+                    onClick = onSignIn,
+                    modifier = Modifier
+                        .padding(top = 16.dp)
+                        .testTag(IdentityTags.SIGN_IN)
                 )
             }
             is Identity.Resolving -> {
