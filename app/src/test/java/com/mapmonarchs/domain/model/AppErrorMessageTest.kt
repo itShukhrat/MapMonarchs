@@ -113,4 +113,22 @@ class AppErrorMessageTest {
             .playerMessage().lowercase()
         assertTrue("must tell the player to wait; got: $m", m.contains("wait"))
     }
+
+    @Test
+    fun `rate limiting uses the exact interval the server gave`() {
+        val m = AppError.RateLimited("technical", retryAfterSeconds = 51).playerMessage()
+        assertTrue("must show the real number, not a guess: $m", m.contains("51 seconds"))
+    }
+
+    @Test
+    fun `a one second wait is not pluralised`() {
+        val m = AppError.RateLimited("technical", retryAfterSeconds = 1).playerMessage()
+        assertTrue("grammar matters even here: $m", m.contains("1 second") && !m.contains("1 seconds"))
+    }
+
+    @Test
+    fun `an unknown interval falls back rather than inventing a number`() {
+        val m = AppError.RateLimited("technical", retryAfterSeconds = null).playerMessage()
+        assertTrue("no server number means no fake countdown: $m", m.contains("a minute"))
+    }
 }

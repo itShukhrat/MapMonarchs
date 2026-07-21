@@ -2,6 +2,7 @@ package com.mapmonarchs.data.remote
 
 import com.mapmonarchs.domain.model.AppError
 import org.junit.Assert.assertTrue
+import org.junit.Assert.assertEquals
 import org.junit.Test
 
 /**
@@ -80,5 +81,33 @@ class AuthErrorMappingTest {
         assertTrue(e.technical.contains("otp.go"))
         assertTrue(!e.playerMessage().contains("otp.go"))
         assertTrue(!e.playerMessage().contains("412"))
+    }
+
+    @Test
+    fun `a rate limit message threads the exact interval end to end`() {
+        val e = RuntimeException(
+            "For security purposes, you can only request this after 47 seconds."
+        ).toAppError()
+        assertTrue("classified as rate limit", e is AppError.RateLimited)
+        val seconds = (e as AppError.RateLimited).retryAfterSeconds
+        assertTrue("the 47 must survive from raw message to typed field; got $seconds", seconds == 47)
+        assertTrue("and reach the player: ${e.playerMessage()}", e.playerMessage().contains("47 seconds"))
+    }
+
+    @Test
+    fun `a tokenless rate limit carries no invented interval`() {
+        val e = RuntimeException("HTTP 429 Too Many Requests").toAppError()
+        assertTrue("still classified as rate limit", e is AppError.RateLimited)
+        assertTrue(
+            "no number in the message means no countdown fabricated",
+            (e as AppError.RateLimited).retryAfterSeconds == null
+        )
+    }
+
+    @Test
+    fun `the parser ignores digits that are not a seconds count`() {
+        // An error code or byte count must never be shown as a wait time.
+        assertEquals(null, parseRetryAfterSeconds("error 42901: over_email_send_rate_limit"))
+        assertEquals(30, parseRetryAfterSeconds("try again in 30 seconds"))
     }
 }

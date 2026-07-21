@@ -54,7 +54,8 @@ fun Throwable.toAppError(): AppError {
             // A test caught this: without it, a rate-limited player would be told
             // "something went wrong" instead of "wait a minute".
             text.contains("for security purposes") ||
-            text.contains("you can only request this after") -> AppError.RateLimited(detail)
+            text.contains("you can only request this after") ->
+            AppError.RateLimited(detail, retryAfterSeconds = parseRetryAfterSeconds(text))
 
         text.contains("error sending") ||
             text.contains("smtp") ||
@@ -81,3 +82,15 @@ fun Throwable.toAppError(): AppError {
         else -> AppError.Unexpected(detail)
     }
 }
+/**
+ * Pulls the retry interval out of a rate-limit message when the server included
+ * one. Supabase phrases it "you can only request this after N seconds"; the
+ * "429" / "rate limit" token forms carry no number, so this returns null there
+ * and the message falls back to "wait a minute" rather than inventing a value.
+ *
+ * Deliberately conservative: only "<digits> second(s)" is accepted. A number
+ * that is not a seconds count -- an error code, a byte size -- must never be
+ * shown to the player as a countdown.
+ */
+internal fun parseRetryAfterSeconds(lowercaseMessage: String): Int? =
+    Regex("""(\d+)\s*second""").find(lowercaseMessage)?.groupValues?.get(1)?.toIntOrNull()

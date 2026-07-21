@@ -52,12 +52,16 @@ sealed class AppError(val technical: String) {
     class InvalidCode(technical: String) : AppError(technical)
 
     /**
-     * Too many code requests. Named separately because the remedy is "wait",
+     * Too many code requests. Carries [retryAfterSeconds] when the server told us
+     * exactly how long -- Supabase says "you can only request this after N
+     * seconds", and answering "wait a minute" threw that number away.
+     *
+     * Named separately because the remedy is "wait",
      * which is completely different advice from "check the code" -- and because
      * Supabase's default mailer is rate-limited to a handful per hour, so this
      * is an expected condition, not an anomaly.
      */
-    class RateLimited(technical: String) : AppError(technical)
+    class RateLimited(technical: String, val retryAfterSeconds: Int? = null) : AppError(technical)
 
     /**
      * The backend accepted the request but mail is not configured or did not
@@ -89,7 +93,12 @@ sealed class AppError(val technical: String) {
         is AuthUnavailable -> "Sign-in unavailable."
         is InvalidEmail -> "That email address does not look right."
         is InvalidCode -> "That code is not valid. It may have expired."
-        is RateLimited -> "Too many attempts. Wait a minute and try again."
+        is RateLimited -> retryAfterSeconds?.let { s ->
+            // The exact interval the server gave, pluralised. Anything vaguer
+            // invites the player to retry before the window clears, which just
+            // extends it.
+            "Too many attempts. Wait $s second" + (if (s == 1) "" else "s") + " and try again."
+        } ?: "Too many attempts. Wait a minute and try again."
         is MailNotDelivered -> "The code could not be sent. Email delivery is not configured."
         is Unexpected -> "Something went wrong."
     }
