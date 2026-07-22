@@ -6,6 +6,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
+import com.mapmonarchs.R
 import androidx.compose.ui.unit.dp
 import com.mapmonarchs.BuildConfig
 import com.mapmonarchs.data.local.TrackingMode
@@ -84,35 +86,39 @@ fun DiagnosticsScreen(
     onRefresh: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    CommandScreen(title = "DIAGNOSTICS", onBack = onBack, modifier = modifier) {
+    CommandScreen(
+        title = stringResource(R.string.diag_title),
+        onBack = onBack,
+        modifier = modifier
+    ) {
 
         // The single most useful line: what is stopping you right now. Derived
         // from the one shared resolver, so it can never contradict the HUD. Prose,
         // not a readout -- so it leads with a section rule, not a panel.
-        SectionHeader("PRIMARY BLOCKER")
+        SectionHeader(stringResource(R.string.diag_primary_blocker))
         BodyNote(
             text = resolveBlocker(state).explanation(),
             modifier = Modifier.testTag(DiagnosticsTags.BLOCKER)
         )
 
-        CommandCard(title = "TERRITORY SERVICE") {
+        CommandCard(title = stringResource(R.string.diag_territory_service)) {
             StatusRow(
-                label = "Backend",
+                label = stringResource(R.string.diag_backend),
                 value = when (val t = state.territory) {
-                    is TerritoryLoad.Loading -> "CHECKING"
-                    is TerritoryLoad.Loaded -> "REACHABLE"
+                    is TerritoryLoad.Loading -> stringResource(R.string.diag_checking)
+                    is TerritoryLoad.Loaded -> stringResource(R.string.diag_reachable)
                     is TerritoryLoad.Failed -> when (t.error) {
-                        is AppError.Offline -> "NO NETWORK"
-                        is AppError.SchemaMissing -> "NOT DEPLOYED"
-                        is AppError.Unauthorized -> "REFUSED"
-                        else -> "ERROR"
+                        is AppError.Offline -> stringResource(R.string.diag_no_network)
+                        is AppError.SchemaMissing -> stringResource(R.string.diag_not_deployed)
+                        is AppError.Unauthorized -> stringResource(R.string.diag_refused)
+                        else -> stringResource(R.string.diag_error)
                     }
                 },
                 valueColor = if (state.territory is TerritoryLoad.Loaded) SovereignGlow else Contested,
                 modifier = Modifier.testTag(DiagnosticsTags.BACKEND)
             )
             StatusRow(
-                label = "Hexes returned",
+                label = stringResource(R.string.diag_hexes_returned),
                 value = (state.territory as? TerritoryLoad.Loaded)?.hexes?.size?.toString() ?: UNKNOWN_HOLDINGS,
                 valueColor = TextMuted
             )
@@ -124,49 +130,49 @@ fun DiagnosticsScreen(
             )
         }
 
-        CommandCard(title = "SESSION") {
+        CommandCard(title = stringResource(R.string.diag_session)) {
             StatusRow(
-                label = "Identity",
+                label = stringResource(R.string.diag_identity),
                 value = when (state.identity) {
-                    is Identity.SignedIn -> "ACTIVE"
-                    is Identity.Preview -> "PREVIEW (NOT SIGNED IN)"
-                    is Identity.Resolving -> "RESOLVING"
-                    is Identity.SignedOut -> "NONE"
-                    is Identity.Unavailable -> "UNAVAILABLE"
+                    is Identity.SignedIn -> stringResource(R.string.diag_active)
+                    is Identity.Preview -> stringResource(R.string.diag_preview_not_signed_in)
+                    is Identity.Resolving -> stringResource(R.string.diag_resolving)
+                    is Identity.SignedOut -> stringResource(R.string.diag_none)
+                    is Identity.Unavailable -> stringResource(R.string.diag_unavailable)
                 },
                 valueColor = if (state.identity is Identity.SignedIn) SovereignGlow else Contested,
                 modifier = Modifier.testTag(DiagnosticsTags.SESSION)
             )
             StatusRow(
-                label = "Callsign",
+                label = stringResource(R.string.diag_callsign),
                 value = (state.identity as? Identity.SignedIn)?.callsign ?: UNKNOWN_HOLDINGS,
                 valueColor = TextMuted
             )
         }
 
-        CommandCard(title = "SIGN-IN AVAILABILITY") {
+        CommandCard(title = stringResource(R.string.diag_signin_availability)) {
             AuthCapabilityRows(diagnostics)
         }
         AuthCapabilityNotes(diagnostics)
 
-        CommandCard(title = "EMAIL DELIVERY") {
+        CommandCard(title = stringResource(R.string.diag_email_delivery)) {
             DeliveryRows(diagnostics)
         }
         DeliveryNotes(diagnostics)
 
-        CommandCard(title = "PLAYABLE WORLD") {
+        CommandCard(title = stringResource(R.string.diag_playable_world)) {
             StatusRow(
-                label = "Game world",
+                label = stringResource(R.string.diag_game_world),
                 value = PLAYABLE_COUNTRY_NAME.uppercase(),
                 valueColor = TextMuted
             )
             StatusRow(
-                label = "Your position",
+                label = stringResource(R.string.diag_your_position),
                 value = when (state.worldPosition) {
-                    is WorldPosition.Inside -> "INSIDE"
-                    is WorldPosition.Outside -> "OUTSIDE"
-                    is WorldPosition.Unknown -> "UNKNOWN"
-                    is WorldPosition.NotChecked -> "NOT CHECKED"
+                    is WorldPosition.Inside -> stringResource(R.string.diag_inside)
+                    is WorldPosition.Outside -> stringResource(R.string.diag_outside)
+                    is WorldPosition.Unknown -> stringResource(R.string.diag_unknown)
+                    is WorldPosition.NotChecked -> stringResource(R.string.diag_not_checked)
                 },
                 valueColor = if (state.worldPosition is WorldPosition.Inside) SovereignGlow else Contested,
                 modifier = Modifier.testTag(DiagnosticsTags.WORLD)
@@ -206,20 +212,20 @@ fun DiagnosticsScreen(
             )
         }
 
-        CommandCard(title = "LOCATION") {
+        CommandCard(title = stringResource(R.string.diag_location)) {
             StatusRow(
-                label = "Permission",
+                label = stringResource(R.string.diag_permission),
                 value = if (state.locationPermissionGranted) "GRANTED" else "DENIED",
                 valueColor = if (state.locationPermissionGranted) SovereignGlow else Contested,
                 modifier = Modifier.testTag(DiagnosticsTags.PERMISSION)
             )
             StatusRow(
-                label = "Position fix",
+                label = stringResource(R.string.diag_position_fix),
                 value = when (state.capture) {
-                    is CaptureState.PermissionRequired -> "NO PERMISSION"
-                    is CaptureState.AcquiringFix -> "ACQUIRING"
-                    is CaptureState.Blocked -> "REJECTED"
-                    else -> "ACCEPTED"
+                    is CaptureState.PermissionRequired -> stringResource(R.string.diag_no_permission)
+                    is CaptureState.AcquiringFix -> stringResource(R.string.diag_acquiring)
+                    is CaptureState.Blocked -> stringResource(R.string.diag_rejected)
+                    else -> stringResource(R.string.diag_accepted)
                 },
                 valueColor = when (state.capture) {
                     is CaptureState.Ready, is CaptureState.InFlight -> SovereignGlow
@@ -229,16 +235,16 @@ fun DiagnosticsScreen(
                 modifier = Modifier.testTag(DiagnosticsTags.FIX)
             )
             StatusRow(
-                label = "Last rejection",
+                label = stringResource(R.string.diag_last_rejection),
                 value = (state.capture as? CaptureState.Blocked)?.reason?.name ?: "NONE",
                 valueColor = TextMuted
             )
-            StatusRow(label = "Cadence", value = trackingMode.label, valueColor = TextMuted)
+            StatusRow(label = stringResource(R.string.diag_cadence), value = trackingMode.label, valueColor = TextMuted)
         }
 
-        CommandCard(title = "CAPTURE") {
+        CommandCard(title = stringResource(R.string.diag_capture)) {
             StatusRow(
-                label = "Status",
+                label = stringResource(R.string.diag_status),
                 value = if (state.previewMode) "PREVIEW ONLY" else "DISABLED",
                 valueColor = Contested
             )
@@ -258,17 +264,17 @@ fun DiagnosticsScreen(
             modifier = Modifier.padding(top = 8.dp)
         )
 
-        CommandCard(title = "BUILD") {
-            StatusRow(label = "Version", value = BuildConfig.VERSION_NAME, valueColor = TextMuted)
+        CommandCard(title = stringResource(R.string.diag_build)) {
+            StatusRow(label = stringResource(R.string.diag_version), value = BuildConfig.VERSION_NAME, valueColor = TextMuted)
             StatusRow(
-                label = "Type",
+                label = stringResource(R.string.diag_type),
                 value = if (BuildConfig.DEBUG) "DEBUG" else "RELEASE",
                 valueColor = TextMuted
             )
         }
 
         CommandAction(
-            label = "RE-CHECK",
+            label = stringResource(R.string.diag_recheck),
             onClick = onRefresh,
             modifier = Modifier
                 .padding(top = 20.dp)
@@ -285,19 +291,19 @@ private fun ColumnScope.AuthCapabilityRows(diagnostics: DiagnosticsState) {
     val probe = diagnostics.capabilities
     val readiness = signInReadiness(probe, diagnostics.delivery)
     StatusRow(
-        label = "Email sign-in",
+        label = stringResource(R.string.diag_email_signin),
         value = probe.readBoolean { it.emailEnabled },
         valueColor = probe.colorFor { it.emailEnabled },
         modifier = Modifier.testTag(DiagnosticsTags.EMAIL_AUTH)
     )
     StatusRow(
-        label = "Anonymous sign-in",
+        label = stringResource(R.string.diag_anonymous_signin),
         value = probe.readBoolean { it.anonymousEnabled },
         valueColor = TextMuted,
         modifier = Modifier.testTag(DiagnosticsTags.ANON_AUTH)
     )
     StatusRow(
-        label = "Sign-in possible here",
+        label = stringResource(R.string.diag_signin_possible),
         value = readiness.label,
         valueColor = if (readiness == SignInReadiness.POSSIBLE) SovereignGlow else Contested,
         modifier = Modifier.testTag(DiagnosticsTags.SIGN_IN_POSSIBLE)
@@ -305,12 +311,12 @@ private fun ColumnScope.AuthCapabilityRows(diagnostics: DiagnosticsState) {
     // Always rendered, in every probe state. A fact you are shown only when it
     // holds one particular value is not an observed fact.
     StatusRow(
-        label = "Account confirmation",
+        label = stringResource(R.string.diag_account_confirmation),
         value = when (probe) {
             is CapabilitiesProbe.Observed ->
                 if (probe.capabilities.mailerAutoconfirm) "AUTOMATIC" else "CODE REQUIRED"
-            is CapabilitiesProbe.Probing -> "CHECKING"
-            else -> "UNKNOWN"
+            is CapabilitiesProbe.Probing -> stringResource(R.string.diag_checking)
+            else -> stringResource(R.string.diag_unknown)
         },
         valueColor = TextMuted,
         modifier = Modifier.testTag(DiagnosticsTags.AUTOCONFIRM)
@@ -367,19 +373,19 @@ private fun AuthCapabilityNotes(diagnostics: DiagnosticsState) {
 private fun ColumnScope.DeliveryRows(diagnostics: DiagnosticsState) {
     val delivery = diagnostics.delivery
     StatusRow(
-        label = "Code delivery",
+        label = stringResource(R.string.diag_code_delivery),
         value = when (delivery) {
-            is DeliveryProof.NeverAttempted -> "NEVER ATTEMPTED"
-            is DeliveryProof.Requested -> "UNCONFIRMED"
-            is DeliveryProof.Delivered -> "CONFIRMED"
-            is DeliveryProof.Failed -> "FAILED"
-            is DeliveryProof.Unknown -> "UNKNOWN"
+            is DeliveryProof.NeverAttempted -> stringResource(R.string.diag_never_attempted)
+            is DeliveryProof.Requested -> stringResource(R.string.diag_unconfirmed)
+            is DeliveryProof.Delivered -> stringResource(R.string.diag_confirmed)
+            is DeliveryProof.Failed -> stringResource(R.string.diag_failed)
+            is DeliveryProof.Unknown -> stringResource(R.string.diag_unknown)
         },
         valueColor = if (delivery is DeliveryProof.Delivered) SovereignGlow else Contested,
         modifier = Modifier.testTag(DiagnosticsTags.DELIVERY)
     )
     StatusRow(
-        label = "Recipient",
+        label = stringResource(R.string.diag_recipient),
         value = when (delivery) {
             is DeliveryProof.Requested -> delivery.recipientHint
             is DeliveryProof.Delivered -> delivery.recipientHint
@@ -389,7 +395,7 @@ private fun ColumnScope.DeliveryRows(diagnostics: DiagnosticsState) {
         valueColor = TextMuted
     )
     StatusRow(
-        label = "Last attempt",
+        label = stringResource(R.string.diag_last_attempt),
         value = when (delivery) {
             is DeliveryProof.Requested -> formatMoment(delivery.atEpochMillis)
             is DeliveryProof.Delivered -> formatMoment(delivery.atEpochMillis)
@@ -445,12 +451,19 @@ private fun DeliveryNotes(diagnostics: DiagnosticsState) {
 }
 
 // Reads one boolean off a probe, or says UNKNOWN. Never defaults to a value.
+//
+// Composable because the answers are now string resources rather than literals.
+// It reads state and returns text; it draws nothing.
+
+@Composable
 private fun CapabilitiesProbe.readBoolean(
     select: (com.mapmonarchs.domain.model.AuthCapabilities) -> Boolean
 ): String = when (this) {
-    is CapabilitiesProbe.Observed -> if (select(capabilities)) "ENABLED" else "DISABLED"
-    is CapabilitiesProbe.Probing -> "CHECKING"
-    else -> "UNKNOWN"
+    is CapabilitiesProbe.Observed -> stringResource(
+        if (select(capabilities)) R.string.diag_enabled else R.string.diag_disabled
+    )
+    is CapabilitiesProbe.Probing -> stringResource(R.string.diag_checking)
+    else -> stringResource(R.string.diag_unknown)
 }
 
 private fun CapabilitiesProbe.colorFor(
