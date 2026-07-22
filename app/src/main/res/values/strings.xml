@@ -90,4 +90,24 @@
          translate with everything else; a blind player in Tashkent gets the same
          localisation guarantee as a sighted one. -->
     <string name="brand_intro_a11y">MapMonarchs. Tap to continue.</string>
+
+    <!-- LOCKED SURFACES. The per-lock copy (why / unlocksWhen / insteadNow /
+         commitment) stays on Route for now: it is data, not composable text, and
+         moves in its own pass with the route titles. -->
+    <string name="locked_status">LOCKED</string>
+    <string name="locked_why">WHY</string>
+    <string name="locked_unlocks_when">UNLOCKS WHEN</string>
+    <string name="locked_for_now">FOR NOW</string>
+    <string name="locked_never_sold">WHAT WILL NEVER BE SOLD</string>
+    <string name="locked_see_how">SEE HOW IT WORKS</string>
+    <string name="locked_preview_body">Preview mode runs the claim loop locally on this device so you can see what holding ground looks like. It is simulated: nothing is sent to the server, nothing is saved, and none of it becomes real territory.</string>
+    <string name="locked_enter_preview">ENTER PREVIEW</string>
+    <string name="locked_open_diagnostics">OPEN DIAGNOSTICS</string>
+
+    <!-- MAP HUD. Accessibility strings included: a HUD a screen reader cannot
+         read in the player language is not localised. -->
+    <string name="hud_hexes_held">HEXES HELD</string>
+    <string name="hud_preview_banner">PREVIEW - SIMULATED, NOT REAL</string>
+    <string name="hud_exit">EXIT</string>
+    <string name="hud_preview_a11y">Preview mode. Simulated territory, not real. Press exit to leave.</string>
 </resources>

@@ -10,6 +10,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
+import com.mapmonarchs.R
 import androidx.compose.ui.unit.dp
 import com.mapmonarchs.feature.shell.FeatureLock
 import com.mapmonarchs.ui.components.BodyNote
@@ -86,7 +88,7 @@ fun LockedScreen(
                 // The status word stays plain and stays first. Whatever the motif
                 // suggests, the fact is that this is shut.
                 Text(
-                    text = "LOCKED",
+                    text = stringResource(R.string.locked_status),
                     style = MaterialTheme.typography.labelLarge,
                     color = TextMuted,
                     modifier = Modifier.testTag(LockedTags.STATUS)
@@ -94,32 +96,28 @@ fun LockedScreen(
             }
         }
 
-        SectionHeader("WHY")
+        SectionHeader(stringResource(R.string.locked_why))
         BodyNote(lock.why, modifier = Modifier.testTag(LockedTags.WHY))
 
-        SectionHeader("UNLOCKS WHEN")
+        SectionHeader(stringResource(R.string.locked_unlocks_when))
         BodyNote(lock.unlocksWhen, modifier = Modifier.testTag(LockedTags.UNLOCK))
 
-        SectionHeader("FOR NOW")
+        SectionHeader(stringResource(R.string.locked_for_now))
         BodyNote(lock.insteadNow)
 
         // Only the surfaces that will one day take money carry this. It is set
         // apart from FOR NOW because it is not a workaround for today -- it is
         // the rule the surface will still be bound by after it opens.
         lock.commitment?.let { commitment ->
-            SectionHeader("WHAT WILL NEVER BE SOLD")
+            SectionHeader(stringResource(R.string.locked_never_sold))
             BodyNote(commitment, modifier = Modifier.testTag(LockedTags.COMMITMENT))
         }
 
         if (onEnterPreview != null) {
-            SectionHeader("SEE HOW IT WORKS")
-            BodyNote(
-                "Preview mode runs the claim loop locally on this device so you can see " +
-                    "what holding ground looks like. It is simulated: nothing is sent to " +
-                    "the server, nothing is saved, and none of it becomes real territory."
-            )
+            SectionHeader(stringResource(R.string.locked_see_how))
+            BodyNote(stringResource(R.string.locked_preview_body))
             CommandAction(
-                label = "ENTER PREVIEW",
+                label = stringResource(R.string.locked_enter_preview),
                 onClick = onEnterPreview,
                 modifier = Modifier
                     .padding(top = 8.dp)
@@ -129,7 +127,7 @@ fun LockedScreen(
 
         if (onOpenDiagnostics != null) {
             CommandAction(
-                label = "OPEN DIAGNOSTICS",
+                label = stringResource(R.string.locked_open_diagnostics),
                 onClick = onOpenDiagnostics,
                 // Secondary ONLY when it is competing with ENTER PREVIEW. On the locks
                 // that offer no preview this is the sole action on the screen, and a

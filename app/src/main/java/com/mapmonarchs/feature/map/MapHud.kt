@@ -31,6 +31,8 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
+import com.mapmonarchs.R
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
@@ -220,7 +222,11 @@ private fun Holdings(holdings: String, modifier: Modifier = Modifier) {
                         if (unknown) "Hexes held: unknown" else "Hexes held: $holdings"
                 }
         )
-        Text(text = "HEXES HELD", style = MaterialTheme.typography.labelSmall, color = TextMuted)
+        Text(
+            text = stringResource(R.string.hud_hexes_held),
+            style = MaterialTheme.typography.labelSmall,
+            color = TextMuted
+        )
     }
 }
 
@@ -331,6 +337,7 @@ private fun CaptureAction(
 /** The preview marker. Deliberately loud, and always offers the way out. */
 @Composable
 private fun PreviewBanner(onExit: () -> Unit, modifier: Modifier = Modifier) {
+    val previewLabel = stringResource(R.string.hud_preview_a11y)
     Row(
         modifier = modifier
             .clip(RoundedCornerShape(8.dp))
@@ -339,17 +346,17 @@ private fun PreviewBanner(onExit: () -> Unit, modifier: Modifier = Modifier) {
             .padding(horizontal = 14.dp, vertical = 9.dp)
             .testTag(MapHudTags.PREVIEW_BANNER)
             .semantics {
-                contentDescription = "Preview mode. Simulated territory, not real. Press exit to leave."
+                contentDescription = previewLabel
             },
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
-            text = "PREVIEW - SIMULATED, NOT REAL",
+            text = stringResource(R.string.hud_preview_banner),
             style = MaterialTheme.typography.labelSmall,
             color = SovereignGlow
         )
         TextCommand(
-            label = "EXIT",
+            label = stringResource(R.string.hud_exit),
             onClick = onExit,
             color = TextPrimary,
             modifier = Modifier.padding(start = 6.dp)
