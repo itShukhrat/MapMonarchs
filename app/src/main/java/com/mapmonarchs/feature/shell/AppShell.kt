@@ -30,6 +30,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.mapmonarchs.data.local.FirstRunStore
@@ -167,7 +168,7 @@ fun AppShell(modifier: Modifier = Modifier) {
 
         when {
             lock != null -> LockedScreen(
-                title = route.title,
+                title = stringResource(route.titleRes),
                 lock = lock,
                 onBack = { navigator.back() },
                 // Only when DIAGNOSTICS can actually explain this lock. Empire and Shop

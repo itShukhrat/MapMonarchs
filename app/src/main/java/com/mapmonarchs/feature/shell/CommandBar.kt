@@ -282,7 +282,7 @@ private fun CommandBarItem(
                 onClick = onClick
             )
             .semantics { contentDescription = description }
-            .testTag(CommandBarTags.item(destination.route.title))
+            .testTag(CommandBarTags.item(destination.route.key))
             .padding(vertical = 4.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center

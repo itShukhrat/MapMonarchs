@@ -55,11 +55,11 @@ fun CommandCenterScreen(
         CommandCard(title = stringResource(R.string.command_your_session)) {
             COMMAND_ROUTES.forEach { route ->
                 StatusRow(
-                    label = route.title,
+                    label = stringResource(route.titleRes),
                     value = stringResource(R.string.command_open),
                     valueColor = SovereignGlow,
                     onClick = { onOpen(route) },
-                    modifier = Modifier.testTag(CommandCenterTags.row(route.title))
+                    modifier = Modifier.testTag(CommandCenterTags.row(route.key))
                 )
             }
         }
@@ -67,11 +67,11 @@ fun CommandCenterScreen(
         CommandCard(title = stringResource(R.string.command_reference)) {
             REFERENCE_ROUTES.forEach { route ->
                 StatusRow(
-                    label = route.title,
+                    label = stringResource(route.titleRes),
                     value = stringResource(R.string.command_read),
                     valueColor = TextMuted,
                     onClick = { onOpen(route) },
-                    modifier = Modifier.testTag(CommandCenterTags.row(route.title))
+                    modifier = Modifier.testTag(CommandCenterTags.row(route.key))
                 )
             }
         }
@@ -87,11 +87,11 @@ fun CommandCenterScreen(
             LOCKED_ROUTES.filter { locked -> NAV_DESTINATIONS.none { it.route == locked } }
                 .forEach { route ->
                     StatusRow(
-                        label = route.title,
+                        label = stringResource(route.titleRes),
                         value = stringResource(R.string.command_locked),
                         valueColor = LockedFg,
                         onClick = { onOpen(route) },
-                        modifier = Modifier.testTag(CommandCenterTags.row(route.title))
+                        modifier = Modifier.testTag(CommandCenterTags.row(route.key))
                     )
                 }
         }

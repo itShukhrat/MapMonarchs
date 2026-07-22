@@ -97,20 +97,20 @@ fun LockedScreen(
         }
 
         SectionHeader(stringResource(R.string.locked_why))
-        BodyNote(lock.why, modifier = Modifier.testTag(LockedTags.WHY))
+        BodyNote(stringResource(lock.why), modifier = Modifier.testTag(LockedTags.WHY))
 
         SectionHeader(stringResource(R.string.locked_unlocks_when))
-        BodyNote(lock.unlocksWhen, modifier = Modifier.testTag(LockedTags.UNLOCK))
+        BodyNote(stringResource(lock.unlocksWhen), modifier = Modifier.testTag(LockedTags.UNLOCK))
 
         SectionHeader(stringResource(R.string.locked_for_now))
-        BodyNote(lock.insteadNow)
+        BodyNote(stringResource(lock.insteadNow))
 
         // Only the surfaces that will one day take money carry this. It is set
         // apart from FOR NOW because it is not a workaround for today -- it is
         // the rule the surface will still be bound by after it opens.
         lock.commitment?.let { commitment ->
             SectionHeader(stringResource(R.string.locked_never_sold))
-            BodyNote(commitment, modifier = Modifier.testTag(LockedTags.COMMITMENT))
+            BodyNote(stringResource(commitment), modifier = Modifier.testTag(LockedTags.COMMITMENT))
         }
 
         if (onEnterPreview != null) {

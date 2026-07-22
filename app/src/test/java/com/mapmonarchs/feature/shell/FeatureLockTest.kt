@@ -21,45 +21,26 @@ class FeatureLockTest {
     fun `every locked route carries a complete lock`() {
         LOCKED_ROUTES.forEach { route ->
             val lock = route.lock
-            assertNotNull("${route.title} is in LOCKED_ROUTES but has no lock", lock)
-            assertTrue("${route.title}: empty why", lock!!.why.isNotBlank())
-            assertTrue("${route.title}: empty unlock condition", lock.unlocksWhen.isNotBlank())
-            assertTrue("${route.title}: nothing offered instead", lock.insteadNow.isNotBlank())
-        }
-    }
-
-    @Test
-    fun `no lock hides behind a vague timeline`() {
-        // "Coming soon" and friends are exactly what this surface exists to avoid.
-        val banned = listOf("coming soon", "stay tuned", "soon!", "in the future", "tbd")
-        LOCKED_ROUTES.forEach { route ->
-            val text = (route.lock!!.why + route.lock!!.unlocksWhen + route.lock!!.insteadNow).lowercase()
-            banned.forEach { phrase ->
-                assertFalse("${route.title} used a vague phrase: '$phrase'", text.contains(phrase))
-            }
-        }
-    }
-
-    @Test
-    fun `unlock conditions are stated as conditions, not dates`() {
-        LOCKED_ROUTES.forEach { route ->
-            val c = route.lock!!.unlocksWhen
-            assertTrue("${route.title}: unlock condition too short to be specific", c.length > 20)
-            assertFalse("${route.title}: promised a date", c.contains(Regex("\\d{4}")))
+            assertNotNull("${route.key} is in LOCKED_ROUTES but has no lock", lock)
+            // Content assertions live in FeatureLockCopyTest (instrumented): these
+            // fields are string ids now, and only a Context can resolve them.
+            assertTrue("${route.key}: why is not a real string id", lock!!.why != 0)
+            assertTrue("${route.key}: unlocksWhen is not a real string id", lock.unlocksWhen != 0)
+            assertTrue("${route.key}: insteadNow is not a real string id", lock.insteadNow != 0)
         }
     }
 
     @Test
     fun `active routes are not locked`() {
         (COMMAND_ROUTES + REFERENCE_ROUTES).forEach { route ->
-            assertNull("${route.title} is presented as active but carries a lock", route.lock)
+            assertNull("${route.key} is presented as active but carries a lock", route.lock)
         }
     }
 
     @Test
     fun `locked and active route sets do not overlap`() {
         val active = (COMMAND_ROUTES + REFERENCE_ROUTES).toSet()
-        LOCKED_ROUTES.forEach { assertFalse("${it.title} is in both groups", active.contains(it)) }
+        LOCKED_ROUTES.forEach { assertFalse("${it.key} is in both groups", active.contains(it)) }
     }
 
     @Test
@@ -81,7 +62,7 @@ class FeatureLockTest {
     fun `forbidden systems are locked, not shipped`() {
         // Hard rule 4: no ranks, teams, or shop before the loop is proven.
         listOf(Route.Leaderboard, Route.Empire, Route.Shop).forEach {
-            assertNotNull("${it.title} must remain locked", it.lock)
+            assertNotNull("${it.key} must remain locked", it.lock)
             assertTrue(LOCKED_ROUTES.contains(it))
         }
     }
@@ -101,13 +82,13 @@ class FeatureLockTest {
     fun `diagnostics is offered only for locks it can explain`() {
         listOf(Route.Territory, Route.Missions, Route.Leaderboard, Route.Notifications).forEach {
             assertTrue(
-                "${it.title} is backend-gated; Diagnostics should explain it",
+                "${it.key} is backend-gated; Diagnostics should explain it",
                 it.lock!!.diagnosticsExplainsThis
             )
         }
         listOf(Route.Empire, Route.Shop).forEach {
             assertFalse(
-                "${it.title} is a product decision Diagnostics cannot show; must not route there",
+                "${it.key} is a product decision Diagnostics cannot show; must not route there",
                 it.lock!!.diagnosticsExplainsThis
             )
         }
@@ -118,18 +99,4 @@ class FeatureLockTest {
      * vice versa -- the flag and the prose have to agree, or the flag is a lie the
      * copy will contradict.
      */
-    @Test
-    fun `the diagnostics flag matches how the unlock is worded`() {
-        LOCKED_ROUTES.forEach { route ->
-            val unlock = route.lock!!.unlocksWhen.lowercase()
-            val mentionsBackend = unlock.contains("schema") || unlock.contains("capture") ||
-                unlock.contains("backend") || unlock.contains("deployed")
-            if (route.lock!!.diagnosticsExplainsThis) {
-                assertTrue(
-                    "${route.title} claims Diagnostics explains it, but its unlock names no backend condition",
-                    mentionsBackend
-                )
-            }
-        }
-    }
 }

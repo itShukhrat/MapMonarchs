@@ -1,5 +1,7 @@
 package com.mapmonarchs.feature.shell
 
+import androidx.annotation.StringRes
+import com.mapmonarchs.R
 import com.mapmonarchs.domain.model.Blocker
 import com.mapmonarchs.ui.components.LockMotif
 import com.mapmonarchs.ui.components.NavGlyph
@@ -13,11 +15,11 @@ import com.mapmonarchs.ui.components.NavGlyph
  */
 data class FeatureLock(
     /** Why it is unavailable, in plain language. */
-    val why: String,
+    @StringRes val why: Int,
     /** The precise condition that unlocks it. No vague timelines. */
-    val unlocksWhen: String,
+    @StringRes val unlocksWhen: Int,
     /** Something useful the player can actually do right now instead. */
-    val insteadNow: String,
+    @StringRes val insteadNow: Int,
     /**
      * Whether DIAGNOSTICS can actually explain this lock.
      *
@@ -56,7 +58,7 @@ data class FeatureLock(
      * is worth more than stating it beside a checkout, because it cannot be
      * read as a sales pitch.
      */
-    val commitment: String? = null
+    @StringRes val commitment: Int? = null
 )
 
 /**
@@ -68,105 +70,134 @@ data class FeatureLock(
  * do.
  */
 sealed interface Route {
-    val title: String
+    @get:StringRes val titleRes: Int
+
+    /**
+     * A stable identifier that is NEVER translated.
+     *
+     * Test tags and analytics keys were built from the display title. Once that
+     * title became a string resource those keys would have changed with the
+     * device language, so a Russian device would look like a different app to
+     * every selector in the suite. Display text and identity are now separate
+     * things, which is what they always were.
+     */
+    val key: String
     val lock: FeatureLock? get() = null
 
-    data object Map : Route { override val title = "MAP" }
-    data object Identity : Route { override val title = "IDENTITY" }
-    data object Diagnostics : Route { override val title = "DIAGNOSTICS" }
-    data object Settings : Route { override val title = "SETTINGS" }
-    data object SignIn : Route { override val title = "SIGN IN" }
+    data object Map : Route {
+        override val titleRes = R.string.route_map
+        override val key = "MAP"
+    }
+    data object Identity : Route {
+        override val titleRes = R.string.route_identity
+        override val key = "IDENTITY"
+    }
+    data object Diagnostics : Route {
+        override val titleRes = R.string.route_diagnostics
+        override val key = "DIAGNOSTICS"
+    }
+    data object Settings : Route {
+        override val titleRes = R.string.route_settings
+        override val key = "SETTINGS"
+    }
+    data object SignIn : Route {
+        override val titleRes = R.string.route_signin
+        override val key = "SIGN IN"
+    }
 
     /**
      * The instrument deck. Replaced the old floating command MENU, which was an
      * overlay reachable only from the map -- so every reference and settings
      * surface was two taps deep and invisible until you found the button.
      */
-    data object Command : Route { override val title = "COMMAND" }
+    data object Command : Route {
+        override val titleRes = R.string.route_command
+        override val key = "COMMAND"
+    }
 
-    data object Help : Route { override val title = "HELP" }
-    data object Safety : Route { override val title = "SAFETY & PRIVACY" }
-    data object About : Route { override val title = "ABOUT" }
+    data object Help : Route {
+        override val titleRes = R.string.route_help
+        override val key = "HELP"
+    }
+    data object Safety : Route {
+        override val titleRes = R.string.route_safety
+        override val key = "SAFETY & PRIVACY"
+    }
+    data object About : Route {
+        override val titleRes = R.string.route_about
+        override val key = "ABOUT"
+    }
 
     data object Territory : Route {
-        override val title = "TERRITORY"
+        override val titleRes = R.string.route_territory
+        override val key = "TERRITORY"
         override val lock = FeatureLock(
-            why = "No territory exists yet. The server function that decides who holds " +
-                "a hex has not been deployed, so there is nothing to inspect.",
-            unlocksWhen = "The territory schema is applied to the backend.",
-            insteadNow = "Open DIAGNOSTICS to see the exact backend status.",
+            why = R.string.lock_territory_why,
+            unlocksWhen = R.string.lock_territory_when,
+            insteadNow = R.string.lock_territory_now,
             diagnosticsExplainsThis = true,
             motif = LockMotif.WORLD
         )
     }
 
     data object Leaderboard : Route {
-        override val title = "LEADERBOARD"
+        override val titleRes = R.string.route_leaderboard
+        override val key = "LEADERBOARD"
         override val lock = FeatureLock(
-            why = "A ranking is only meaningful once territory can be won and lost. " +
-                "Ranking players on zero captured hexes would rank nobody against nobody.",
-            unlocksWhen = "Capture is live and the first season of territory data exists.",
-            insteadNow = "Nothing to compare yet. The map is the whole game today.",
+            why = R.string.lock_leaderboard_why,
+            unlocksWhen = R.string.lock_leaderboard_when,
+            insteadNow = R.string.lock_leaderboard_now,
             diagnosticsExplainsThis = true,
             motif = LockMotif.RANKING
         )
     }
 
     data object Notifications : Route {
-        override val title = "NOTIFICATIONS"
+        override val titleRes = R.string.route_notifications
+        override val key = "NOTIFICATIONS"
         override val lock = FeatureLock(
-            why = "There are no events to report. Notifications matter when your ground " +
-                "is under attack -- until capture exists, an inbox would only ever be empty.",
-            unlocksWhen = "Capture and decay are live, so territory can change hands.",
-            insteadNow = "Nothing is happening to your territory, because you have none.",
+            why = R.string.lock_notifications_why,
+            unlocksWhen = R.string.lock_notifications_when,
+            insteadNow = R.string.lock_notifications_now,
             diagnosticsExplainsThis = true,
             motif = LockMotif.SIGNAL
         )
     }
 
     data object Missions : Route {
-        override val title = "MISSIONS"
+        override val titleRes = R.string.route_missions
+        override val key = "MISSIONS"
         override val lock = FeatureLock(
-            why = "A mission is an instruction to go somewhere and hold it. With no " +
-                "capture, every objective would reduce to \"walk around\" -- which the " +
-                "map already asks you to do, without pretending it was assigned.",
-            unlocksWhen = "Capture is live, so an objective can have a real outcome.",
-            insteadNow = "Walk. That is the whole objective today, and it is the one " +
-                "being tested.",
+            why = R.string.lock_missions_why,
+            unlocksWhen = R.string.lock_missions_when,
+            insteadNow = R.string.lock_missions_now,
             diagnosticsExplainsThis = true,
             motif = LockMotif.QUEST
         )
     }
 
     data object Empire : Route {
-        override val title = "EMPIRE"
+        override val titleRes = R.string.route_empire
+        override val key = "EMPIRE"
         override val lock = FeatureLock(
-            why = "Teams and empires are deliberately held back. Alliances built before " +
-                "the solo loop is proven fun would hide whether the loop is fun at all.",
-            unlocksWhen = "The walk-claim-hold loop is proven on real walks by real players.",
-            insteadNow = "Hold ground alone first. That is the part that has to work.",
+            why = R.string.lock_empire_why,
+            unlocksWhen = R.string.lock_empire_when,
+            insteadNow = R.string.lock_empire_now,
             diagnosticsExplainsThis = false,
             motif = LockMotif.PRESTIGE
         )
     }
 
     data object Shop : Route {
-        override val title = "SHOP"
+        override val titleRes = R.string.route_shop
+        override val key = "SHOP"
         override val lock = FeatureLock(
-            why = "There is nothing to sell, and nothing worth buying. A shop opened " +
-                "before the game is good is just a way to take money for an unproven product.",
-            unlocksWhen = "The loop is proven and cosmetics exist worth owning.",
-            insteadNow = "Nothing here will ever affect who wins ground. Cosmetics only.",
+            why = R.string.lock_shop_why,
+            unlocksWhen = R.string.lock_shop_when,
+            insteadNow = R.string.lock_shop_now,
             diagnosticsExplainsThis = false,
             motif = LockMotif.VAULT,
-
-            commitment = "Cosmetics only, forever. Nothing sold here will ever affect who " +
-
-                "holds ground, how fast you claim it, or how far you can walk. Ground is " +
-
-                "won on foot or it is not won. That rule is the reason this surface is " +
-
-                "still shut: a store is easy, and a store worth trusting is not."
+            commitment = R.string.lock_shop_commitment
         )
     }
 }

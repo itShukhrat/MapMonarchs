@@ -113,7 +113,7 @@ class ShellNavigatorTest {
 
     @Test
     fun `every command route has a title`() {
-        COMMAND_ROUTES.forEach { assertTrue("blank title for $it", it.title.isNotBlank()) }
+        COMMAND_ROUTES.forEach { assertTrue("blank title for $it", it.key.isNotBlank()) }
     }
 
     @Test

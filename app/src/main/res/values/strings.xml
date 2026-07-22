@@ -258,4 +258,45 @@
     <string name="diag_failed">FAILED</string>
     <string name="diag_recipient">Recipient</string>
     <string name="diag_last_attempt">Last attempt</string>
+
+    <!-- ROUTE TITLES. Shared by the dock, the command deck and every locked
+         screen header, so they exist once. -->
+    <string name="route_map">MAP</string>
+    <string name="route_identity">IDENTITY</string>
+    <string name="route_diagnostics">DIAGNOSTICS</string>
+    <string name="route_settings">SETTINGS</string>
+    <string name="route_signin">SIGN IN</string>
+    <string name="route_command">COMMAND</string>
+    <string name="route_help">HELP</string>
+    <string name="route_safety">SAFETY &amp; PRIVACY</string>
+    <string name="route_about">ABOUT</string>
+    <string name="route_territory">TERRITORY</string>
+    <string name="route_leaderboard">LEADERBOARD</string>
+    <string name="route_notifications">NOTIFICATIONS</string>
+    <string name="route_missions">MISSIONS</string>
+    <string name="route_empire">EMPIRE</string>
+    <string name="route_shop">SHOP</string>
+
+    <!-- LOCK COPY. Held as string ids on FeatureLock rather than raw text,
+         because a lock is data and cannot call stringResource. Every field
+         stays mandatory, so a lock still cannot fail to explain itself. -->
+    <string name="lock_territory_why">No territory exists yet. The server function that decides who holds a hex has not been deployed, so there is nothing to inspect.</string>
+    <string name="lock_territory_when">The territory schema is applied to the backend.</string>
+    <string name="lock_territory_now">Open DIAGNOSTICS to see the exact backend status.</string>
+    <string name="lock_leaderboard_why">A ranking is only meaningful once territory can be won and lost. Ranking players on zero captured hexes would rank nobody against nobody.</string>
+    <string name="lock_leaderboard_when">Capture is live and the first season of territory data exists.</string>
+    <string name="lock_leaderboard_now">Nothing to compare yet. The map is the whole game today.</string>
+    <string name="lock_notifications_why">There are no events to report. Notifications matter when your ground is under attack — until capture exists, an inbox would only ever be empty.</string>
+    <string name="lock_notifications_when">Capture and decay are live, so territory can change hands.</string>
+    <string name="lock_notifications_now">Nothing is happening to your territory, because you have none.</string>
+    <string name="lock_missions_why">A mission is an instruction to go somewhere and hold it. With no capture, every objective would reduce to \"walk around\" — which the map already asks you to do, without pretending it was assigned.</string>
+    <string name="lock_missions_when">Capture is live, so an objective can have a real outcome.</string>
+    <string name="lock_missions_now">Walk. That is the whole objective today, and it is the one being tested.</string>
+    <string name="lock_empire_why">Teams and empires are deliberately held back. Alliances built before the solo loop is proven fun would hide whether the loop is fun at all.</string>
+    <string name="lock_empire_when">The walk-claim-hold loop is proven on real walks by real players.</string>
+    <string name="lock_empire_now">Hold ground alone first. That is the part that has to work.</string>
+    <string name="lock_shop_why">There is nothing to sell, and nothing worth buying. A shop opened before the game is good is just a way to take money for an unproven product.</string>
+    <string name="lock_shop_when">The loop is proven and cosmetics exist worth owning.</string>
+    <string name="lock_shop_now">Nothing here will ever affect who wins ground. Cosmetics only.</string>
+    <string name="lock_shop_commitment">Cosmetics only, forever. Nothing sold here will ever affect who holds ground, how fast you claim it, or how far you can walk. Ground is won on foot or it is not won. That rule is the reason this surface is still shut: a store is easy, and a store worth trusting is not.</string>
 </resources>
