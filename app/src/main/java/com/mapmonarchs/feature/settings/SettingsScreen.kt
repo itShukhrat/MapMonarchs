@@ -5,6 +5,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
+import com.mapmonarchs.R
 import androidx.compose.ui.unit.dp
 import com.mapmonarchs.data.local.TrackingMode
 import com.mapmonarchs.ui.components.BodyNote
@@ -40,16 +42,22 @@ fun SettingsScreen(
     onBack: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    CommandScreen(title = "SETTINGS", onBack = onBack, modifier = modifier) {
+    CommandScreen(
+        title = stringResource(R.string.settings_title),
+        onBack = onBack,
+        modifier = modifier
+    ) {
 
         // The permission state is a live readout, so it lives in a panel. The
         // remediation (note + deep link) sits BELOW the panel rather than inside
         // it: the card is the status, the action is the response to it, and the
         // action carries its own accent shadow that a card clip would cut.
-        CommandCard(title = "LOCATION") {
+        CommandCard(title = stringResource(R.string.settings_location)) {
             StatusRow(
-                label = "Permission",
-                value = if (locationGranted) "GRANTED" else "DENIED",
+                label = stringResource(R.string.settings_permission),
+                value = stringResource(
+                    if (locationGranted) R.string.settings_granted else R.string.settings_denied
+                ),
                 valueColor = if (locationGranted) SovereignGlow else Contested,
                 modifier = Modifier.testTag(SettingsTags.PERMISSION_STATE)
             )
@@ -57,12 +65,11 @@ fun SettingsScreen(
 
         if (!locationGranted) {
             BodyNote(
-                "Android will not ask again once permission has been denied. It has to be " +
-                    "granted from system settings, or the map cannot tell which hex you are in.",
+                stringResource(R.string.settings_denied_note),
                 modifier = Modifier.padding(top = 12.dp)
             )
             CommandAction(
-                label = "OPEN SYSTEM SETTINGS",
+                label = stringResource(R.string.settings_open_system),
                 onClick = onOpenSystemSettings,
                 modifier = Modifier
                     .padding(top = 8.dp)
@@ -72,10 +79,9 @@ fun SettingsScreen(
 
         // The cadence choices are a control group, so they share one panel. The
         // caption leads the panel because it is what the choices below it mean.
-        CommandCard(title = "TRACKING CADENCE") {
+        CommandCard(title = stringResource(R.string.settings_cadence)) {
             BodyNote(
-                "How often the app asks for a position while the map is open. Faster updates " +
-                    "make claiming feel more responsive and cost more battery.",
+                stringResource(R.string.settings_cadence_note),
                 modifier = Modifier.padding(top = 8.dp)
             )
             TrackingMode.entries.forEach { mode ->
@@ -89,13 +95,9 @@ fun SettingsScreen(
             }
         }
 
-        SectionHeader("WHAT WE DO NOT DO")
+        SectionHeader(stringResource(R.string.settings_not_do))
 
-        BodyNote(
-            "Location is only read while the map is open. There is no background tracking, " +
-                "and no advertising identifier. Other players can see which ground you hold -- " +
-                "never your live position, and never the route you walked to reach it."
-        )
+        BodyNote(stringResource(R.string.settings_not_do_body))
 
     }
 }

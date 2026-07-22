@@ -47,4 +47,19 @@
     <string name="safety_movement_body">Every claim attempt is recorded with the reason it was accepted or rejected. That record is what lets us detect spoofed locations and impossible travel. It exists to protect honest players from people who fake their way to the top.</string>
     <string name="safety_not_do">WHAT WE DO NOT DO</string>
     <string name="safety_not_do_body">We do not track you in the background. We do not show your live position to other players. We do not sell location data, and there is no advertising SDK in this app.</string>
+
+    <!-- SETTINGS. TrackingMode.label and .detail are NOT here: they live on a
+         data-layer enum shared with DIAGNOSTICS, so moving them is its own pass
+         rather than a half-change that leaves two sources of truth. -->
+    <string name="settings_title">SETTINGS</string>
+    <string name="settings_location">LOCATION</string>
+    <string name="settings_permission">Permission</string>
+    <string name="settings_granted">GRANTED</string>
+    <string name="settings_denied">DENIED</string>
+    <string name="settings_denied_note">Android will not ask again once permission has been denied. It has to be granted from system settings, or the map cannot tell which hex you are in.</string>
+    <string name="settings_open_system">OPEN SYSTEM SETTINGS</string>
+    <string name="settings_cadence">TRACKING CADENCE</string>
+    <string name="settings_cadence_note">How often the app asks for a position while the map is open. Faster updates make claiming feel more responsive and cost more battery.</string>
+    <string name="settings_not_do">WHAT WE DO NOT DO</string>
+    <string name="settings_not_do_body">Location is only read while the map is open. There is no background tracking, and no advertising identifier. Other players can see which ground you hold — never your live position, and never the route you walked to reach it.</string>
 </resources>
