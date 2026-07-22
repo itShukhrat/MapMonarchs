@@ -62,4 +62,16 @@
     <string name="settings_cadence_note">How often the app asks for a position while the map is open. Faster updates make claiming feel more responsive and cost more battery.</string>
     <string name="settings_not_do">WHAT WE DO NOT DO</string>
     <string name="settings_not_do_body">Location is only read while the map is open. There is no background tracking, and no advertising identifier. Other players can see which ground you hold — never your live position, and never the route you walked to reach it.</string>
+
+    <!-- COMMAND DECK. Route titles are NOT here: they live on Route and are
+         shared with the dock and the locked screens, so they move as one pass
+         rather than being duplicated per caller. -->
+    <string name="command_title">COMMAND</string>
+    <string name="command_your_session">YOUR SESSION</string>
+    <string name="command_open">OPEN</string>
+    <string name="command_reference">REFERENCE</string>
+    <string name="command_read">READ</string>
+    <string name="command_locked">LOCKED</string>
+    <string name="command_not_open">NOT OPEN YET</string>
+    <string name="command_not_open_body">These are real systems with real unlock conditions, not placeholders. Each one states what has to be true before it works.</string>
 </resources>

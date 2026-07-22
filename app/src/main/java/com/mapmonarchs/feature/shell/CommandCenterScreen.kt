@@ -5,6 +5,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
+import com.mapmonarchs.R
 import androidx.compose.ui.unit.dp
 import com.mapmonarchs.ui.components.BodyNote
 import com.mapmonarchs.ui.components.CommandCard
@@ -43,18 +45,18 @@ fun CommandCenterScreen(
     onBack: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    CommandScreen(title = "COMMAND", onBack = onBack, modifier = modifier.testTag(CommandCenterTags.SCREEN)) {
+    CommandScreen(title = stringResource(R.string.command_title), onBack = onBack, modifier = modifier.testTag(CommandCenterTags.SCREEN)) {
 
         // Panelled like every other dashboard surface. These rows carry a
         // right-aligned state per destination -- OPEN, READ, LOCKED -- which is
         // the same readout shape the panel language exists for. The deck is the
         // hub those screens hang off, so leaving it as loose rows made the hub
         // the least finished thing in its own hierarchy.
-        CommandCard(title = "YOUR SESSION") {
+        CommandCard(title = stringResource(R.string.command_your_session)) {
             COMMAND_ROUTES.forEach { route ->
                 StatusRow(
                     label = route.title,
-                    value = "OPEN",
+                    value = stringResource(R.string.command_open),
                     valueColor = SovereignGlow,
                     onClick = { onOpen(route) },
                     modifier = Modifier.testTag(CommandCenterTags.row(route.title))
@@ -62,11 +64,11 @@ fun CommandCenterScreen(
             }
         }
 
-        CommandCard(title = "REFERENCE") {
+        CommandCard(title = stringResource(R.string.command_reference)) {
             REFERENCE_ROUTES.forEach { route ->
                 StatusRow(
                     label = route.title,
-                    value = "READ",
+                    value = stringResource(R.string.command_read),
                     valueColor = TextMuted,
                     onClick = { onOpen(route) },
                     modifier = Modifier.testTag(CommandCenterTags.row(route.title))
@@ -77,17 +79,16 @@ fun CommandCenterScreen(
         // The caption sits INSIDE this panel because it is what the rows below it
         // mean -- the same call made for the cadence group in SETTINGS. Elsewhere
         // prose stays outside a panel; here it is the label for the group.
-        CommandCard(title = "NOT OPEN YET") {
+        CommandCard(title = stringResource(R.string.command_not_open)) {
             BodyNote(
-                "These are real systems with real unlock conditions, not placeholders. " +
-                    "Each one states what has to be true before it works.",
+                stringResource(R.string.command_not_open_body),
                 modifier = Modifier.padding(top = 8.dp)
             )
             LOCKED_ROUTES.filter { locked -> NAV_DESTINATIONS.none { it.route == locked } }
                 .forEach { route ->
                     StatusRow(
                         label = route.title,
-                        value = "LOCKED",
+                        value = stringResource(R.string.command_locked),
                         valueColor = LockedFg,
                         onClick = { onOpen(route) },
                         modifier = Modifier.testTag(CommandCenterTags.row(route.title))
