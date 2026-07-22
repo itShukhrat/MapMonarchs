@@ -11,5 +11,12 @@
         <item name="android:windowBackground">@color/void_black</item>
         <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="android:navigationBarColor">@android:color/transparent</item>
+        <!--
+          Android 12 and above ignore windowBackground for the launch frame and
+          draw the adaptive icon over windowSplashScreenBackground instead. Left
+          unset it fell back to a light default, so the dark launch theme above
+          was doing nothing on modern devices - the very frame it exists to fix.
+        -->
+        <item name="android:windowSplashScreenBackground">@color/void_black</item>
     </style>
 </resources>
