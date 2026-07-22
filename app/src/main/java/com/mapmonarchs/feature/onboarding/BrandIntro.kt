@@ -37,6 +37,9 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.res.stringResource
+import com.mapmonarchs.R
+import com.mapmonarchs.domain.model.PLAYABLE_COUNTRY_NAME
 import com.mapmonarchs.ui.motion.rememberAnimationsEnabled
 import com.mapmonarchs.ui.theme.MapMonarchsBrush
 import com.mapmonarchs.ui.theme.SlateEdge
@@ -88,6 +91,7 @@ fun BrandIntro(onDone: () -> Unit, modifier: Modifier = Modifier) {
         return
     }
 
+    val introLabel = stringResource(R.string.brand_intro_a11y)
     var started by remember { mutableStateOf(false) }
     LaunchedEffect(Unit) {
         started = true
@@ -118,7 +122,7 @@ fun BrandIntro(onDone: () -> Unit, modifier: Modifier = Modifier) {
                 onClick = onDone
             )
             .testTag(BrandIntroTags.SCREEN)
-            .semantics { contentDescription = "MapMonarchs. Tap to continue." },
+            .semantics { contentDescription = introLabel },
         contentAlignment = Alignment.Center
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -161,7 +165,7 @@ fun BrandIntro(onDone: () -> Unit, modifier: Modifier = Modifier) {
             }
 
             Text(
-                text = "MAPMONARCHS",
+                text = stringResource(R.string.brand_wordmark),
                 style = MaterialTheme.typography.labelLarge,
                 color = TextPrimary,
                 modifier = Modifier
@@ -190,7 +194,7 @@ fun BrandIntro(onDone: () -> Unit, modifier: Modifier = Modifier) {
             // Uzbekistan-only and that is a feature of the design, not a
             // limitation to be discovered later at a border.
             Text(
-                text = "UZBEKISTAN",
+                text = PLAYABLE_COUNTRY_NAME.uppercase(),
                 style = MaterialTheme.typography.labelSmall,
                 color = TextMuted,
                 modifier = Modifier

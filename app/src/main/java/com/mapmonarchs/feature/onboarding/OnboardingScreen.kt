@@ -17,6 +17,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
+import com.mapmonarchs.R
 import androidx.compose.ui.unit.dp
 import com.mapmonarchs.ui.components.CommandAction
 import com.mapmonarchs.ui.components.HexagonShape
@@ -68,47 +70,42 @@ fun OnboardingScreen(onContinue: () -> Unit, modifier: Modifier = Modifier) {
         )
 
         Text(
-            text = "MAPMONARCHS",
+            text = stringResource(R.string.brand_wordmark),
             style = MaterialTheme.typography.labelLarge,
             color = TextPrimary,
             modifier = Modifier.padding(top = 28.dp)
         )
 
         Text(
-            text = "Ground you walk becomes ground you hold.",
+            text = stringResource(R.string.onboarding_tagline),
             style = MaterialTheme.typography.titleLarge,
             color = TextPrimary,
             modifier = Modifier.padding(top = 14.dp)
         )
 
         Text(
-            text = "The playable world is $PLAYABLE_COUNTRY_NAME. Only ground inside the " +
-                "country can be claimed; the map is dimmed everywhere else.",
+            text = stringResource(R.string.onboarding_world, PLAYABLE_COUNTRY_NAME),
             style = MaterialTheme.typography.bodyMedium,
             color = TextMuted,
             modifier = Modifier.padding(top = 20.dp)
         )
 
         Text(
-            text = "The map needs your location to know which hex you are standing in. " +
-                "Territory is decided on our servers from the route you actually walk, " +
-                "which is what keeps it fair.",
+            text = stringResource(R.string.onboarding_location),
             style = MaterialTheme.typography.bodyMedium,
             color = TextMuted,
             modifier = Modifier.padding(top = 20.dp)
         )
 
         Text(
-            text = "We do not track you in the background. Other players can see " +
-                "which ground you hold -- never where you are now, and never where " +
-                "you have been.",
+            text = stringResource(R.string.onboarding_privacy),
             style = MaterialTheme.typography.bodyMedium,
             color = TextMuted,
             modifier = Modifier.padding(top = 14.dp)
         )
 
         CommandAction(
-            label = "CONTINUE",
+            label = stringResource(R.string.onboarding_continue),
             onClick = onContinue,
             modifier = Modifier
                 .fillMaxWidth()
@@ -117,7 +114,7 @@ fun OnboardingScreen(onContinue: () -> Unit, modifier: Modifier = Modifier) {
         )
 
         Text(
-            text = "Android will ask for permission next.",
+            text = stringResource(R.string.onboarding_permission_next),
             style = MaterialTheme.typography.labelSmall,
             color = TextMuted,
             modifier = Modifier

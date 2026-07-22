@@ -74,4 +74,20 @@
     <string name="command_locked">LOCKED</string>
     <string name="command_not_open">NOT OPEN YET</string>
     <string name="command_not_open_body">These are real systems with real unlock conditions, not placeholders. Each one states what has to be true before it works.</string>
+
+    <!-- FIRST RUN. brand_wordmark is shared by BrandIntro and OnboardingScreen
+         so the two can never drift apart. The country name arrives as a format
+         arg from PLAYABLE_COUNTRY_NAME, which is the single source of truth the
+         boundary layer and the out-of-world blocker also read. -->
+    <string name="brand_wordmark">MAPMONARCHS</string>
+    <string name="onboarding_tagline">Ground you walk becomes ground you hold.</string>
+    <string name="onboarding_world">The playable world is %1$s. Only ground inside the country can be claimed; the map is dimmed everywhere else.</string>
+    <string name="onboarding_location">The map needs your location to know which hex you are standing in. Territory is decided on our servers from the route you actually walk, which is what keeps it fair.</string>
+    <string name="onboarding_privacy">We do not track you in the background. Other players can see which ground you hold — never where you are now, and never where you have been.</string>
+    <string name="onboarding_continue">CONTINUE</string>
+    <string name="onboarding_permission_next">Android will ask for permission next.</string>
+    <!-- Screen-reader label. Accessibility copy is player-facing text and has to
+         translate with everything else; a blind player in Tashkent gets the same
+         localisation guarantee as a sighted one. -->
+    <string name="brand_intro_a11y">MapMonarchs. Tap to continue.</string>
 </resources>
