@@ -14,6 +14,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
+import com.mapmonarchs.R
 import androidx.compose.ui.unit.dp
 import com.mapmonarchs.domain.model.Identity
 import com.mapmonarchs.ui.components.BodyNote
@@ -54,7 +56,11 @@ fun IdentityScreen(
     onSignOut: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    CommandScreen(title = "IDENTITY", onBack = onBack, modifier = modifier) {
+    CommandScreen(
+        title = stringResource(R.string.identity_title),
+        onBack = onBack,
+        modifier = modifier
+    ) {
 
         val colour: Color? = (identity as? Identity.SignedIn)?.let { Color(it.territoryColorArgb) }
 
@@ -65,18 +71,18 @@ fun IdentityScreen(
             callsign = when (identity) {
                 is Identity.SignedIn -> identity.callsign
                 is Identity.Preview -> identity.callsign
-                is Identity.Resolving -> "IDENTIFYING"
-                is Identity.SignedOut -> "NO IDENTITY"
-                is Identity.Unavailable -> "UNAVAILABLE"
+                is Identity.Resolving -> stringResource(R.string.identity_identifying)
+                is Identity.SignedOut -> stringResource(R.string.identity_no_identity)
+                is Identity.Unavailable -> stringResource(R.string.identity_unavailable)
             },
             stateLabel = when (identity) {
-                is Identity.SignedIn -> "SOVEREIGN CALLSIGN"
+                is Identity.SignedIn -> stringResource(R.string.identity_state_signed_in)
                 // Never dressed up. A preview callsign is a placeholder and the
                 // label says so, because the crest makes it look consequential.
-                is Identity.Preview -> "PLACEHOLDER - NOT A SESSION"
-                is Identity.Resolving -> "ESTABLISHING SESSION"
-                is Identity.SignedOut -> "NO SESSION"
-                is Identity.Unavailable -> "SESSION UNAVAILABLE"
+                is Identity.Preview -> stringResource(R.string.identity_state_preview)
+                is Identity.Resolving -> stringResource(R.string.identity_state_resolving)
+                is Identity.SignedOut -> stringResource(R.string.identity_state_signed_out)
+                is Identity.Unavailable -> stringResource(R.string.identity_state_unavailable)
             },
             territoryColor = colour,
             modifier = Modifier
@@ -84,39 +90,36 @@ fun IdentityScreen(
                 .testTag(IdentityTags.CALLSIGN)
         )
 
-        CommandCard(title = "SESSION") {
+        CommandCard(title = stringResource(R.string.identity_session)) {
 
             StatusRow(
-                label = "State",
+                label = stringResource(R.string.identity_state),
                 value = when (identity) {
-                    is Identity.SignedIn -> "ACTIVE"
-                    is Identity.Preview -> "PREVIEW"
-                    is Identity.Resolving -> "RESOLVING"
-                    is Identity.SignedOut -> "SIGNED OUT"
-                    is Identity.Unavailable -> "UNAVAILABLE"
+                    is Identity.SignedIn -> stringResource(R.string.identity_active)
+                    is Identity.Preview -> stringResource(R.string.identity_preview)
+                    is Identity.Resolving -> stringResource(R.string.identity_resolving)
+                    is Identity.SignedOut -> stringResource(R.string.identity_signed_out)
+                    is Identity.Unavailable -> stringResource(R.string.identity_unavailable)
                 },
                 valueColor = if (identity is Identity.Unavailable) Contested else MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.testTag(IdentityTags.STATE)
             )
 
             StatusRow(
-                label = "Territory colour",
-                value = if (colour != null) "ASSIGNED" else "NONE",
+                label = stringResource(R.string.identity_colour),
+                value = stringResource(
+                    if (colour != null) R.string.identity_assigned else R.string.identity_none
+                ),
                 valueColor = colour ?: TextMuted
             )
         }
 
         when (identity) {
             is Identity.SignedIn -> {
-                SectionHeader("HOW THIS IS DERIVED")
-                BodyNote(
-                    "Your callsign and colour are computed from your account id, so they " +
-                        "are the same on every device and after every reinstall. They are " +
-                        "not stored as a profile and cannot be changed -- which also means " +
-                        "nobody can impersonate your colour on the map."
-                )
+                SectionHeader(stringResource(R.string.identity_derived))
+                BodyNote(stringResource(R.string.identity_derived_body))
                 CommandAction(
-                    label = "SIGN OUT",
+                    label = stringResource(R.string.identity_sign_out),
                     onClick = onSignOut,
                     emphasis = ActionEmphasis.SECONDARY,
                     modifier = Modifier
@@ -125,14 +128,11 @@ fun IdentityScreen(
                 )
             }
             is Identity.Unavailable -> {
-                SectionHeader("WHY YOU HAVE NO IDENTITY")
+                SectionHeader(stringResource(R.string.identity_why_none))
                 BodyNote(identity.error.playerMessage())
-                BodyNote(
-                    "Without a session the server cannot attribute territory to you, so " +
-                        "claiming is disabled. The map stays readable in the meantime."
-                )
+                BodyNote(stringResource(R.string.identity_no_session_effect))
                 CommandAction(
-                    label = "RETRY SIGN-IN",
+                    label = stringResource(R.string.identity_retry),
                     onClick = onRetry,
                     modifier = Modifier
                         .padding(top = 8.dp)
@@ -140,14 +140,10 @@ fun IdentityScreen(
                 )
             }
             is Identity.SignedOut -> {
-                SectionHeader("NO SESSION")
-                BodyNote(
-                    "You are not signed in, so the server cannot attribute territory to " +
-                        "you. Sign-in uses a code sent to your email -- this project has " +
-                        "anonymous sign-in switched off."
-                )
+                SectionHeader(stringResource(R.string.identity_no_session))
+                BodyNote(stringResource(R.string.identity_no_session_body))
                 CommandAction(
-                    label = "SIGN IN",
+                    label = stringResource(R.string.identity_sign_in),
                     onClick = onSignIn,
                     modifier = Modifier
                         .padding(top = 8.dp)
@@ -155,19 +151,11 @@ fun IdentityScreen(
                 )
             }
             is Identity.Preview -> {
-                SectionHeader("THIS IS NOT AN ACCOUNT")
-                BodyNote(
-                    "Preview mode gives you a placeholder callsign so the map has something " +
-                        "to colour. It is not a session, it is not stored anywhere, and it " +
-                        "cannot hold real territory."
-                )
-                BodyNote(
-                    "Sign-in is available now. Sign in with an email code and your " +
-                        "callsign and colour become a real one, derived from your account -- " +
-                        "stable across devices and reinstalls, and able to hold territory."
-                )
+                SectionHeader(stringResource(R.string.identity_not_account))
+                BodyNote(stringResource(R.string.identity_preview_body))
+                BodyNote(stringResource(R.string.identity_preview_upgrade))
                 CommandAction(
-                    label = "SIGN IN",
+                    label = stringResource(R.string.identity_sign_in),
                     onClick = onSignIn,
                     modifier = Modifier
                         .padding(top = 16.dp)
@@ -175,8 +163,8 @@ fun IdentityScreen(
                 )
             }
             is Identity.Resolving -> {
-                SectionHeader("WORKING")
-                BodyNote("Establishing a session.")
+                SectionHeader(stringResource(R.string.identity_working))
+                BodyNote(stringResource(R.string.identity_working_body))
             }
         }
 

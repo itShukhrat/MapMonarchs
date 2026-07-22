@@ -110,4 +110,40 @@
     <string name="hud_preview_banner">PREVIEW - SIMULATED, NOT REAL</string>
     <string name="hud_exit">EXIT</string>
     <string name="hud_preview_a11y">Preview mode. Simulated territory, not real. Press exit to leave.</string>
+
+    <!-- IDENTITY. Callsigns are derived server-side and are never translated:
+         a player is the same person in every language. Only the words around
+         them move. -->
+    <string name="identity_title">IDENTITY</string>
+    <string name="identity_no_identity">NO IDENTITY</string>
+    <string name="identity_identifying">IDENTIFYING</string>
+    <string name="identity_unavailable">UNAVAILABLE</string>
+    <string name="identity_state_signed_in">SOVEREIGN CALLSIGN</string>
+    <string name="identity_state_preview">PLACEHOLDER - NOT A SESSION</string>
+    <string name="identity_state_resolving">ESTABLISHING SESSION</string>
+    <string name="identity_state_signed_out">NO SESSION</string>
+    <string name="identity_state_unavailable">SESSION UNAVAILABLE</string>
+    <string name="identity_session">SESSION</string>
+    <string name="identity_state">State</string>
+    <string name="identity_active">ACTIVE</string>
+    <string name="identity_preview">PREVIEW</string>
+    <string name="identity_resolving">RESOLVING</string>
+    <string name="identity_signed_out">SIGNED OUT</string>
+    <string name="identity_colour">Territory colour</string>
+    <string name="identity_assigned">ASSIGNED</string>
+    <string name="identity_none">NONE</string>
+    <string name="identity_derived">HOW THIS IS DERIVED</string>
+    <string name="identity_derived_body">Your callsign and colour are computed from your account id, so they are the same on every device and after every reinstall. They are not stored as a profile and cannot be changed — which also means nobody can impersonate your colour on the map.</string>
+    <string name="identity_sign_out">SIGN OUT</string>
+    <string name="identity_why_none">WHY YOU HAVE NO IDENTITY</string>
+    <string name="identity_no_session_effect">Without a session the server cannot attribute territory to you, so claiming is disabled. The map stays readable in the meantime.</string>
+    <string name="identity_retry">RETRY SIGN-IN</string>
+    <string name="identity_no_session">NO SESSION</string>
+    <string name="identity_no_session_body">You are not signed in, so the server cannot attribute territory to you. Sign-in uses a code sent to your email — this project has anonymous sign-in switched off.</string>
+    <string name="identity_sign_in">SIGN IN</string>
+    <string name="identity_not_account">THIS IS NOT AN ACCOUNT</string>
+    <string name="identity_preview_body">Preview mode gives you a placeholder callsign so the map has something to colour. It is not a session, it is not stored anywhere, and it cannot hold real territory.</string>
+    <string name="identity_preview_upgrade">Sign-in is available now. Sign in with an email code and your callsign and colour become a real one, derived from your account — stable across devices and reinstalls, and able to hold territory.</string>
+    <string name="identity_working">WORKING</string>
+    <string name="identity_working_body">Establishing a session.</string>
 </resources>
