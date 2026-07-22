@@ -31,11 +31,14 @@ class TrackingModeTest {
     }
 
     @Test
-    fun `every mode states its battery trade-off`() {
+    fun `every mode carries a label and a cost detail`() {
         // A settings row that does not say what it costs is not a real choice.
+        // That the copy is non-blank is asserted in TrackingModeCopyTest
+        // (instrumented): these are string ids now, and only a Context resolves
+        // them. Here we can still prove no mode was left without one.
         TrackingMode.entries.forEach { mode ->
-            assertTrue("no label for $mode", mode.label.isNotBlank())
-            assertTrue("no cost detail for $mode", mode.detail.isNotBlank())
+            assertTrue("no label id for $mode", mode.labelRes != 0)
+            assertTrue("no cost detail id for $mode", mode.detailRes != 0)
         }
     }
 }

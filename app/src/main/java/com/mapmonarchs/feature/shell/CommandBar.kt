@@ -42,6 +42,8 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
+import com.mapmonarchs.R
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -262,11 +264,16 @@ private fun CommandBarItem(
 
     // Locked destinations announce their state rather than relying on a dimmer
     // glyph, which a screen reader cannot see and a player in sunlight may miss.
-    val description = buildString {
-        append(destination.label)
-        if (destination.isLocked) append(", locked")
-        if (selected) append(", current screen")
-    }
+    val label = stringResource(destination.labelRes)
+    val description = stringResource(
+        when {
+            destination.isLocked && selected -> R.string.nav_a11y_locked_current
+            destination.isLocked -> R.string.nav_a11y_locked
+            selected -> R.string.nav_a11y_current
+            else -> R.string.nav_a11y_plain
+        },
+        label
+    )
 
     Column(
         modifier = modifier
@@ -304,7 +311,7 @@ private fun CommandBarItem(
             }
         }
         Text(
-            text = destination.label,
+            text = label,
             style = MapMonarchsType.navLabel,
             color = tint,
             modifier = Modifier.padding(top = 5.dp)

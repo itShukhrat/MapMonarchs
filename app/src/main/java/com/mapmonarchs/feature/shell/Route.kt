@@ -248,19 +248,28 @@ val LOCKED_ROUTES: List<Route> = listOf(
  */
 data class NavDestination(
     val route: Route,
-    val glyph: NavGlyph,
-    /** Short enough to sit under a 22dp glyph without truncating. */
-    val label: String
+    val glyph: NavGlyph
 ) {
+    /**
+     * The label IS the route title, not a copy of it.
+     *
+     * It used to be a separate constructor argument holding the same words. The
+     * comment above already said these must not diverge, but nothing enforced
+     * it -- two literals for one concept is precisely the drift this file warns
+     * about, and localisation would have doubled the number of places to keep
+     * in sync. Now there is one.
+     */
+    val labelRes: Int get() = route.titleRes
+
     val isLocked: Boolean get() = route.lock != null
 }
 
 val NAV_DESTINATIONS: List<NavDestination> = listOf(
-    NavDestination(Route.Map, NavGlyph.MAP, "MAP"),
-    NavDestination(Route.Territory, NavGlyph.CLAIMS, "TERRITORY"),
-    NavDestination(Route.Missions, NavGlyph.MISSIONS, "MISSIONS"),
-    NavDestination(Route.Empire, NavGlyph.SOCIAL, "EMPIRE"),
-    NavDestination(Route.Command, NavGlyph.COMMAND, "COMMAND")
+    NavDestination(Route.Map, NavGlyph.MAP),
+    NavDestination(Route.Territory, NavGlyph.CLAIMS),
+    NavDestination(Route.Missions, NavGlyph.MISSIONS),
+    NavDestination(Route.Empire, NavGlyph.SOCIAL),
+    NavDestination(Route.Command, NavGlyph.COMMAND)
 )
 
 val ALL_ROUTES: List<Route> = COMMAND_ROUTES + REFERENCE_ROUTES + LOCKED_ROUTES

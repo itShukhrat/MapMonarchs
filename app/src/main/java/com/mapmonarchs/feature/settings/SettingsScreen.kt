@@ -86,8 +86,8 @@ fun SettingsScreen(
             )
             TrackingMode.entries.forEach { mode ->
                 ChoiceRow(
-                    label = mode.label,
-                    detail = mode.detail,
+                    label = stringResource(mode.labelRes),
+                    detail = stringResource(mode.detailRes),
                     selected = mode == trackingMode,
                     onClick = { onTrackingModeChange(mode) },
                     modifier = Modifier.testTag("tracking_${mode.name}")

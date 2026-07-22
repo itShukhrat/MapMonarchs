@@ -239,7 +239,7 @@ fun DiagnosticsScreen(
                 value = (state.capture as? CaptureState.Blocked)?.reason?.name ?: "NONE",
                 valueColor = TextMuted
             )
-            StatusRow(label = stringResource(R.string.diag_cadence), value = trackingMode.label, valueColor = TextMuted)
+            StatusRow(label = stringResource(R.string.diag_cadence), value = stringResource(trackingMode.labelRes), valueColor = TextMuted)
         }
 
         CommandCard(title = stringResource(R.string.diag_capture)) {

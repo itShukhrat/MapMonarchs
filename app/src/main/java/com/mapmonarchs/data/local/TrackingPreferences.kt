@@ -1,6 +1,8 @@
 package com.mapmonarchs.data.local
 
+import androidx.annotation.StringRes
 import android.content.Context
+import com.mapmonarchs.R
 
 /**
  * Tracking cadence. This is a REAL setting with a real cost.
@@ -10,10 +12,14 @@ import android.content.Context
  * it decided for them. BALANCED is the default because a territory game does not
  * need sub-second fixes to work.
  */
-enum class TrackingMode(val label: String, val detail: String, val intervalMillis: Long) {
-    PRECISE("PRECISE", "Fastest updates. Highest battery cost.", 2_000L),
-    BALANCED("BALANCED", "Updates every few seconds. Recommended.", 5_000L),
-    CONSERVATIVE("CONSERVATIVE", "Slower updates. Lowest battery cost.", 12_000L);
+enum class TrackingMode(
+    @StringRes val labelRes: Int,
+    @StringRes val detailRes: Int,
+    val intervalMillis: Long
+) {
+    PRECISE(R.string.cadence_precise, R.string.cadence_precise_detail, 2_000L),
+    BALANCED(R.string.cadence_balanced, R.string.cadence_balanced_detail, 5_000L),
+    CONSERVATIVE(R.string.cadence_conservative, R.string.cadence_conservative_detail, 12_000L);
 
     companion object {
         /**
