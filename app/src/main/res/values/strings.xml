@@ -31,4 +31,20 @@
     <string name="about_map_data_body">Maps and map data are provided by Mapbox and OpenStreetMap contributors. Attribution is shown on the map itself as their licence requires.</string>
     <string name="about_status">STATUS</string>
     <string name="about_status_body">This is an early build. Territory claiming is not yet enabled — the server side of the capture system is still being brought up.</string>
+
+    <!-- SAFETY AND PRIVACY. A Play compliance surface: location disclosure is
+         required, so this copy must translate before the app ships to a market
+         that does not read English. -->
+    <string name="safety_title">SAFETY &amp; PRIVACY</string>
+    <string name="safety_playing">PLAYING SAFELY</string>
+    <string name="safety_playing_1">Look up. Territory is not worth walking into traffic, and no hex is worth entering private property, construction sites, or rail corridors.</string>
+    <string name="safety_playing_2">Claiming is disabled above walking speed. This is intentional — the game is not playable from a moving vehicle, and attempting it is dangerous.</string>
+    <string name="safety_playing_3">If an area feels unsafe, leave it. The map will still be there tomorrow, and territory decays slowly enough that nothing is lost by waiting.</string>
+    <string name="safety_collect">WHAT WE COLLECT</string>
+    <string name="safety_collect_1">While the map is open we read your position, its accuracy, your speed, and whether Android reports the location as mocked.</string>
+    <string name="safety_collect_2">These readings are sent to our servers to decide which hex you are standing in. The server makes that decision, not your phone, which is what stops a modified app from claiming territory it never walked to.</string>
+    <string name="safety_movement">WHY MOVEMENT IS ANALYSED</string>
+    <string name="safety_movement_body">Every claim attempt is recorded with the reason it was accepted or rejected. That record is what lets us detect spoofed locations and impossible travel. It exists to protect honest players from people who fake their way to the top.</string>
+    <string name="safety_not_do">WHAT WE DO NOT DO</string>
+    <string name="safety_not_do_body">We do not track you in the background. We do not show your live position to other players. We do not sell location data, and there is no advertising SDK in this app.</string>
 </resources>

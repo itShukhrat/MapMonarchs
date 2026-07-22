@@ -4,7 +4,9 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.mapmonarchs.R
 import com.mapmonarchs.ui.components.BodyNote
 import com.mapmonarchs.ui.components.CommandScreen
 import com.mapmonarchs.ui.components.SectionHeader
@@ -21,53 +23,38 @@ import com.mapmonarchs.ui.components.SectionHeader
  *
  * WHAT CAN GO WRONG: safety copy that reads as legal boilerplate gets skipped.
  * Kept short, specific, and in plain language.
+ *
+ * MIGRATED TO STRING RESOURCES SECOND, and not by accident: a location
+ * disclosure that a player cannot read is not a disclosure. Of every screen in
+ * the product this is the one where shipping untranslated copy into Uzbekistan
+ * would be a compliance problem rather than a polish problem.
  */
 @Composable
 fun SafetyScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
-    CommandScreen(title = "SAFETY & PRIVACY", onBack = onBack, modifier = modifier) {
+    CommandScreen(
+        title = stringResource(R.string.safety_title),
+        onBack = onBack,
+        modifier = modifier
+    ) {
 
-        SectionHeader("PLAYING SAFELY")
+        SectionHeader(stringResource(R.string.safety_playing))
 
-        BodyNote(
-            "Look up. Territory is not worth walking into traffic, and no hex is worth " +
-                "entering private property, construction sites, or rail corridors."
-        )
-        BodyNote(
-            "Claiming is disabled above walking speed. This is intentional -- the game is " +
-                "not playable from a moving vehicle, and attempting it is dangerous."
-        )
-        BodyNote(
-            "If an area feels unsafe, leave it. The map will still be there tomorrow, and " +
-                "territory decays slowly enough that nothing is lost by waiting."
-        )
+        BodyNote(stringResource(R.string.safety_playing_1))
+        BodyNote(stringResource(R.string.safety_playing_2))
+        BodyNote(stringResource(R.string.safety_playing_3))
 
-        SectionHeader("WHAT WE COLLECT")
+        SectionHeader(stringResource(R.string.safety_collect))
 
-        BodyNote(
-            "While the map is open we read your position, its accuracy, your speed, and " +
-                "whether Android reports the location as mocked."
-        )
-        BodyNote(
-            "These readings are sent to our servers to decide which hex you are standing in. " +
-                "The server makes that decision, not your phone, which is what stops a " +
-                "modified app from claiming territory it never walked to."
-        )
+        BodyNote(stringResource(R.string.safety_collect_1))
+        BodyNote(stringResource(R.string.safety_collect_2))
 
-        SectionHeader("WHY MOVEMENT IS ANALYSED")
+        SectionHeader(stringResource(R.string.safety_movement))
 
-        BodyNote(
-            "Every claim attempt is recorded with the reason it was accepted or rejected. " +
-                "That record is what lets us detect spoofed locations and impossible travel. " +
-                "It exists to protect honest players from people who fake their way to the top."
-        )
+        BodyNote(stringResource(R.string.safety_movement_body))
 
-        SectionHeader("WHAT WE DO NOT DO")
+        SectionHeader(stringResource(R.string.safety_not_do))
 
-        BodyNote(
-            "We do not track you in the background. We do not show your live position to " +
-                "other players. We do not sell location data, and there is no advertising SDK " +
-                "in this app."
-        )
+        BodyNote(stringResource(R.string.safety_not_do_body))
 
     }
 }
