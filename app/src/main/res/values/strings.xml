@@ -1,3 +1,34 @@
 <resources>
     <string name="app_name">MapMonarchs</string>
+
+    <!--
+      PLAYER-FACING COPY LIVES HERE, NOT IN KOTLIN.
+
+      Every string below was a hardcoded literal in a composable. They move here
+      so the app can ship in Uzbek and Russian, which it must: the playable world
+      is Uzbekistan and shipping English-only to that market is a launch blocker,
+      not a polish item.
+
+      MIGRATION ORDER MATTERS. Feature screens are migrated one at a time because
+      each screen is a complete unit that still compiles on its own. The DOMAIN
+      layer is not: AppError.playerMessage() and Blocker.explanation() change
+      return type and every caller must change in the same commit. See
+      docs/localization-plan.md.
+
+      TRANSLATION STATUS: English is authored. values-uz and values-ru are
+      deliberately absent until a native speaker supplies them, so Android falls
+      back to English rather than showing machine-translated copy that would look
+      finished and read wrong.
+    -->
+
+    <!-- ABOUT -->
+    <string name="about_title">ABOUT</string>
+    <string name="about_build">BUILD</string>
+    <string name="about_version">Version</string>
+    <string name="about_build_number">Build</string>
+    <string name="about_type">Type</string>
+    <string name="about_map_data">MAP DATA</string>
+    <string name="about_map_data_body">Maps and map data are provided by Mapbox and OpenStreetMap contributors. Attribution is shown on the map itself as their licence requires.</string>
+    <string name="about_status">STATUS</string>
+    <string name="about_status_body">This is an early build. Territory claiming is not yet enabled — the server side of the capture system is still being brought up.</string>
 </resources>
