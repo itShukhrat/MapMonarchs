@@ -167,4 +167,30 @@
     <string name="help_q_battery">BATTERY DRAIN</string>
     <string name="help_a_battery">Location is only read while the map is open. If the cost is still too high, lower the tracking cadence in settings — claiming stays available, it just updates less often.</string>
     <string name="help_open_settings">OPEN SETTINGS</string>
+
+    <!-- SIGN IN. Email OTP is the only provider this project supports; there is
+         no Google or Apple path in the repo or the Supabase config, so no copy
+         here may imply one. The address placeholder stays a literal example, not
+         translated prose. -->
+    <string name="signin_title">SIGN IN</string>
+    <string name="signin_complete">Signed in.</string>
+    <string name="signin_your_address">YOUR ADDRESS</string>
+    <string name="signin_address_body">Territory has to belong to someone. We send a six-digit code to sign you in — there is no password to remember and nothing to install.</string>
+    <string name="signin_email_placeholder">you@example.com</string>
+    <string name="signin_try_again">TRY AGAIN</string>
+    <string name="signin_sending">SENDING</string>
+    <string name="signin_send_code">SEND CODE</string>
+    <string name="signin_what_for">WHAT WE USE IT FOR</string>
+    <string name="signin_what_for_body">Signing in. That is all. Your address is not shown to other players, not used for marketing, and not linked to your location history.</string>
+    <string name="signin_enter_code">ENTER THE CODE</string>
+    <string name="signin_sent_to">Sent to %1$s. It expires shortly.</string>
+    <string name="signin_code_placeholder">000000</string>
+    <string name="signin_resend">RESEND</string>
+    <string name="signin_resent">A new code has been sent.</string>
+    <string name="signin_verifying">VERIFYING</string>
+    <string name="signin_confirm">CONFIRM</string>
+    <string name="signin_no_code">NO CODE?</string>
+    <string name="signin_no_code_body">Check spam. Delivery depends on the mail service this project is configured with, so it can take a moment.</string>
+    <string name="signin_resend_code">RESEND CODE</string>
+    <string name="signin_different_address">USE A DIFFERENT ADDRESS</string>
 </resources>

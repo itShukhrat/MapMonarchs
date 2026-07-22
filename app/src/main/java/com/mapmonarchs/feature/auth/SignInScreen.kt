@@ -15,6 +15,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
+import com.mapmonarchs.R
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
@@ -68,11 +70,15 @@ fun SignInScreen(
     onBack: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    CommandScreen(title = "SIGN IN", onBack = onBack, modifier = modifier) {
+    CommandScreen(
+        title = stringResource(R.string.signin_title),
+        onBack = onBack,
+        modifier = modifier
+    ) {
         when (state) {
             is SignInState.EnteringEmail -> EmailStep(state, onEmailChanged, onRequestCode)
             is SignInState.EnteringCode -> CodeStep(state, onCodeChanged, onVerifyCode, onResend, onChangeEmail)
-            is SignInState.Complete -> BodyNote("Signed in.")
+            is SignInState.Complete -> BodyNote(stringResource(R.string.signin_complete))
         }
     }
 }
@@ -83,16 +89,13 @@ private fun EmailStep(
     onEmailChanged: (String) -> Unit,
     onRequestCode: () -> Unit
 ) {
-    SectionHeader("YOUR ADDRESS")
-    BodyNote(
-        "Territory has to belong to someone. We send a six-digit code to sign you " +
-            "in -- there is no password to remember and nothing to install."
-    )
+    SectionHeader(stringResource(R.string.signin_your_address))
+    BodyNote(stringResource(R.string.signin_address_body))
 
     FieldBox(
         value = state.email,
         onValueChange = onEmailChanged,
-        placeholder = "you@example.com",
+        placeholder = stringResource(R.string.signin_email_placeholder),
         keyboardType = KeyboardType.Email,
         tag = SignInTags.EMAIL_FIELD
     )
@@ -101,7 +104,7 @@ private fun EmailStep(
         ErrorStrip(
             message = it.playerMessage(),
             onRetry = onRequestCode,
-            retryLabel = "TRY AGAIN",
+            retryLabel = stringResource(R.string.signin_try_again),
             modifier = Modifier
                 .padding(top = 12.dp)
                 .testTag(SignInTags.ERROR)
@@ -109,7 +112,9 @@ private fun EmailStep(
     }
 
     CommandAction(
-        label = if (state.sending) "SENDING" else "SEND CODE",
+        label = stringResource(
+            if (state.sending) R.string.signin_sending else R.string.signin_send_code
+        ),
         onClick = onRequestCode,
         // The reason is stated rather than left to the dimming. A player using a
         // screen reader hears why the control will not respond; previously they
@@ -124,10 +129,9 @@ private fun EmailStep(
             .testTag(SignInTags.PRIMARY)
     )
 
-    SectionHeader("WHAT WE USE IT FOR")
+    SectionHeader(stringResource(R.string.signin_what_for))
     BodyNote(
-        "Signing in. That is all. Your address is not shown to other players, not " +
-            "used for marketing, and not linked to your location history.",
+        stringResource(R.string.signin_what_for_body),
         modifier = Modifier.testTag(SignInTags.PROVIDER_NOTE)
     )
 }
@@ -140,13 +144,13 @@ private fun CodeStep(
     onResend: () -> Unit,
     onChangeEmail: () -> Unit
 ) {
-    SectionHeader("ENTER THE CODE")
-    BodyNote("Sent to ${state.email}. It expires shortly.")
+    SectionHeader(stringResource(R.string.signin_enter_code))
+    BodyNote(stringResource(R.string.signin_sent_to, state.email))
 
     FieldBox(
         value = state.code,
         onValueChange = onCodeChanged,
-        placeholder = "000000",
+        placeholder = stringResource(R.string.signin_code_placeholder),
         keyboardType = KeyboardType.NumberPassword,
         tag = SignInTags.CODE_FIELD
     )
@@ -155,7 +159,7 @@ private fun CodeStep(
         ErrorStrip(
             message = it.playerMessage(),
             onRetry = onResend,
-            retryLabel = "RESEND",
+            retryLabel = stringResource(R.string.signin_resend),
             modifier = Modifier
                 .padding(top = 12.dp)
                 .testTag(SignInTags.ERROR)
@@ -163,11 +167,13 @@ private fun CodeStep(
     }
 
     if (state.resent) {
-        BodyNote("A new code has been sent.", modifier = Modifier.padding(top = 10.dp))
+        BodyNote(stringResource(R.string.signin_resent), modifier = Modifier.padding(top = 10.dp))
     }
 
     CommandAction(
-        label = if (state.verifying) "VERIFYING" else "CONFIRM",
+        label = stringResource(
+            if (state.verifying) R.string.signin_verifying else R.string.signin_confirm
+        ),
         onClick = onVerifyCode,
         state = when {
             state.verifying -> ActionState.Unavailable("checking the code")
@@ -179,13 +185,10 @@ private fun CodeStep(
             .testTag(SignInTags.PRIMARY)
     )
 
-    SectionHeader("NO CODE?")
-    BodyNote(
-        "Check spam. Delivery depends on the mail service this project is " +
-            "configured with, so it can take a moment."
-    )
+    SectionHeader(stringResource(R.string.signin_no_code))
+    BodyNote(stringResource(R.string.signin_no_code_body))
     TextCommand(
-        label = "RESEND CODE",
+        label = stringResource(R.string.signin_resend_code),
         onClick = onResend,
         modifier = Modifier
             .padding(top = 4.dp)
@@ -193,7 +196,7 @@ private fun CodeStep(
             .testTag(SignInTags.RESEND)
     )
     TextCommand(
-        label = "USE A DIFFERENT ADDRESS",
+        label = stringResource(R.string.signin_different_address),
         onClick = onChangeEmail,
         color = TextMuted,
         modifier = Modifier
