@@ -146,4 +146,25 @@
     <string name="identity_preview_upgrade">Sign-in is available now. Sign in with an email code and your callsign and colour become a real one, derived from your account — stable across devices and reinstalls, and able to hold territory.</string>
     <string name="identity_working">WORKING</string>
     <string name="identity_working_body">Establishing a session.</string>
+
+    <!-- HELP. The RIGHT NOW section renders the live blocker, which still comes
+         from Blocker.explanation() in the domain layer. That text moves in its
+         own atomic pass with every caller; only the headings and the fixed
+         answers move here. -->
+    <string name="help_title">HELP</string>
+    <string name="help_right_now">RIGHT NOW</string>
+    <string name="help_open_diagnostics">OPEN DIAGNOSTICS</string>
+    <string name="help_q_no_claim">WHY CAN I NOT CLAIM ANY GROUND?</string>
+    <string name="help_a_no_claim">Claiming is disabled in this build. The server side that decides ownership has not been deployed yet, so no client can claim a hex — including a modified one. This is a deployment state, not a bug in your app.</string>
+    <string name="help_q_gps">THE BUTTON SAYS GPS TOO WEAK</string>
+    <string name="help_a_gps">Your position is known to worse than 30 metres, which is wider than a hex. Acting on it could claim ground you are not standing on. Move away from tall buildings and give it a few seconds outdoors.</string>
+    <string name="help_q_fast">IT SAYS I AM MOVING TOO FAST</string>
+    <string name="help_a_fast">Claiming is limited to walking pace. This is deliberate: the game is not playable from a vehicle, and allowing it would be both unfair and unsafe.</string>
+    <string name="help_q_mock">IT SAYS MOCK LOCATION</string>
+    <string name="help_a_mock">Android is reporting your position as simulated. Turn off any location-spoofing app or developer mock-location setting. Spoofed positions are rejected by the server as well, so there is nothing to gain by hiding it.</string>
+    <string name="help_q_empty">THE MAP LOADS BUT NOTHING IS ON IT</string>
+    <string name="help_a_empty">That is expected. No territory exists anywhere yet, for any player.</string>
+    <string name="help_q_battery">BATTERY DRAIN</string>
+    <string name="help_a_battery">Location is only read while the map is open. If the cost is still too high, lower the tracking cadence in settings — claiming stays available, it just updates less often.</string>
+    <string name="help_open_settings">OPEN SETTINGS</string>
 </resources>

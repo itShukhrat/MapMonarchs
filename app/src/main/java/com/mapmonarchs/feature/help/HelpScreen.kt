@@ -5,6 +5,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
+import com.mapmonarchs.R
 import androidx.compose.ui.unit.dp
 import com.mapmonarchs.feature.map.resolveBlocker
 import com.mapmonarchs.feature.map.MapUiState
@@ -37,61 +39,44 @@ fun HelpScreen(
     onOpenSettings: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    CommandScreen(title = "HELP", onBack = onBack, modifier = modifier) {
+    CommandScreen(
+        title = stringResource(R.string.help_title),
+        onBack = onBack,
+        modifier = modifier
+    ) {
 
-        SectionHeader("RIGHT NOW")
+        SectionHeader(stringResource(R.string.help_right_now))
         BodyNote(
             text = resolveBlocker(state).explanation(),
             modifier = Modifier.testTag(HelpTags.CURRENT)
         )
         CommandAction(
-            label = "OPEN DIAGNOSTICS",
+            label = stringResource(R.string.help_open_diagnostics),
             onClick = onOpenDiagnostics,
             modifier = Modifier
                 .padding(top = 8.dp)
                 .testTag(HelpTags.DIAGNOSTICS)
         )
 
-        SectionHeader("WHY CAN'T I CLAIM ANY GROUND?")
-        BodyNote(
-            "Claiming is disabled in this build. The server side that decides ownership " +
-                "has not been deployed yet, so no client can claim a hex -- including a " +
-                "modified one. This is a deployment state, not a bug in your app."
-        )
+        SectionHeader(stringResource(R.string.help_q_no_claim))
+        BodyNote(stringResource(R.string.help_a_no_claim))
 
-        SectionHeader("THE BUTTON SAYS GPS TOO WEAK")
-        BodyNote(
-            "Your position is known to worse than 30 metres, which is wider than a hex. " +
-                "Acting on it could claim ground you are not standing on. Move away from " +
-                "tall buildings and give it a few seconds outdoors."
-        )
+        SectionHeader(stringResource(R.string.help_q_gps))
+        BodyNote(stringResource(R.string.help_a_gps))
 
-        SectionHeader("IT SAYS I AM MOVING TOO FAST")
-        BodyNote(
-            "Claiming is limited to walking pace. This is deliberate: the game is not " +
-                "playable from a vehicle, and allowing it would be both unfair and unsafe."
-        )
+        SectionHeader(stringResource(R.string.help_q_fast))
+        BodyNote(stringResource(R.string.help_a_fast))
 
-        SectionHeader("IT SAYS MOCK LOCATION")
-        BodyNote(
-            "Android is reporting your position as simulated. Turn off any location-spoofing " +
-                "app or developer mock-location setting. Spoofed positions are rejected by the " +
-                "server as well, so there is nothing to gain by hiding it."
-        )
+        SectionHeader(stringResource(R.string.help_q_mock))
+        BodyNote(stringResource(R.string.help_a_mock))
 
-        SectionHeader("THE MAP LOADS BUT NOTHING IS ON IT")
-        BodyNote(
-            "That is expected. No territory exists anywhere yet, for any player."
-        )
+        SectionHeader(stringResource(R.string.help_q_empty))
+        BodyNote(stringResource(R.string.help_a_empty))
 
-        SectionHeader("BATTERY DRAIN")
-        BodyNote(
-            "Location is only read while the map is open. If the cost is still too high, " +
-                "lower the tracking cadence in settings -- claiming stays available, it just " +
-                "updates less often."
-        )
+        SectionHeader(stringResource(R.string.help_q_battery))
+        BodyNote(stringResource(R.string.help_a_battery))
         CommandAction(
-            label = "OPEN SETTINGS",
+            label = stringResource(R.string.help_open_settings),
             onClick = onOpenSettings,
             emphasis = ActionEmphasis.SECONDARY,
             modifier = Modifier.padding(top = 8.dp)
