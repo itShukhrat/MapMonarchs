@@ -8,6 +8,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import com.mapmonarchs.R
+import com.mapmonarchs.feature.common.localizedExplanation
+import com.mapmonarchs.feature.common.localizedMessage
 import androidx.compose.ui.unit.dp
 import com.mapmonarchs.BuildConfig
 import com.mapmonarchs.data.local.TrackingMode
@@ -97,7 +99,7 @@ fun DiagnosticsScreen(
         // not a readout -- so it leads with a section rule, not a panel.
         SectionHeader(stringResource(R.string.diag_primary_blocker))
         BodyNote(
-            text = resolveBlocker(state).explanation(),
+            text = resolveBlocker(state).localizedExplanation(),
             modifier = Modifier.testTag(DiagnosticsTags.BLOCKER)
         )
 
@@ -125,7 +127,7 @@ fun DiagnosticsScreen(
         }
         if (state.territory is TerritoryLoad.Failed) {
             BodyNote(
-                (state.territory as TerritoryLoad.Failed).error.playerMessage(),
+                (state.territory as TerritoryLoad.Failed).error.localizedMessage(),
                 modifier = Modifier.padding(top = 12.dp)
             )
         }

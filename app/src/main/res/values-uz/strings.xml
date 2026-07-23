@@ -247,4 +247,56 @@
     <string name="hud_a11y_recentre">Joylashuvingizga qaytish</string>
     <string name="hud_a11y_recentre_unavailable">Joylashuvingizga qaytish. Mavjud emas: joylashuv hali aniqlanmagan.</string>
     <string name="hud_a11y_frame">Butun oʻyin dunyosini koʻrsatish</string>
+
+    <!-- ===== Domain: capture button states (map) ===== -->
+    <string name="capture_claiming">EGALLANMOQDA…</string>
+    <string name="capture_claimed">EGALLANDI</string>
+    <string name="capture_failed">EGALLASH XATOSI</string>
+    <string name="capture_claim_preview">EGALLASH (DEMO)</string>
+
+    <!-- ===== Domain: Blocker HUD labels (short, upper-case, capture button) ===== -->
+    <string name="blocker_hud_claim">GEKSNI EGALLASH</string>
+    <string name="blocker_hud_location_off">JOYLASHUV OʻCHIQ</string>
+    <string name="blocker_hud_acquiring">GPS QIDIRILMOQDA</string>
+    <string name="blocker_hud_mock">SOXTA JOYLASHUV</string>
+    <string name="blocker_hud_low_accuracy">GPS ZAIF</string>
+    <string name="blocker_hud_too_fast">JUDA TEZ</string>
+    <string name="blocker_hud_teleport">SIGNAL SAKRADI</string>
+    <string name="blocker_hud_outside">%1$s TASHQARISIDA</string>
+    <string name="blocker_hud_identifying">ANIQLANMOQDA</string>
+    <string name="blocker_hud_no_identity">SHAXS YOʻQ</string>
+    <string name="blocker_hud_sign_in">EGALLASH UCHUN KIRING</string>
+    <string name="blocker_hud_claiming_offline">EGALLASH OFFLAYN</string>
+
+    <!-- ===== Domain: Blocker explanations (diagnostics / help) ===== -->
+    <string name="blocker_exp_none">Hozir sizga mavjud boʻlgan amalga hech narsa toʻsqinlik qilmayapti.</string>
+    <string name="blocker_exp_location_missing">Joylashuvga ruxsat berilmagan, shuning uchun ilova siz qaysi geksda turganingizni aniqlay olmaydi. Uni SOZLAMALAR boʻlimida bering.</string>
+    <string name="blocker_exp_acquiring">Amal qilish uchun yetarlicha aniq joylashuv oʻqilishini kutmoqda. Odatda ochiq havoda bu bir necha soniyada hal boʻladi.</string>
+    <string name="blocker_exp_mock">Qurilmangiz soxta joylashuvni xabar qilmoqda. Hududni egallash uchun dasturchi sozlamalarida soxta joylashuvni oʻchiring.</string>
+    <string name="blocker_exp_low_accuracy">Soʻnggi joylashuv oʻqilishi sizni geksga joylashtirish uchun juda noaniq edi. Ochiq osmon yordam beradi; bino ichi va zich koʻchalar xalaqit beradi.</string>
+    <string name="blocker_exp_too_fast">Siz buni yurish deb hisoblash uchun juda tez harakatlanyapsiz. Hudud piyoda yurib qoʻlga kiritiladi.</string>
+    <string name="blocker_exp_teleport">Joylashuvingiz siz yura oladigan masofadan uzoqroqqa sakradi. Oʻqilish ishonchsiz deb hisoblanib, rad etildi.</string>
+    <string name="blocker_exp_outside_known">MapMonarchs %1$s hududida oʻynaladi. Hozir siz %2$s hududidasiz — bu oʻyin dunyosidan tashqarida, shuning uchun bu yerni hech kim egallay olmaydi.</string>
+    <string name="blocker_exp_outside_unknown">MapMonarchs %1$s hududida oʻynaladi. Siz oʻyin dunyosidan tashqaridasiz, shuning uchun bu yerni hech kim egallay olmaydi.</string>
+    <string name="blocker_exp_identity_resolving">Sessiyangiz hali oʻrnatilmoqda.</string>
+    <string name="blocker_exp_identity_unavailable">Kirish mavjud emas, shuning uchun server hududni sizga biriktira olmaydi. %1$s</string>
+    <string name="blocker_exp_not_signed_in">Siz tizimga kirmagansiz, shuning uchun server hududni hech kimga biriktira olmaydi. Hududni egallash uchun email kodi bilan kiring.</string>
+    <string name="blocker_exp_capture_not_deployed">Egallash backendi joylashtirilgan va server tomonidan boshqariladi. Ilovadagi egallash tugmasi ishga tushishidan oldin yakunlanmoqda va tekshirilmoqda, shuning uchun ilovadan egallash hali faol emas. Bu mijoz tomonidagi qadam — joylashuvingiz yoki sessiyangizdagi muammo emas.</string>
+
+    <!-- ===== Domain: AppError player messages ===== -->
+    <string name="error_offline">Aloqa yoʻq. Hudud eskirgan boʻlishi mumkin.</string>
+    <string name="error_schema_missing">Hudud xizmati hali joylashtirilmagan.</string>
+    <string name="error_unauthorized">Kirish rad etildi. Sessiya muddati tugagan boʻlishi mumkin.</string>
+    <string name="error_malformed">Hudud maʼlumotlarini oʻqib boʻlmadi.</string>
+    <string name="error_backend_failure">Hudud xizmati xatosi.</string>
+    <string name="error_auth_unavailable">Kirish mavjud emas.</string>
+    <string name="error_invalid_email">Bu email manzili notoʻgʻri koʻrinadi.</string>
+    <string name="error_invalid_code">Bu kod yaroqsiz. Muddati tugagan boʻlishi mumkin.</string>
+    <string name="error_rate_limited_unknown">Juda koʻp urinish. Bir daqiqa kuting va qayta urinib koʻring.</string>
+    <string name="error_mail_not_delivered">Kodni yuborib boʻlmadi. Email yetkazish sozlanmagan.</string>
+    <string name="error_unexpected">Nimadir xato ketdi.</string>
+    <plurals name="error_rate_limited">
+        <item quantity="one">Juda koʻp urinish. %1$d soniya kuting va qayta urinib koʻring.</item>
+        <item quantity="other">Juda koʻp urinish. %1$d soniya kuting va qayta urinib koʻring.</item>
+    </plurals>
 </resources>

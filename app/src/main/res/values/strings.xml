@@ -328,4 +328,56 @@
     <string name="hud_a11y_recentre">Recentre on your position</string>
     <string name="hud_a11y_recentre_unavailable">Recentre on your position. Unavailable: no position fix yet.</string>
     <string name="hud_a11y_frame">Frame the whole playable world</string>
+
+    <!-- ===== Domain: capture button states (map) ===== -->
+    <string name="capture_claiming">CLAIMING</string>
+    <string name="capture_claimed">CLAIMED</string>
+    <string name="capture_failed">CAPTURE FAILED</string>
+    <string name="capture_claim_preview">CLAIM (PREVIEW)</string>
+
+    <!-- ===== Domain: Blocker HUD labels (short, upper-case, capture button) ===== -->
+    <string name="blocker_hud_claim">CLAIM HEX</string>
+    <string name="blocker_hud_location_off">LOCATION OFF</string>
+    <string name="blocker_hud_acquiring">ACQUIRING GPS</string>
+    <string name="blocker_hud_mock">MOCK LOCATION</string>
+    <string name="blocker_hud_low_accuracy">GPS TOO WEAK</string>
+    <string name="blocker_hud_too_fast">MOVING TOO FAST</string>
+    <string name="blocker_hud_teleport">SIGNAL JUMPED</string>
+    <string name="blocker_hud_outside">OUTSIDE %1$s</string>
+    <string name="blocker_hud_identifying">IDENTIFYING</string>
+    <string name="blocker_hud_no_identity">NO IDENTITY</string>
+    <string name="blocker_hud_sign_in">SIGN IN TO CLAIM</string>
+    <string name="blocker_hud_claiming_offline">CLAIMING OFFLINE</string>
+
+    <!-- ===== Domain: Blocker explanations (diagnostics / help) ===== -->
+    <string name="blocker_exp_none">Nothing is blocking the action available to you right now.</string>
+    <string name="blocker_exp_location_missing">Location permission is not granted, so the app cannot tell which hex you are standing in. Grant it in SETTINGS.</string>
+    <string name="blocker_exp_acquiring">Waiting for a position reading accurate enough to act on. This usually clears within a few seconds outdoors.</string>
+    <string name="blocker_exp_mock">Your device is reporting a simulated location. Turn off mock location in developer options to claim ground.</string>
+    <string name="blocker_exp_low_accuracy">Your last position reading was too imprecise to place you in a hex. Open sky helps; indoors and dense streets hurt.</string>
+    <string name="blocker_exp_too_fast">You are moving too quickly for this to count as walking. Territory is earned on foot.</string>
+    <string name="blocker_exp_teleport">Your position jumped further than you could have walked. The reading was discarded rather than trusted.</string>
+    <string name="blocker_exp_outside_known">MapMonarchs is played in %1$s. You are currently in %2$s, which is outside the playable world, so no ground here can be claimed by anyone.</string>
+    <string name="blocker_exp_outside_unknown">MapMonarchs is played in %1$s. You are outside the playable world, so no ground here can be claimed by anyone.</string>
+    <string name="blocker_exp_identity_resolving">Still establishing your session.</string>
+    <string name="blocker_exp_identity_unavailable">Sign-in is unavailable, so the server cannot attribute territory to you. %1$s</string>
+    <string name="blocker_exp_not_signed_in">You are not signed in, so the server has no one to attribute territory to. Sign in with an email code to claim ground.</string>
+    <string name="blocker_exp_capture_not_deployed">The capture backend is deployed and server-authoritative. The in-app claim button is being finalised and verified before it goes live, so claiming from the app is not active yet. This is a client step, not something wrong with your position or your session.</string>
+
+    <!-- ===== Domain: AppError player messages ===== -->
+    <string name="error_offline">No connection. Territory may be out of date.</string>
+    <string name="error_schema_missing">Territory service is not deployed yet.</string>
+    <string name="error_unauthorized">Access refused. Sign-in may have expired.</string>
+    <string name="error_malformed">Territory data could not be read.</string>
+    <string name="error_backend_failure">Territory service error.</string>
+    <string name="error_auth_unavailable">Sign-in unavailable.</string>
+    <string name="error_invalid_email">That email address does not look right.</string>
+    <string name="error_invalid_code">That code is not valid. It may have expired.</string>
+    <string name="error_rate_limited_unknown">Too many attempts. Wait a minute and try again.</string>
+    <string name="error_mail_not_delivered">The code could not be sent. Email delivery is not configured.</string>
+    <string name="error_unexpected">Something went wrong.</string>
+    <plurals name="error_rate_limited">
+        <item quantity="one">Too many attempts. Wait %1$d second and try again.</item>
+        <item quantity="other">Too many attempts. Wait %1$d seconds and try again.</item>
+    </plurals>
 </resources>

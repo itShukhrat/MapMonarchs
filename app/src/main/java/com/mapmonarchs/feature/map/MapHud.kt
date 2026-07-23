@@ -45,6 +45,9 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import com.mapmonarchs.R
+import com.mapmonarchs.domain.model.Blocker
+import com.mapmonarchs.feature.common.localizedHudLabel
+import com.mapmonarchs.feature.common.localizedMessage
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
@@ -120,7 +123,7 @@ fun MapHud(
             // player is not in the game at all, so that is the fact to surface.
             (state.identityError() ?: state.territoryError)?.let { error ->
                 ErrorStrip(
-                    message = error.playerMessage(),
+                    message = error.localizedMessage(),
                     onRetry = onRetry,
                     modifier = Modifier.testTag(MapHudTags.ERROR)
                 )
@@ -157,7 +160,7 @@ fun MapHud(
         )
 
         CaptureAction(
-            label = state.captureLabel(),
+            label = captureButtonLabel(state),
             ready = state.isCaptureActionable(),
             onReadyClick = onCapture,
             onBlockedClick = onExplainBlocker,
@@ -264,6 +267,27 @@ private fun Holdings(holdings: String, modifier: Modifier = Modifier) {
  * problem here, press to understand it", rather than the flat grey of a disabled
  * control that would invite no interaction at all.
  */
+/**
+ * Localized twin of [captureLabel]. In-flight and settled capture states are
+ * progress, not blockers, so they report first; everything else is the blocker's
+ * own [localizedHudLabel], verbatim. Kept here (not in the domain) because it
+ * reads string resources, but the ordering it mirrors is decided once in
+ * [captureLabel] / [resolveBlocker].
+ */
+@Composable
+private fun captureButtonLabel(state: MapUiState): String {
+    when (state.capture) {
+        is CaptureState.InFlight -> return stringResource(R.string.capture_claiming)
+        is CaptureState.Succeeded -> return stringResource(R.string.capture_claimed)
+        is CaptureState.Failed -> return stringResource(R.string.capture_failed)
+        else -> Unit
+    }
+    val blocker = resolveBlocker(state)
+    if (blocker != Blocker.None) return blocker.localizedHudLabel()
+    return if (state.previewMode) stringResource(R.string.capture_claim_preview)
+    else stringResource(R.string.blocker_hud_claim)
+}
+
 @Composable
 private fun CaptureAction(
     label: String,

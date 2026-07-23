@@ -246,4 +246,58 @@
     <string name="hud_a11y_recentre">Вернуться к вашей позиции</string>
     <string name="hud_a11y_recentre_unavailable">Вернуться к вашей позиции. Недоступно: позиция ещё не определена.</string>
     <string name="hud_a11y_frame">Показать весь игровой мир</string>
+
+    <!-- ===== Domain: capture button states (map) ===== -->
+    <string name="capture_claiming">ЗАХВАТ…</string>
+    <string name="capture_claimed">ЗАХВАЧЕНО</string>
+    <string name="capture_failed">СБОЙ ЗАХВАТА</string>
+    <string name="capture_claim_preview">ЗАХВАТ (ДЕМО)</string>
+
+    <!-- ===== Domain: Blocker HUD labels (short, upper-case, capture button) ===== -->
+    <string name="blocker_hud_claim">ЗАХВАТИТЬ ГЕКС</string>
+    <string name="blocker_hud_location_off">ЛОКАЦИЯ ВЫКЛ</string>
+    <string name="blocker_hud_acquiring">ПОИСК GPS</string>
+    <string name="blocker_hud_mock">ФИКТИВНАЯ ЛОКАЦИЯ</string>
+    <string name="blocker_hud_low_accuracy">GPS СЛАБЫЙ</string>
+    <string name="blocker_hud_too_fast">СЛИШКОМ БЫСТРО</string>
+    <string name="blocker_hud_teleport">СКАЧОК СИГНАЛА</string>
+    <string name="blocker_hud_outside">ВНЕ %1$s</string>
+    <string name="blocker_hud_identifying">ОПОЗНАНИЕ</string>
+    <string name="blocker_hud_no_identity">НЕТ ЛИЧНОСТИ</string>
+    <string name="blocker_hud_sign_in">ВОЙТИ ДЛЯ ЗАХВАТА</string>
+    <string name="blocker_hud_claiming_offline">ЗАХВАТ ОФФЛАЙН</string>
+
+    <!-- ===== Domain: Blocker explanations (diagnostics / help) ===== -->
+    <string name="blocker_exp_none">Сейчас ничто не мешает доступному вам действию.</string>
+    <string name="blocker_exp_location_missing">Разрешение на геолокацию не предоставлено, поэтому приложение не может определить, в каком гексе вы находитесь. Предоставьте его в разделе НАСТРОЙКИ.</string>
+    <string name="blocker_exp_acquiring">Ожидание определения местоположения, достаточно точного для действия. Обычно это занимает несколько секунд на открытом воздухе.</string>
+    <string name="blocker_exp_mock">Ваше устройство сообщает поддельное местоположение. Отключите фиктивную геолокацию в параметрах разработчика, чтобы захватывать территорию.</string>
+    <string name="blocker_exp_low_accuracy">Последнее определение местоположения было слишком неточным, чтобы разместить вас в гексе. Открытое небо помогает; помещения и плотная застройка мешают.</string>
+    <string name="blocker_exp_too_fast">Вы движетесь слишком быстро, чтобы это засчиталось как ходьба. Территория зарабатывается пешком.</string>
+    <string name="blocker_exp_teleport">Ваше местоположение сместилось дальше, чем вы могли пройти. Показание было отброшено, а не принято.</string>
+    <string name="blocker_exp_outside_known">MapMonarchs играется в %1$s. Сейчас вы находитесь в %2$s — за пределами игрового мира, поэтому здесь никто не может захватить территорию.</string>
+    <string name="blocker_exp_outside_unknown">MapMonarchs играется в %1$s. Вы за пределами игрового мира, поэтому здесь никто не может захватить территорию.</string>
+    <string name="blocker_exp_identity_resolving">Устанавливаем вашу сессию.</string>
+    <string name="blocker_exp_identity_unavailable">Вход недоступен, поэтому сервер не может закрепить за вами территорию. %1$s</string>
+    <string name="blocker_exp_not_signed_in">Вы не вошли в систему, поэтому серверу некому приписать территорию. Войдите с кодом из письма, чтобы захватывать территорию.</string>
+    <string name="blocker_exp_capture_not_deployed">Бэкенд захвата развёрнут и авторитетен на стороне сервера. Кнопка захвата в приложении дорабатывается и проверяется перед запуском, поэтому захват из приложения пока не активен. Это шаг на стороне клиента, а не проблема с вашим местоположением или сессией.</string>
+
+    <!-- ===== Domain: AppError player messages ===== -->
+    <string name="error_offline">Нет соединения. Территория может быть устаревшей.</string>
+    <string name="error_schema_missing">Сервис территорий ещё не развёрнут.</string>
+    <string name="error_unauthorized">Доступ отклонён. Возможно, сессия истекла.</string>
+    <string name="error_malformed">Не удалось прочитать данные территории.</string>
+    <string name="error_backend_failure">Ошибка сервиса территорий.</string>
+    <string name="error_auth_unavailable">Вход недоступен.</string>
+    <string name="error_invalid_email">Этот адрес электронной почты выглядит неправильно.</string>
+    <string name="error_invalid_code">Этот код недействителен. Возможно, он истёк.</string>
+    <string name="error_rate_limited_unknown">Слишком много попыток. Подождите минуту и повторите.</string>
+    <string name="error_mail_not_delivered">Не удалось отправить код. Доставка почты не настроена.</string>
+    <string name="error_unexpected">Что-то пошло не так.</string>
+    <plurals name="error_rate_limited">
+        <item quantity="one">Слишком много попыток. Подождите %1$d секунду и повторите.</item>
+        <item quantity="few">Слишком много попыток. Подождите %1$d секунды и повторите.</item>
+        <item quantity="many">Слишком много попыток. Подождите %1$d секунд и повторите.</item>
+        <item quantity="other">Слишком много попыток. Подождите %1$d секунды и повторите.</item>
+    </plurals>
 </resources>

@@ -17,6 +17,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import com.mapmonarchs.R
+import com.mapmonarchs.feature.common.localizedMessage
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
@@ -102,7 +103,7 @@ private fun EmailStep(
 
     state.error?.let {
         ErrorStrip(
-            message = it.playerMessage(),
+            message = it.localizedMessage(),
             onRetry = onRequestCode,
             retryLabel = stringResource(R.string.signin_try_again),
             modifier = Modifier
@@ -157,7 +158,7 @@ private fun CodeStep(
 
     state.error?.let {
         ErrorStrip(
-            message = it.playerMessage(),
+            message = it.localizedMessage(),
             onRetry = onResend,
             retryLabel = stringResource(R.string.signin_resend),
             modifier = Modifier

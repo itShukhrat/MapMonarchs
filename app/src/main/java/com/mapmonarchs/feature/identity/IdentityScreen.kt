@@ -16,6 +16,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import com.mapmonarchs.R
+import com.mapmonarchs.feature.common.localizedMessage
 import androidx.compose.ui.unit.dp
 import com.mapmonarchs.domain.model.Identity
 import com.mapmonarchs.ui.components.BodyNote
@@ -129,7 +130,7 @@ fun IdentityScreen(
             }
             is Identity.Unavailable -> {
                 SectionHeader(stringResource(R.string.identity_why_none))
-                BodyNote(identity.error.playerMessage())
+                BodyNote(identity.error.localizedMessage())
                 BodyNote(stringResource(R.string.identity_no_session_effect))
                 CommandAction(
                     label = stringResource(R.string.identity_retry),

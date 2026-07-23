@@ -7,6 +7,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import com.mapmonarchs.R
+import com.mapmonarchs.feature.common.localizedExplanation
 import androidx.compose.ui.unit.dp
 import com.mapmonarchs.feature.map.resolveBlocker
 import com.mapmonarchs.feature.map.MapUiState
@@ -47,7 +48,7 @@ fun HelpScreen(
 
         SectionHeader(stringResource(R.string.help_right_now))
         BodyNote(
-            text = resolveBlocker(state).explanation(),
+            text = resolveBlocker(state).localizedExplanation(),
             modifier = Modifier.testTag(HelpTags.CURRENT)
         )
         CommandAction(
