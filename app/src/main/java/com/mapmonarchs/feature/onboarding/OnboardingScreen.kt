@@ -84,7 +84,7 @@ fun OnboardingScreen(onContinue: () -> Unit, modifier: Modifier = Modifier) {
         )
 
         Text(
-            text = stringResource(R.string.onboarding_world, PLAYABLE_COUNTRY_NAME),
+            text = stringResource(R.string.onboarding_world, stringResource(R.string.country_name)),
             style = MaterialTheme.typography.bodyMedium,
             color = TextMuted,
             modifier = Modifier.padding(top = 20.dp)

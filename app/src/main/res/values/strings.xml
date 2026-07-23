@@ -318,4 +318,14 @@
     <string name="cadence_balanced_detail">Updates every few seconds. Recommended.</string>
     <string name="cadence_conservative">CONSERVATIVE</string>
     <string name="cadence_conservative_detail">Slower updates. Lowest battery cost.</string>
+    <string name="country_name">Uzbekistan</string>
+    <string name="hud_a11y_callsign">Your callsign: %1$s</string>
+    <string name="hud_a11y_identity">Identity: %1$s</string>
+    <string name="hud_a11y_hexes_unknown">Hexes held: unknown</string>
+    <string name="hud_a11y_hexes">Hexes held: %1$s</string>
+    <string name="hud_a11y_claim">Claim this hex</string>
+    <string name="hud_a11y_cannot_claim">Cannot claim: %1$s. Press to find out why.</string>
+    <string name="hud_a11y_recentre">Recentre on your position</string>
+    <string name="hud_a11y_recentre_unavailable">Recentre on your position. Unavailable: no position fix yet.</string>
+    <string name="hud_a11y_frame">Frame the whole playable world</string>
 </resources>

@@ -180,6 +180,8 @@ fun MapHud(
  */
 @Composable
 private fun IdentityChip(label: String, territoryColor: Color?, modifier: Modifier = Modifier) {
+    val cd = if (territoryColor != null) stringResource(R.string.hud_a11y_callsign, label)
+             else stringResource(R.string.hud_a11y_identity, label)
     Row(
         modifier = modifier
             .clip(RoundedCornerShape(12.dp))
@@ -189,10 +191,7 @@ private fun IdentityChip(label: String, territoryColor: Color?, modifier: Modifi
             .background(MapMonarchsBrush.hudPanel)
             .border(1.dp, EdgeLit, RoundedCornerShape(12.dp))
             .padding(horizontal = 14.dp, vertical = 10.dp)
-            .semantics {
-                contentDescription =
-                    if (territoryColor != null) "Your callsign: $label" else "Identity: $label"
-            },
+            .semantics { contentDescription = cd },
         verticalAlignment = Alignment.CenterVertically
     ) {
         HexGlyph(color = territoryColor, glyphSize = 16.dp)
@@ -221,6 +220,8 @@ private fun IdentityChip(label: String, territoryColor: Color?, modifier: Modifi
 @Composable
 private fun Holdings(holdings: String, modifier: Modifier = Modifier) {
     val unknown = holdings == UNKNOWN_HOLDINGS
+    val cd = if (unknown) stringResource(R.string.hud_a11y_hexes_unknown)
+             else stringResource(R.string.hud_a11y_hexes, holdings)
     Column(
         modifier = modifier
             .clip(RoundedCornerShape(12.dp))
@@ -240,10 +241,7 @@ private fun Holdings(holdings: String, modifier: Modifier = Modifier) {
             color = if (unknown) TextMuted else TextPrimary,
             modifier = Modifier
                 .testTag(MapHudTags.HELD)
-                .semantics {
-                    contentDescription =
-                        if (unknown) "Hexes held: unknown" else "Hexes held: $holdings"
-                }
+                .semantics { contentDescription = cd }
         )
         Text(
             text = stringResource(R.string.hud_hexes_held),
@@ -276,6 +274,8 @@ private fun CaptureAction(
 ) {
     val shape = RoundedCornerShape(14.dp)
     val haptics = LocalHapticFeedback.current
+    val captureCd = if (ready) stringResource(R.string.hud_a11y_claim)
+                    else stringResource(R.string.hud_a11y_cannot_claim, label)
     Box(
         modifier = modifier
             // A READY claim lifts off the map on an accent-tinted shadow. This is
@@ -328,13 +328,7 @@ private fun CaptureAction(
             )
             .padding(horizontal = 40.dp, vertical = 18.dp)
             .testTag(MapHudTags.CAPTURE)
-            .semantics {
-                contentDescription = if (ready) {
-                    "Claim this hex"
-                } else {
-                    "Cannot claim: $label. Press to find out why."
-                }
-            },
+            .semantics { contentDescription = captureCd },
         contentAlignment = Alignment.Center
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -449,11 +443,8 @@ private fun MapControls(
             filled = true,
             enabled = hasFix,
             onClick = onRecentre,
-            contentDescription = if (hasFix) {
-                "Recentre on your position"
-            } else {
-                "Recentre on your position. Unavailable: no position fix yet."
-            }
+            contentDescription = if (hasFix) stringResource(R.string.hud_a11y_recentre)
+            else stringResource(R.string.hud_a11y_recentre_unavailable)
         )
         // Fixed width, not fillMaxWidth: a full-width divider dragged the whole
         // Column to the screen edge and stretched the cluster across the map.
@@ -469,7 +460,7 @@ private fun MapControls(
             filled = false,
             enabled = true,
             onClick = onFrameWorld,
-            contentDescription = "Frame the whole playable world"
+            contentDescription = stringResource(R.string.hud_a11y_frame)
         )
     }
 }

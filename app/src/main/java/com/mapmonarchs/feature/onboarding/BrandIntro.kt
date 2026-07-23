@@ -194,7 +194,7 @@ fun BrandIntro(onDone: () -> Unit, modifier: Modifier = Modifier) {
             // Uzbekistan-only and that is a feature of the design, not a
             // limitation to be discovered later at a border.
             Text(
-                text = PLAYABLE_COUNTRY_NAME.uppercase(),
+                text = stringResource(R.string.country_name).uppercase(),
                 style = MaterialTheme.typography.labelSmall,
                 color = TextMuted,
                 modifier = Modifier

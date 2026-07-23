@@ -163,7 +163,7 @@ fun DiagnosticsScreen(
         CommandCard(title = stringResource(R.string.diag_playable_world)) {
             StatusRow(
                 label = stringResource(R.string.diag_game_world),
-                value = PLAYABLE_COUNTRY_NAME.uppercase(),
+                value = stringResource(R.string.country_name).uppercase(),
                 valueColor = TextMuted
             )
             StatusRow(

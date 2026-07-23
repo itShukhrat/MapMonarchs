@@ -237,4 +237,14 @@
     <string name="cadence_balanced_detail">Har bir necha soniyada yangilanadi. Tavsiya etiladi.</string>
     <string name="cadence_conservative">TEJAMKOR</string>
     <string name="cadence_conservative_detail">Sekinroq yangilanishlar. Eng kam batareya sarfi.</string>
+    <string name="country_name">Oʻzbekiston</string>
+    <string name="hud_a11y_callsign">Sizning chaqiruv belgingiz: %1$s</string>
+    <string name="hud_a11y_identity">Shaxs: %1$s</string>
+    <string name="hud_a11y_hexes_unknown">Egallangan gekslar: nomaʼlum</string>
+    <string name="hud_a11y_hexes">Egallangan gekslar: %1$s</string>
+    <string name="hud_a11y_claim">Bu geksni egallash</string>
+    <string name="hud_a11y_cannot_claim">Egallab boʻlmaydi: %1$s. Sababini bilish uchun bosing.</string>
+    <string name="hud_a11y_recentre">Joylashuvingizga qaytish</string>
+    <string name="hud_a11y_recentre_unavailable">Joylashuvingizga qaytish. Mavjud emas: joylashuv hali aniqlanmagan.</string>
+    <string name="hud_a11y_frame">Butun oʻyin dunyosini koʻrsatish</string>
 </resources>

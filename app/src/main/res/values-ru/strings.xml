@@ -236,4 +236,14 @@
     <string name="cadence_balanced_detail">Обновления каждые несколько секунд. Рекомендуется.</string>
     <string name="cadence_conservative">ЭКОНОМНО</string>
     <string name="cadence_conservative_detail">Более редкие обновления. Наименьший расход батареи.</string>
+    <string name="country_name">Узбекистан</string>
+    <string name="hud_a11y_callsign">Ваш позывной: %1$s</string>
+    <string name="hud_a11y_identity">Личность: %1$s</string>
+    <string name="hud_a11y_hexes_unknown">Гексов во владении: неизвестно</string>
+    <string name="hud_a11y_hexes">Гексов во владении: %1$s</string>
+    <string name="hud_a11y_claim">Захватить этот гекс</string>
+    <string name="hud_a11y_cannot_claim">Нельзя захватить: %1$s. Нажмите, чтобы узнать причину.</string>
+    <string name="hud_a11y_recentre">Вернуться к вашей позиции</string>
+    <string name="hud_a11y_recentre_unavailable">Вернуться к вашей позиции. Недоступно: позиция ещё не определена.</string>
+    <string name="hud_a11y_frame">Показать весь игровой мир</string>
 </resources>
