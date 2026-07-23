@@ -14,8 +14,8 @@
 // Env vars (auto-injected by Supabase Edge Functions): SUPABASE_URL,
 // SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY.
 // ============================================================================
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { latLngToCell } from "https://esm.sh/h3-js@4";
+import { createClient } from "npm:@supabase/supabase-js@2";
+import { latLngToCell } from "npm:h3-js@4";
 
 const RES = 9; // H3 resolution — must match schema.sql (_res constant int := 9)
 
