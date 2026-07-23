@@ -36,11 +36,11 @@ Deno.serve(async (req) => {
   const anon = Deno.env.get("SUPABASE_ANON_KEY")!;
   const service = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
-  // Verify the caller's JWT and read their id. Never trust a client-sent uid.
-  const asUser = createClient(url, anon, {
-    global: { headers: { Authorization: authHeader } },
-  });
-  const { data: { user }, error: authErr } = await asUser.auth.getUser();
+  // Verify the caller's JWT explicitly (getUser(token) validates it statelessly)
+  // and read their id. Never trust a client-sent uid.
+  const token = authHeader.split(" ").pop()!.trim();
+  const asAnon = createClient(url, anon);
+  const { data: { user }, error: authErr } = await asAnon.auth.getUser(token);
   if (authErr || !user) return json({ ok: false, reason: "not_authenticated" }, 401);
 
   let body: Record<string, unknown>;
