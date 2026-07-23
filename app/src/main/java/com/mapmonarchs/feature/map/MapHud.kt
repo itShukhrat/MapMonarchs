@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
@@ -79,6 +80,8 @@ fun MapHud(
     onRetry: () -> Unit,
     onExplainBlocker: () -> Unit,
     onExitPreview: () -> Unit = {},
+    onRecentre: () -> Unit = {},
+    onFrameWorld: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     Box(
@@ -132,6 +135,15 @@ fun MapHud(
                     .padding(bottom = CommandBarHeight + 98.dp)
             )
         }
+
+        MapControls(
+            hasFix = state.playerLat != null && state.playerLng != null,
+            onRecentre = onRecentre,
+            onFrameWorld = onFrameWorld,
+            modifier = Modifier
+                .align(Alignment.CenterEnd)
+                .padding(end = 20.dp, bottom = CommandBarHeight + 40.dp)
+        )
 
         CaptureAction(
             label = state.captureLabel(),
@@ -384,5 +396,117 @@ private fun HexGlyph(color: Color?, glyphSize: Dp, modifier: Modifier = Modifier
         path.close()
         if (color != null) drawPath(path, color)
         else drawPath(path, TextMuted, style = Stroke(width = 1.5.dp.toPx()))
+    }
+}
+/**
+ * Map overlay controls.
+ *
+ * PROBLEM SOLVED: the map had no controls at all. Once a player panned away from
+ * their own position there was no way back except waiting for the next GPS fix to
+ * yank the camera. A hero surface that cannot be steered is a screenshot.
+ *
+ * WHAT THEY ARE, AND ARE NOT: two camera actions, nothing more. RECENTRE returns
+ * to the player; FRAME returns to the whole playable world. There is deliberately
+ * no zoom rocker, no compass, no layer switcher -- this is a territory board, not
+ * a navigation app, and every control that does not serve holding ground is
+ * clutter competing with the map.
+ *
+ * WHY HEXAGONS, NOT MAP ICONS: the brief forbids stock pins and globes, and the
+ * product already speaks one shape. RECENTRE is a filled core inside a ring --
+ * "you, centred". FRAME is an open ring -- "the board, whole". Same crest
+ * geometry as identity and the launcher.
+ *
+ * RECENTRE DISABLES HONESTLY: with no fix there is no "you" to centre on, so it
+ * dims and announces why rather than lying about a position it does not have.
+ */
+@Composable
+private fun MapControls(
+    hasFix: Boolean,
+    onRecentre: () -> Unit,
+    onFrameWorld: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier
+            .clip(RoundedCornerShape(16.dp))
+            .background(MapMonarchsBrush.hudPanel)
+            .border(1.dp, EdgeLit, RoundedCornerShape(16.dp))
+            .padding(4.dp),
+        verticalArrangement = Arrangement.spacedBy(4.dp)
+    ) {
+        MapControlButton(
+            filled = true,
+            enabled = hasFix,
+            onClick = onRecentre,
+            contentDescription = if (hasFix) {
+                "Recentre on your position"
+            } else {
+                "Recentre on your position. Unavailable: no position fix yet."
+            }
+        )
+        Box(
+            modifier = Modifier
+                .padding(horizontal = 8.dp)
+                .fillMaxWidth()
+                .height(1.dp)
+                .background(SlateEdge)
+        )
+        MapControlButton(
+            filled = false,
+            enabled = true,
+            onClick = onFrameWorld,
+            contentDescription = "Frame the whole playable world"
+        )
+    }
+}
+
+@Composable
+private fun MapControlButton(
+    filled: Boolean,
+    enabled: Boolean,
+    onClick: () -> Unit,
+    contentDescription: String,
+    modifier: Modifier = Modifier
+) {
+    val haptics = LocalHapticFeedback.current
+    val tint = when {
+        !enabled -> SlateEdge
+        filled -> SovereignGlow
+        else -> TextMuted
+    }
+    Box(
+        modifier = modifier
+            .size(46.dp)
+            .clip(RoundedCornerShape(12.dp))
+            .clickable(
+                enabled = enabled,
+                role = Role.Button,
+                onClick = {
+                    haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                    onClick()
+                }
+            )
+            .semantics { this.contentDescription = contentDescription },
+        contentAlignment = Alignment.Center
+    ) {
+        Canvas(modifier = Modifier.size(20.dp)) {
+            val cx = size.width / 2f
+            val cy = size.height / 2f
+            val r = size.minDimension / 2f
+            val path = Path()
+            for (i in 0..5) {
+                val a = Math.toRadians(60.0 * i - 30.0)
+                val x = cx + r * kotlin.math.cos(a).toFloat()
+                val y = cy + r * kotlin.math.sin(a).toFloat()
+                if (i == 0) path.moveTo(x, y) else path.lineTo(x, y)
+            }
+            path.close()
+            drawPath(path, tint, style = Stroke(width = 1.6.dp.toPx()))
+            // The filled core is what makes RECENTRE read as "me", the same way a
+            // held identity crest fills and an unclaimed one stays hollow.
+            if (filled) {
+                drawCircle(tint, r * 0.42f, androidx.compose.ui.geometry.Offset(cx, cy))
+            }
+        }
     }
 }

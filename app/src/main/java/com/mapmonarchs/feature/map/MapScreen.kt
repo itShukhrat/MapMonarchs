@@ -392,7 +392,35 @@ fun MapScreen(
             onCapture = viewModel::onCaptureRequested,
             onRetry = viewModel::onRetry,
             onExplainBlocker = onExplainBlocker,
-            onExitPreview = viewModel::exitPreview
+            onExitPreview = viewModel::exitPreview,
+            // Camera controls. These steer the view only -- no state, no backend,
+            // no gameplay effect. RECENTRE returns to the last accepted fix;
+            // FRAME returns to the whole playable world, the same overview the
+            // map opens on so a player is always one tap from seeing the board
+            // and its edges.
+            onRecentre = {
+                val lat = state.playerLat
+                val lng = state.playerLng
+                if (lat != null && lng != null) {
+                    viewportState.flyTo(
+                        cameraOptions {
+                            center(Point.fromLngLat(lng, lat))
+                            zoom(16.0)
+                        },
+                        MapAnimationOptions.mapAnimationOptions { duration(900L) }
+                    )
+                }
+            },
+            onFrameWorld = {
+                viewportState.flyTo(
+                    cameraOptions {
+                        center(DEFAULT_CENTER)
+                        zoom(5.4)
+                        pitch(0.0)
+                    },
+                    MapAnimationOptions.mapAnimationOptions { duration(1100L) }
+                )
+            }
         )
     }
 }
