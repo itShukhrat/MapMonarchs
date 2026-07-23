@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
@@ -444,10 +445,13 @@ private fun MapControls(
                 "Recentre on your position. Unavailable: no position fix yet."
             }
         )
+        // Fixed width, not fillMaxWidth: a full-width divider dragged the whole
+        // Column to the screen edge and stretched the cluster across the map.
+        // The buttons define the width; the rule sits inside them.
         Box(
             modifier = Modifier
-                .padding(horizontal = 8.dp)
-                .fillMaxWidth()
+                .padding(horizontal = 10.dp)
+                .width(26.dp)
                 .height(1.dp)
                 .background(SlateEdge)
         )
