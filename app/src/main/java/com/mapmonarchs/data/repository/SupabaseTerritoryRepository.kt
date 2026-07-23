@@ -1,5 +1,7 @@
 package com.mapmonarchs.data.repository
 
+import io.ktor.client.call.body
+
 import android.util.Log
 import com.mapmonarchs.data.dto.HexOwnershipDto
 import com.mapmonarchs.data.dto.toDomain
@@ -10,6 +12,7 @@ import com.mapmonarchs.domain.model.LocationFix
 import com.mapmonarchs.domain.repository.Outcome
 import com.mapmonarchs.domain.repository.TerritoryRepository
 import io.github.jan.supabase.SupabaseClient
+import io.github.jan.supabase.functions.functions
 import io.github.jan.supabase.postgrest.postgrest
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -59,9 +62,14 @@ class SupabaseTerritoryRepository(
                     put("_is_mock", fix.isMock)
                 }
 
-                val response = client.postgrest
-                    .rpc(function = "attempt_capture", parameters = params)
-                    .decodeAs<JsonObject>()
+                // Calls the Edge Function, not a Postgres RPC: the H3 cell is derived
+                // there with h3-js because this project's Postgres 17 has no h3
+                // extension. The body is identical (raw lat/lng); the server still
+                // derives the hex. The Functions plugin attaches the user JWT, which
+                // the function verifies before calling apply_capture().
+                val response = client.functions
+                    .invoke(function = "attempt_capture", body = params)
+                    .body<JsonObject>()
 
                 val ok = response["ok"]?.jsonPrimitive?.content?.toBooleanStrictOrNull() ?: false
                 val outcome = if (ok) {
