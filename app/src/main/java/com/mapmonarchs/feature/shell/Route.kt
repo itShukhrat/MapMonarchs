@@ -135,7 +135,7 @@ sealed interface Route {
             why = R.string.lock_territory_why,
             unlocksWhen = R.string.lock_territory_when,
             insteadNow = R.string.lock_territory_now,
-            diagnosticsExplainsThis = true,
+            diagnosticsExplainsThis = false,
             motif = LockMotif.WORLD
         )
     }
@@ -147,7 +147,7 @@ sealed interface Route {
             why = R.string.lock_leaderboard_why,
             unlocksWhen = R.string.lock_leaderboard_when,
             insteadNow = R.string.lock_leaderboard_now,
-            diagnosticsExplainsThis = true,
+            diagnosticsExplainsThis = false,
             motif = LockMotif.RANKING
         )
     }
@@ -159,7 +159,7 @@ sealed interface Route {
             why = R.string.lock_notifications_why,
             unlocksWhen = R.string.lock_notifications_when,
             insteadNow = R.string.lock_notifications_now,
-            diagnosticsExplainsThis = true,
+            diagnosticsExplainsThis = false,
             motif = LockMotif.SIGNAL
         )
     }
@@ -171,7 +171,7 @@ sealed interface Route {
             why = R.string.lock_missions_why,
             unlocksWhen = R.string.lock_missions_when,
             insteadNow = R.string.lock_missions_now,
-            diagnosticsExplainsThis = true,
+            diagnosticsExplainsThis = false,
             motif = LockMotif.QUEST
         )
     }

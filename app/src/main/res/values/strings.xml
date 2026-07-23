@@ -30,7 +30,7 @@
     <string name="about_map_data">MAP DATA</string>
     <string name="about_map_data_body">Maps and map data are provided by Mapbox and OpenStreetMap contributors. Attribution is shown on the map itself as their licence requires.</string>
     <string name="about_status">STATUS</string>
-    <string name="about_status_body">This is an early build. Territory claiming is not yet enabled — the server side of the capture system is still being brought up.</string>
+    <string name="about_status_body">This is an early build. The capture backend is deployed and server-authoritative; the in-app claim button is being finalised. Ranking, missions, and squads are deliberately held back until the core loop is proven.</string>
 
     <!-- SAFETY AND PRIVACY. A Play compliance surface: location disclosure is
          required, so this copy must translate before the app ships to a market
@@ -155,7 +155,7 @@
     <string name="help_right_now">RIGHT NOW</string>
     <string name="help_open_diagnostics">OPEN DIAGNOSTICS</string>
     <string name="help_q_no_claim">WHY CAN I NOT CLAIM ANY GROUND?</string>
-    <string name="help_a_no_claim">Claiming is disabled in this build. The server side that decides ownership has not been deployed yet, so no client can claim a hex — including a modified one. This is a deployment state, not a bug in your app.</string>
+    <string name="help_a_no_claim">The capture backend is live and server-authoritative. The in-app claim button is being finalised and verified before it goes live, so claiming from the app is not active for you just yet. DIAGNOSTICS shows the exact backend state at any time.</string>
     <string name="help_q_gps">THE BUTTON SAYS GPS TOO WEAK</string>
     <string name="help_a_gps">Your position is known to worse than 30 metres, which is wider than a hex. Acting on it could claim ground you are not standing on. Move away from tall buildings and give it a few seconds outdoors.</string>
     <string name="help_q_fast">IT SAYS I AM MOVING TOO FAST</string>
@@ -280,18 +280,18 @@
     <!-- LOCK COPY. Held as string ids on FeatureLock rather than raw text,
          because a lock is data and cannot call stringResource. Every field
          stays mandatory, so a lock still cannot fail to explain itself. -->
-    <string name="lock_territory_why">No territory exists yet. The server function that decides who holds a hex has not been deployed, so there is nothing to inspect.</string>
-    <string name="lock_territory_when">The territory schema is applied to the backend.</string>
-    <string name="lock_territory_now">Open DIAGNOSTICS to see the exact backend status.</string>
+    <string name="lock_territory_why">A territory board — every hex held, with its borders and decay at a glance — is deliberately held back until enough ground is in play to be worth its own screen. Territory lives on the map itself for now.</string>
+    <string name="lock_territory_when">Enough ground is held to make a dedicated board worth opening.</string>
+    <string name="lock_territory_now">Watch the map. That is where territory sits today.</string>
     <string name="lock_leaderboard_why">A ranking is only meaningful once territory can be won and lost. Ranking players on zero captured hexes would rank nobody against nobody.</string>
-    <string name="lock_leaderboard_when">Capture is live and the first season of territory data exists.</string>
-    <string name="lock_leaderboard_now">Nothing to compare yet. The map is the whole game today.</string>
-    <string name="lock_notifications_why">There are no events to report. Notifications matter when your ground is under attack — until capture exists, an inbox would only ever be empty.</string>
-    <string name="lock_notifications_when">Capture and decay are live, so territory can change hands.</string>
-    <string name="lock_notifications_now">Nothing is happening to your territory, because you have none.</string>
-    <string name="lock_missions_why">A mission is an instruction to go somewhere and hold it. With no capture, every objective would reduce to \"walk around\" — which the map already asks you to do, without pretending it was assigned.</string>
-    <string name="lock_missions_when">Capture is live, so an objective can have a real outcome.</string>
-    <string name="lock_missions_now">Walk. That is the whole objective today, and it is the one being tested.</string>
+    <string name="lock_leaderboard_when">Enough ground has been claimed to rank.</string>
+    <string name="lock_leaderboard_now">Nothing to compare yet — no ground has been claimed.</string>
+    <string name="lock_notifications_why">Alerts matter once your ground comes under attack often enough to warrant them. The system is held back until there is enough territory in play — and there is nothing to report yet.</string>
+    <string name="lock_notifications_when">Territory changes hands often enough for an alert to earn its interruption.</string>
+    <string name="lock_notifications_now">Nothing to report yet.</string>
+    <string name="lock_missions_why">Missions assign and score objectives on top of the claim loop. They are held back until that loop is proven fun on real walks — an objective bolted onto a loop nobody enjoys would only disguise the problem.</string>
+    <string name="lock_missions_when">The claim loop is proven, so an objective adds to it.</string>
+    <string name="lock_missions_now">Walk and hold ground. That is the whole objective today.</string>
     <string name="lock_empire_why">Teams and empires are deliberately held back. Alliances built before the solo loop is proven fun would hide whether the loop is fun at all.</string>
     <string name="lock_empire_when">The walk-claim-hold loop is proven on real walks by real players.</string>
     <string name="lock_empire_now">Hold ground alone first. That is the part that has to work.</string>

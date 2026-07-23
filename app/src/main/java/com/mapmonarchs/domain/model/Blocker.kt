@@ -147,8 +147,9 @@ sealed interface Blocker {
 
 
         is CaptureNotDeployed ->
-            "The server function that decides ownership has not been deployed yet, so " +
-                "no client can claim ground -- including a modified one. This is a " +
-                "backend deployment step, not something you can fix from the app."
+            "The capture backend is deployed and server-authoritative. The in-app " +
+                "claim button is being finalised and verified before it goes live, so " +
+                "claiming from the app is not active yet. This is a client step, not " +
+                "something wrong with your position or your session."
     }
 }

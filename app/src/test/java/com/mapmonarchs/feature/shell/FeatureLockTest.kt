@@ -68,27 +68,22 @@ class FeatureLockTest {
     }
 
     /**
-     * A lock offers DIAGNOSTICS only when Diagnostics can actually explain it.
+     * No lock routes to DIAGNOSTICS now that the backend gate is open.
      *
-     * Territory, Missions, Leaderboard and Notifications are gated on backend
-     * state that Diagnostics surfaces (schema deployment, capture presence), so
-     * routing there answers the player's question. Empire and Shop are held back
-     * by a product judgement -- "the loop is proven fun" -- that no probe reports.
-     * Sending those to a backend status page would have the player read NOT
-     * DEPLOYED and conclude a deployment is all that stands between them and an
-     * empire, which is the wrong remedy.
+     * The schema, the capture function and the Edge Function are deployed, so
+     * Diagnostics reads REACHABLE. Every remaining lock is a product deferral --
+     * the feature screen is not built, or the loop is not yet proven -- which no
+     * probe reports. Routing any of them to a status page that says REACHABLE
+     * would be a dead end: it answers a question the player is not asking and
+     * says nothing about why the surface is shut. This flipped when the backend
+     * was deployed; before that, Territory/Missions/Leaderboard/Notifications
+     * were genuinely backend-gated and Diagnostics did explain them.
      */
     @Test
-    fun `diagnostics is offered only for locks it can explain`() {
-        listOf(Route.Territory, Route.Missions, Route.Leaderboard, Route.Notifications).forEach {
-            assertTrue(
-                "${it.key} is backend-gated; Diagnostics should explain it",
-                it.lock!!.diagnosticsExplainsThis
-            )
-        }
-        listOf(Route.Empire, Route.Shop).forEach {
+    fun `no lock routes to Diagnostics once the backend gate is open`() {
+        LOCKED_ROUTES.forEach {
             assertFalse(
-                "${it.key} is a product decision Diagnostics cannot show; must not route there",
+                "${it.key} routes to Diagnostics, but a product-deferral lock cannot be explained by a REACHABLE backend",
                 it.lock!!.diagnosticsExplainsThis
             )
         }

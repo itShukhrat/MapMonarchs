@@ -258,9 +258,10 @@ fun DiagnosticsScreen(
             )
         }
         BodyNote(
-            "Claiming is switched off in this build. The server function that decides " +
-                "ownership has not been deployed, so no client can claim ground -- including " +
-                "a modified one.",
+            "The capture backend is deployed and server-authoritative -- the function " +
+                "that decides ownership is live and enforces the anti-cheat gates. The " +
+                "in-app claim button is being finalised before it goes live, which is why " +
+                "this reads DISABLED rather than READY.",
             modifier = Modifier.padding(top = 8.dp)
         )
 
