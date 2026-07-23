@@ -1,30 +1,45 @@
 -- ============================================================================
--- SUPERSEDED — DO NOT APPLY THIS FILE TO THE HOSTED PROJECT.
+-- MapMonarchs — schema.sql  (Supabase / Postgres 17)  RUNNABLE + idempotent.
+-- Paste this whole file into the Supabase SQL Editor and Run. It applies with
+-- NO error and is safe to re-run.
 --
--- This is the ORIGINAL design, which computes the H3 cell inside Postgres via
--- the h3 extension. That extension is NOT available on this Supabase project
--- (Postgres 17.6): `create extension h3` fails with 0A000 "extension h3 is not
--- available / control file ... No such file or directory". See
--- migrations/README.md for the exact error and classification.
+-- H3 NOTE (read this): the Postgres `h3` extension is NOT available on this
+-- hosted project. `create extension h3` fails with:
+--   ERROR 0A000: extension "h3" is not available / control file ... No such file.
+-- That is a Supabase hosting limitation, not a permissions or SQL problem, and
+-- cannot be fixed from SQL. So this file contains NO `create extension h3` and
+-- NO h3_* SQL call -- which is exactly why it runs cleanly here.
 --
--- The DEPLOYED backend is supabase/migrations/ (h3-free SQL) plus the Edge
--- Function supabase/functions/attempt_capture (real H3 via h3-js). This file is
--- kept only for its design rationale in the comments below.
+-- Real H3 is computed in the Edge Function supabase/functions/attempt_capture
+-- (npm:h3-js@4): the client sends raw lat/lng, the function derives the H3 cell
+-- and calls apply_capture() below with it as the text parameter _h3. apply_capture
+-- is EXECUTE-revoked from clients, so only that function can write territory.
+-- Full rejection details + verification: supabase/migrations/README.md
 -- ============================================================================
 
+-- ---- FOUNDATION (tables, RLS, decay, signup trigger, backfill, realtime) ----
+-- Applied to Supabase project gacptifoxlpribgdqhtz (Postgres 17.6).
+-- Idempotent (if-not-exists / drop-if-exists / guarded publication add).
+-- The durable record of the deployed schema; supersedes supabase/schema.sql.
+
 -- ============================================================================
--- MapMonarchs — v0 schema  (Supabase / Postgres)
--- Run this in the Supabase SQL Editor.  Contains NO secrets.
+-- MapMonarchs — FOUNDATION schema (h3-free subset, deployable on Postgres 17)
 --
--- Design rule: the client NEVER writes territory. Ownership is mutated only by
--- the SECURITY DEFINER function attempt_capture(). RLS blocks all direct writes
--- to hex_ownership, so a hacked client cannot mint territory.
+-- WHY: this project's Postgres 17 does NOT offer h3 / h3_postgis (verified:
+-- pg_available_extensions contains neither). The full schema.sql cannot run.
+-- This is every statement from schema.sql that does not need h3.
+--
+-- SAFE BY CONSTRUCTION: the capture function is intentionally absent (it is the
+-- one statement that calls an h3 function, and Postgres refuses to create a
+-- function whose body references a missing function). hex_ownership has NO write
+-- policy, so with no capture function NOTHING can write territory. These tables
+-- are read-only truth until the capture path is solved (Edge Function + h3-js).
+--
+-- h3_index stays TEXT, identical to schema.sql, so a future capture path that
+-- writes real H3 indices as text drops straight in with no migration.
 -- ============================================================================
 
--- ---- Extensions (available on Supabase) ------------------------------------
 create extension if not exists postgis     with schema extensions;
-create extension if not exists h3          with schema extensions;
-create extension if not exists h3_postgis  with schema extensions;
 
 -- ---- Tables ----------------------------------------------------------------
 -- profiles is an ANCHOR, not an identity store.
@@ -143,14 +158,56 @@ create trigger on_auth_user_created
 insert into public.profiles(id)
 select u.id from auth.users u
 on conflict (id) do nothing;
+-- ---- Realtime: push hex ownership changes to the map live -------------------
+-- Every other statement in this file is re-runnable; this one was not. ALTER
+-- PUBLICATION ... ADD TABLE errors with "relation is already member" on a
+-- second run -- and the most likely reason to re-run this file is the sanity
+-- check below failing and the point() order needing a swap.
+do $$
+begin
+  if not exists (
+    select 1 from pg_publication_tables
+    where pubname = 'supabase_realtime'
+      and schemaname = 'public'
+      and tablename = 'hex_ownership'
+  ) then
+    alter publication supabase_realtime add table public.hex_ownership;
+  end if;
+end $$;
+
+-- ---- CAPTURE WRITE-PATH (apply_capture; h3 cell arrives as a text param) ----
+-- The capture write-path. H3 is NOT computed here: the Postgres h3 extension
+-- is unavailable on this host (see migrations/README.md), so the cell is
+-- derived by the Edge Function supabase/functions/attempt_capture (real H3 via
+-- h3-js) and passed in as the text parameter _h3. apply_capture is
+-- EXECUTE-revoked from clients, so only that function can call it.
+-- Idempotent (create-or-replace / revoke / grant).
 
 -- ============================================================================
--- attempt_capture — the only path that mutates territory.
--- Client sends raw lat/lng (+ accuracy/speed/mock flag). Server derives the hex
--- itself (never trusts a client-sent hex), runs anti-cheat gates, logs the
--- attempt, and only then applies the capture.
+-- MapMonarchs — capture path for Postgres 17 (no h3 extension in the DB)
+--
+-- This is attempt_capture() from schema.sql with exactly two changes:
+--   * the H3 cell is a PARAMETER (_h3), not computed here -- it is computed by
+--     the Edge Function (supabase/functions/attempt_capture) with h3-js, which
+--     is the only place the h3 dependency now lives.
+--   * the user id is a PARAMETER (_uid), because the Edge Function has already
+--     verified the caller's JWT.
+--
+-- WHY THIS PRESERVES THE ANTI-CHEAT CONTRACT: the client still sends only raw
+-- lat/lng to the Edge Function. The Edge Function (server-side, trusted) derives
+-- the cell and calls this. This function is EXECUTE-revoked from clients, so a
+-- hacked client cannot call apply_capture directly with a hand-picked _h3 -- it
+-- can only reach the Edge Function, which never trusts a client-sent cell.
+--
+-- Atomicity is kept HERE (not in the Edge Function): the SELECT ... FOR UPDATE
+-- row lock and all ownership writes stay inside one Postgres function, so two
+-- simultaneous captures of the same hex still serialise correctly.
+--
+-- Requires foundation.sql (tables, RLS, effective_strength) applied first.
 -- ============================================================================
-create or replace function public.attempt_capture(
+create or replace function public.apply_capture(
+  _uid      uuid,
+  _h3       text,
   _lat      double precision,
   _lng      double precision,
   _accuracy real    default null,
@@ -159,13 +216,10 @@ create or replace function public.attempt_capture(
 ) returns jsonb
 language plpgsql
 security definer
-set search_path = public, extensions
+set search_path = public
 as $$
 declare
-  _uid  uuid := auth.uid();
-  _res  constant int := 9;          -- H3 resolution (edge ~174m). Playtest dial.
   _atk  constant real := 40;        -- damage dealt to an enemy hex per capture
-  _h3   text;
   _last public.location_events;
   _dist double precision;
   _dt   double precision;
@@ -176,12 +230,11 @@ begin
   if _uid is null then
     return jsonb_build_object('ok', false, 'reason', 'not_authenticated');
   end if;
+  if _h3 is null or _h3 = '' then
+    return jsonb_build_object('ok', false, 'reason', 'no_cell');
+  end if;
 
-  -- Derive hex server-side from submitted coordinates. NOTE: h3_latlng_to_cell
-  -- takes POINT(longitude, latitude). The sanity check at the bottom proves this.
-  _h3 := h3_latlng_to_cell(point(_lng, _lat), _res)::text;
-
-  -- ---- anti-cheat gates ----
+  -- ---- anti-cheat gates (identical thresholds to schema.sql) ----
   if _is_mock then
     _reason := 'mock_location';
   elsif _accuracy is not null and _accuracy > 30 then
@@ -252,38 +305,14 @@ begin
   end if;
 end; $$;
 
--- Postgres grants EXECUTE on new functions to PUBLIC by default, so the grant
--- below does not by itself keep anon out. The body already returns
--- not_authenticated when auth.uid() is null, so this is defence in depth --
--- but an unauthenticated caller should not reach the body at all.
-revoke execute on function public.attempt_capture(
-  double precision, double precision, real, real, boolean
+-- Only the Edge Function (service_role) may call this. Clients are revoked, so a
+-- hacked client cannot bypass the Edge Function and submit a hand-picked cell.
+revoke execute on function public.apply_capture(
+  uuid, text, double precision, double precision, real, real, boolean
 ) from public;
-grant execute on function public.attempt_capture(
-  double precision, double precision, real, real, boolean
-) to authenticated;
-
--- ---- Realtime: push hex ownership changes to the map live -------------------
--- Every other statement in this file is re-runnable; this one was not. ALTER
--- PUBLICATION ... ADD TABLE errors with "relation is already member" on a
--- second run -- and the most likely reason to re-run this file is the sanity
--- check below failing and the point() order needing a swap.
-do $$
-begin
-  if not exists (
-    select 1 from pg_publication_tables
-    where pubname = 'supabase_realtime'
-      and schemaname = 'public'
-      and tablename = 'hex_ownership'
-  ) then
-    alter publication supabase_realtime add table public.hex_ownership;
-  end if;
-end $$;
-
--- ============================================================================
--- SANITY CHECK — run this once. It MUST return 8928308280fffff.
--- If it returns something else, the POINT() order is flipped: swap to
--- point(_lat, _lng) in attempt_capture and re-run. This is the H3 lng/lat gotcha.
--- ============================================================================
-select h3_latlng_to_cell(point(-122.41795063018799, 37.775938728915946), 9)::text
-       as should_be_8928308280fffff;
+revoke execute on function public.apply_capture(
+  uuid, text, double precision, double precision, real, real, boolean
+) from authenticated;
+grant execute on function public.apply_capture(
+  uuid, text, double precision, double precision, real, real, boolean
+) to service_role;

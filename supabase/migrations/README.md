@@ -1,7 +1,9 @@
 # MapMonarchs — Supabase backend (project `gacptifoxlpribgdqhtz`, Postgres 17.6)
 
-These migrations are the durable record of the **deployed** backend. Apply in
-lexical order. They are idempotent, so re-running is safe.
+`../schema.sql` is the single-file, runnable, idempotent form of the deployed
+backend -- paste it into the SQL Editor and Run (verified live: applies with no
+error). These migration files are the SAME content split for the Supabase CLI.
+Apply in lexical order; idempotent, so re-running is safe.
 
 | # | file | what it deploys |
 |---|------|-----------------|
