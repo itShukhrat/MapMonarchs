@@ -30,7 +30,7 @@
     <string name="about_map_data">MAP DATA</string>
     <string name="about_map_data_body">Maps and map data are provided by Mapbox and OpenStreetMap contributors. Attribution is shown on the map itself as their licence requires.</string>
     <string name="about_status">STATUS</string>
-    <string name="about_status_body">This is an early build. The capture backend is deployed and server-authoritative; the in-app claim button is being finalised. Ranking, missions, and squads are deliberately held back until the core loop is proven.</string>
+    <string name="about_status_body">This is an early build, but the core is real: territory claiming is live and server-authoritative. Ranking, missions, and squads are deliberately held back until the claim loop is proven on real walks.</string>
 
     <!-- SAFETY AND PRIVACY. A Play compliance surface: location disclosure is
          required, so this copy must translate before the app ships to a market
@@ -155,7 +155,7 @@
     <string name="help_right_now">RIGHT NOW</string>
     <string name="help_open_diagnostics">OPEN DIAGNOSTICS</string>
     <string name="help_q_no_claim">WHY CAN I NOT CLAIM ANY GROUND?</string>
-    <string name="help_a_no_claim">The capture backend is live and server-authoritative. The in-app claim button is being finalised and verified before it goes live, so claiming from the app is not active for you just yet. DIAGNOSTICS shows the exact backend state at any time.</string>
+    <string name="help_a_no_claim">Claiming is live. To claim a hex you must be signed in and standing inside Uzbekistan, on a real position fix at walking pace. If the button will not fire, open DIAGNOSTICS — it names the exact reason, whether that is no session, weak GPS, or being outside the country.</string>
     <string name="help_q_gps">THE BUTTON SAYS GPS TOO WEAK</string>
     <string name="help_a_gps">Your position is known to worse than 30 metres, which is wider than a hex. Acting on it could claim ground you are not standing on. Move away from tall buildings and give it a few seconds outdoors.</string>
     <string name="help_q_fast">IT SAYS I AM MOVING TOO FAST</string>
@@ -240,6 +240,7 @@
     <string name="diag_status">Status</string>
     <string name="diag_preview_only">PREVIEW ONLY</string>
     <string name="diag_disabled">DISABLED</string>
+    <string name="diag_live">LIVE</string>
     <string name="diag_build">BUILD</string>
     <string name="diag_version">Version</string>
     <string name="diag_type">Type</string>

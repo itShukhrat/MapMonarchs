@@ -97,17 +97,18 @@ class BlockerResolutionTest {
     @Test
     fun `a failed territory read is not a capture blocker`() {
         val s = state(territory = TerritoryLoad.Failed(AppError.SchemaMissing("42P01")))
-        assertEquals(Blocker.CaptureNotDeployed, resolveBlocker(s))
+        assertEquals(Blocker.None, resolveBlocker(s))
     }
 
     /**
-     * The current honest truth of a perfect live state: still blocked, by the
-     * backend. "Nothing is blocking you" is not representable outside preview and
-     * this test exists to keep it that way.
+     * The honest truth of a perfect live state now that the backend is deployed:
+     * a signed-in player, on an accepted fix, inside the playable world, is
+     * genuinely unblocked. Before the schema was applied this returned
+     * CaptureNotDeployed; the deploy is exactly what changed it to None.
      */
     @Test
-    fun `a perfectly healthy live state is still blocked by the undeployed backend`() {
-        assertEquals(Blocker.CaptureNotDeployed, resolveBlocker(state()))
+    fun `a perfectly healthy live state is unblocked once the backend is deployed`() {
+        assertEquals(Blocker.None, resolveBlocker(state()))
     }
 
     @Test
@@ -227,7 +228,7 @@ class BlockerResolutionTest {
         // A failed lookup is not evidence the player left the country. Blocking
         // on Unknown would lock someone out of their own game over a dropped call.
         val s = state(worldPosition = WorldPosition.Unknown("network"))
-        assertEquals(Blocker.CaptureNotDeployed, resolveBlocker(s))
+        assertEquals(Blocker.None, resolveBlocker(s))
     }
 
     @Test

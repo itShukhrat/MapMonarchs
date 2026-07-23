@@ -110,23 +110,24 @@ class MapHudTest {
     // --- what the button does, per real blocker -----------------------------
 
     /**
-     * The honest current truth of a LIVE session: everything the player controls
-     * is correct, and claiming is still off because attempt_capture() is not
-     * deployed. The button says so and routes to the explanation rather than
-     * pretending to be ready.
+     * The honest current truth of a LIVE session now that the backend is
+     * deployed: everything the player controls is correct, so the button reads
+     * CLAIM HEX and firing it submits the claim (the server, authoritative,
+     * re-checks every gate). It does NOT route to an explanation -- there is no
+     * blocker left to explain.
      */
     @Test
-    fun fullyHealthyLiveStateStillReportsTheUndeployedBackend() {
+    fun fullyHealthyLiveStateIsReadyToClaim() {
         var captures = 0
         var explains = 0
         rule.setContent {
             MapMonarchsTheme { MapHud(state(), { captures++ }, {}, { explains++ }) }
         }
         rule.onNodeWithTag(MapHudTags.CAPTURE)
-            .assertTextEquals("CLAIMING OFFLINE")
+            .assertTextEquals("CLAIM HEX")
             .performClick()
-        assertEquals("the client must never claim while the server cannot arbitrate", 0, captures)
-        assertEquals(1, explains)
+        assertEquals("a ready claim must fire the capture, not an explanation", 1, captures)
+        assertEquals(0, explains)
     }
 
     /** Preview is the only place a claim actually fires, and it is labelled as simulated. */

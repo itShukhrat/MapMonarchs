@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.mapmonarchs.domain.model.AppError
+import com.mapmonarchs.domain.model.CaptureOutcome
 import com.mapmonarchs.domain.model.Identity
 import com.mapmonarchs.domain.model.LocationFix
 import com.mapmonarchs.domain.repository.AuthRepository
@@ -408,15 +409,28 @@ class MapViewModel(
             )
             return
         }
-        // The real gate. Reached only outside preview, and it must hold before
-        // anything could ever be submitted. It is false in preview by
-        // construction, so this is belt and braces -- deliberately, because the
-        // cost of being wrong here is a client minting territory.
-        if (!state.canSubmitRealClaim()) {
+        // The real gate. Must hold before anything is submitted -- false in
+        // preview by construction, so this is also belt and braces: the cost of
+        // being wrong is a client trying to mint territory. The SERVER is the
+        // real authority and re-checks every gate; this only avoids a pointless
+        // round-trip and a guaranteed rejection.
+        val fix = lastFix
+        if (!state.canSubmitRealClaim() || fix == null) {
             Log.i(TAG, "real claim refused: ${state.claimRefusalReason()}")
             return
         }
-        Log.i(TAG, "capture requested but gated: schema.sql not yet applied")
+        _uiState.value = _uiState.value.copy(capture = CaptureState.InFlight)
+        viewModelScope.launch {
+            when (val outcome = repository.attemptCapture(fix)) {
+                is Outcome.Success -> {
+                    _uiState.value = _uiState.value.copy(capture = outcome.value.toCaptureState())
+                    // A successful claim changed ownership; refresh the map to show it.
+                    if (outcome.value is CaptureOutcome.Applied) loadTerritory()
+                }
+                is Outcome.Failure ->
+                    _uiState.value = _uiState.value.copy(capture = CaptureState.Failed(outcome.error))
+            }
+        }
     }
 
     /**

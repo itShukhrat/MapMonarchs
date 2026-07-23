@@ -245,8 +245,8 @@ fun DiagnosticsScreen(
         CommandCard(title = stringResource(R.string.diag_capture)) {
             StatusRow(
                 label = stringResource(R.string.diag_status),
-                value = if (state.previewMode) "PREVIEW ONLY" else "DISABLED",
-                valueColor = Contested
+                value = if (state.previewMode) stringResource(R.string.diag_preview_only) else stringResource(R.string.diag_live),
+                valueColor = if (state.previewMode) Contested else SovereignGlow
             )
         }
         if (state.previewMode) {
@@ -258,10 +258,9 @@ fun DiagnosticsScreen(
             )
         }
         BodyNote(
-            "The capture backend is deployed and server-authoritative -- the function " +
-                "that decides ownership is live and enforces the anti-cheat gates. The " +
-                "in-app claim button is being finalised before it goes live, which is why " +
-                "this reads DISABLED rather than READY.",
+            "The capture backend is live and server-authoritative. Claiming a hex " +
+                "submits your raw position; the server derives the cell, enforces the " +
+                "anti-cheat gates, and records the attempt. Everything you claim is real.",
             modifier = Modifier.padding(top = 8.dp)
         )
 

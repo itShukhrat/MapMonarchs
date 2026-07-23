@@ -81,9 +81,14 @@ class RemedyRouteTest {
     }
 
     @Test
-    fun `an undeployed backend routes to diagnostics`() {
+    fun `a healthy live state is unblocked and needs no remedy`() {
+        // Deploying the backend flipped the terminal from CaptureNotDeployed to
+        // None: a signed-in player on a good fix inside the world can just claim.
+        // remedyRouteFor is never consulted for None in practice (a ready claim
+        // fires onCapture, not onExplainBlocker); its defensive default stays
+        // Diagnostics.
         val s = state()
-        assertEquals(Blocker.CaptureNotDeployed, resolveBlocker(s))
+        assertEquals(Blocker.None, resolveBlocker(s))
         assertEquals(Route.Diagnostics, remedyRouteFor(resolveBlocker(s)))
     }
 

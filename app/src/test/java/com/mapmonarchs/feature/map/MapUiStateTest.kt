@@ -105,17 +105,18 @@ class MapUiStateTest {
     }
 
     /**
-     * REVERSED, and worth stating plainly: a signed-in player on an accepted fix
-     * is NOT actionable, because attempt_capture() is not deployed. This used to
-     * assert the opposite, which described an app that could claim ground. It
-     * cannot, and the button must not imply otherwise.
+     * REVERSED by the backend deploy: a signed-in player on an accepted fix
+     * inside the world IS actionable now. attempt_capture() is deployed and
+     * server-authoritative, so the button reads CLAIM HEX and fires. This test
+     * asserted the opposite while the backend was undeployed.
      */
     @Test
-    fun `a live claim is never actionable while the backend is undeployed`() {
-        assertFalse(state(capture = CaptureState.Ready).isCaptureActionable())
-        assertEquals("CLAIMING OFFLINE", state(capture = CaptureState.Ready).captureLabel())
+    fun `a ready claim is actionable now that the backend is deployed`() {
+        assertTrue(state(capture = CaptureState.Ready).isCaptureActionable())
+        assertEquals("CLAIM HEX", state(capture = CaptureState.Ready).captureLabel())
+        // Acquiring a fix is still a real block -- you cannot claim a position
+        // you do not have yet.
         assertFalse(state(capture = CaptureState.AcquiringFix).isCaptureActionable())
-        assertFalse(state(capture = CaptureState.InFlight).isCaptureActionable())
     }
 
     @Test

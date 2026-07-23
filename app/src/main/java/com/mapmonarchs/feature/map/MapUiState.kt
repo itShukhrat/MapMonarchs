@@ -2,6 +2,7 @@ package com.mapmonarchs.feature.map
 
 import androidx.compose.ui.graphics.Color
 import com.mapmonarchs.domain.model.AppError
+import com.mapmonarchs.domain.model.CaptureOutcome
 import com.mapmonarchs.domain.model.Blocker
 import com.mapmonarchs.domain.model.HexOwnership
 import com.mapmonarchs.domain.model.Identity
@@ -122,10 +123,11 @@ fun resolveBlocker(state: MapUiState): Blocker = when {
     // arbitrating a claim, and pretending otherwise would collapse two axes this
     // state model exists to keep apart.
 
-    // Terminal, and deliberately not "nothing is blocking you". attempt_capture()
-    // is not deployed, so a signed-in player standing still on a perfect fix is
-    // still blocked -- by the backend, which is worth saying out loud.
-    else -> Blocker.CaptureNotDeployed
+    // Terminal: a signed-in player, on an accepted fix, inside the playable
+    // world, not in preview, is genuinely unblocked. The capture backend is
+    // deployed and server-authoritative, so the claim button is live. Preview
+    // reaches None earlier; this is the real one.
+    else -> Blocker.None
 }
 
 /**
@@ -221,4 +223,25 @@ fun MapUiState.claimRefusalReason(): String = when {
     identity !is Identity.SignedIn -> "no authenticated session"
     capture !is CaptureState.Ready -> "position not accepted (${capture::class.simpleName})"
     else -> "unknown"
+}
+
+/**
+ * Server capture outcome -> client capture state. Pure, so the mapping (the one
+ * genuinely fiddly part of the capture wiring) is unit-tested on its own without
+ * a ViewModel or fakes.
+ *
+ * The server reason strings are the lower-case of the RejectionReason names by
+ * construction (mock_location -> MOCK_LOCATION), so the four movement rejections
+ * map straight across. A reason that does NOT map -- not_authenticated, no_cell --
+ * is a session or server fault, not a movement verdict, so it surfaces as Failed
+ * rather than being forced into a RejectionReason it is not.
+ */
+fun CaptureOutcome.toCaptureState(): CaptureState = when (this) {
+    is CaptureOutcome.Applied -> CaptureState.Succeeded(action)
+    is CaptureOutcome.Rejected -> {
+        val mapped = runCatching { RejectionReason.valueOf(reason.uppercase()) }.getOrNull()
+        if (mapped != null) CaptureState.Blocked(mapped)
+        else CaptureState.Failed(AppError.BackendFailure("capture rejected: $reason"))
+    }
+    is CaptureOutcome.Failed -> CaptureState.Failed(AppError.BackendFailure(message))
 }
