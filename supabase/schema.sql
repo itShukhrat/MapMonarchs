@@ -1,4 +1,18 @@
 -- ============================================================================
+-- SUPERSEDED — DO NOT APPLY THIS FILE TO THE HOSTED PROJECT.
+--
+-- This is the ORIGINAL design, which computes the H3 cell inside Postgres via
+-- the h3 extension. That extension is NOT available on this Supabase project
+-- (Postgres 17.6): `create extension h3` fails with 0A000 "extension h3 is not
+-- available / control file ... No such file or directory". See
+-- migrations/README.md for the exact error and classification.
+--
+-- The DEPLOYED backend is supabase/migrations/ (h3-free SQL) plus the Edge
+-- Function supabase/functions/attempt_capture (real H3 via h3-js). This file is
+-- kept only for its design rationale in the comments below.
+-- ============================================================================
+
+-- ============================================================================
 -- MapMonarchs — v0 schema  (Supabase / Postgres)
 -- Run this in the Supabase SQL Editor.  Contains NO secrets.
 --

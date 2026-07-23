@@ -1,3 +1,11 @@
+-- migration: 20260722120002_capture_apply
+-- The capture write-path. H3 is NOT computed here: the Postgres h3 extension
+-- is unavailable on this host (see migrations/README.md), so the cell is
+-- derived by the Edge Function supabase/functions/attempt_capture (real H3 via
+-- h3-js) and passed in as the text parameter _h3. apply_capture is
+-- EXECUTE-revoked from clients, so only that function can call it.
+-- Idempotent (create-or-replace / revoke / grant).
+
 -- ============================================================================
 -- MapMonarchs — capture path for Postgres 17 (no h3 extension in the DB)
 --

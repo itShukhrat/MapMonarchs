@@ -1,3 +1,8 @@
+-- migration: 20260722120001_foundation
+-- Applied to Supabase project gacptifoxlpribgdqhtz (Postgres 17.6).
+-- Idempotent (if-not-exists / drop-if-exists / guarded publication add).
+-- The durable record of the deployed schema; supersedes supabase/schema.sql.
+
 -- ============================================================================
 -- MapMonarchs — FOUNDATION schema (h3-free subset, deployable on Postgres 17)
 --
