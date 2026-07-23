@@ -1,4 +1,14 @@
 package com.mapmonarchs.feature.map
+import com.mapmonarchs.ui.motion.rememberAnimationsEnabled
+import androidx.compose.ui.draw.scale
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.getValue
+import androidx.compose.foundation.interaction.collectIsPressedAsState
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.Spring
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -478,13 +488,31 @@ private fun MapControlButton(
         filled -> SovereignGlow
         else -> TextMuted
     }
+    // The same press response every other control in the product has. A camera
+    // control that only answered with a haptic was the one place the motion
+    // language broke.
+    val interaction = remember { MutableInteractionSource() }
+    val pressed by interaction.collectIsPressedAsState()
+    val animate = rememberAnimationsEnabled()
+    val press by animateFloatAsState(
+        targetValue = if (pressed && enabled) 0.9f else 1f,
+        animationSpec = if (animate) {
+            spring(dampingRatio = 0.6f, stiffness = Spring.StiffnessHigh)
+        } else {
+            tween(durationMillis = 0)
+        },
+        label = "mapControlPress"
+    )
     Box(
         modifier = modifier
             .size(46.dp)
+            .scale(press)
             .clip(RoundedCornerShape(12.dp))
             .clickable(
                 enabled = enabled,
                 role = Role.Button,
+                interactionSource = interaction,
+                indication = null,
                 onClick = {
                     haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                     onClick()
