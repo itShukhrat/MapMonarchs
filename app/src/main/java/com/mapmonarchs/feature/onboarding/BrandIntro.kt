@@ -101,9 +101,18 @@ private const val REVEAL_MS = 1150
  * should not be held for two seconds by an animation they cannot see.
  */
 @Composable
-fun BrandIntro(onDone: () -> Unit, modifier: Modifier = Modifier) {
-    val animate = rememberAnimationsEnabled()
-
+fun BrandIntro(
+    onDone: () -> Unit,
+    modifier: Modifier = Modifier,
+    /**
+     * Whether to play the sequence at all. Injected ONLY so both motion paths
+     * can be asserted: a test cannot flip Settings.Global without
+     * WRITE_SECURE_SETTINGS, so without this seam the reduced-motion branch --
+     * the one that strands a motion-sensitive player if it ever regresses --
+     * could not be covered. Production always takes the default.
+     */
+    animate: Boolean = rememberAnimationsEnabled()
+) {
     // Reduced motion means straight through. Not a shortened intro -- none.
     if (!animate) {
         LaunchedEffect(Unit) { onDone() }

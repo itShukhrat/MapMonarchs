@@ -1,21 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  The crown mark, supplied as artwork and split into adaptive layers here.
+  ONE MARK ACROSS THE LAUNCH PATH.
 
-  Foreground and background are separate on purpose: the launcher masks the
-  background to its own shape, so the crown is keyed onto its own transparent
-  layer and sized inside the 66dp safe circle rather than being cropped with the
-  tile. See ic_launcher_crown_bg.xml.
+  Android 12+ draws this adaptive icon as the system splash, which makes it the
+  frame immediately before BrandIntro. It therefore has to be the SAME mark the
+  intro assembles and the same one IdentityCrest wears afterwards, or the player
+  watches the brand change symbol twice inside the first two seconds.
 
-  TO REVERT to the Sovereign Cell mark, point the three layers back at
-  ic_launcher_background / ic_launcher_foreground / ic_launcher_monochrome -
-  those files are still in the tree, unmodified.
+  The crown artwork is still in the tree (ic_launcher_crown_*) and is not
+  referenced. It remains a valid marketing asset; it is not the product's mark,
+  because the rest of the app - dock, HUD, capture button, identity, empire - is
+  hexagonal and a launcher icon cannot be the one surface that disagrees.
 -->
 <adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
-    <background android:drawable="@drawable/ic_launcher_crown_bg" />
-    <foreground android:drawable="@drawable/ic_launcher_crown_fg" />
-    <!-- Themed icons get a flat white silhouette of the same art: the system
-         tints monochrome but preserves per-pixel alpha, so handing it the
-         colour foreground would produce a washed, uneven mark. -->
-    <monochrome android:drawable="@drawable/ic_launcher_crown_mono" />
+    <background android:drawable="@drawable/ic_launcher_background" />
+    <foreground android:drawable="@drawable/ic_launcher_foreground" />
+    <!-- Themed icons get a flat full-opacity silhouette: the system tints
+         monochrome but preserves per-path alpha, so the colour foreground would
+         render as several greys of one hue. -->
+    <monochrome android:drawable="@drawable/ic_launcher_monochrome" />
 </adaptive-icon>
