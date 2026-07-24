@@ -50,10 +50,13 @@ import com.mapbox.maps.extension.compose.style.MapStyle
 /**
  * The MapMonarchs tactical basemap: a custom Mapbox Studio style derived from
  * dark-v11 and retuned to this app's palette -- land and water flattened to the
- * cool Void/Obsidian family, road geometry cut to arterials until street zoom,
- * POI and minor labels stripped down to a country -> city hierarchy. It carries
- * no saturation of its own, so the lit Sovereign border, the player puck, and
- * territory stay the only coloured things on the board.
+ * cool Void/Obsidian family. Place, road, and geography labels are kept as a
+ * deliberate hierarchy rather than stripped: country > capital > regional city >
+ * town > district, the full road-class network (muted, widening by importance)
+ * with street names at street zoom, and named geography (rivers, seas, deserts).
+ * Only POIs are held back -- a command board is not a navigation app. The
+ * basemap carries no saturation of its own, so the lit Sovereign border, the
+ * player puck, and territory stay the only coloured things on the board.
  *
  * Reversible by design: swap this back to "mapbox://styles/mapbox/dark-v11" and
  * the stock basemap returns. Every layer this file adds is style-independent --
