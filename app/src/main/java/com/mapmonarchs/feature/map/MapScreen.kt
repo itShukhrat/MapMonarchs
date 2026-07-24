@@ -48,12 +48,19 @@ import com.mapbox.maps.extension.compose.annotation.generated.PolygonAnnotation
 import com.mapbox.maps.extension.compose.style.MapStyle
 
 /**
- * MAPBOX_DARK is stock for now. It gets replaced by a custom Mapbox Studio style
- * (labels stripped to arterial roads, terrain flattened to near-monochrome) once
- * hexes render -- you cannot tune "territory is the only saturated thing on
- * screen" without territory on screen, so styling now would mean styling twice.
+ * The MapMonarchs tactical basemap: a custom Mapbox Studio style derived from
+ * dark-v11 and retuned to this app's palette -- land and water flattened to the
+ * cool Void/Obsidian family, road geometry cut to arterials until street zoom,
+ * POI and minor labels stripped down to a country -> city hierarchy. It carries
+ * no saturation of its own, so the lit Sovereign border, the player puck, and
+ * territory stay the only coloured things on the board.
+ *
+ * Reversible by design: swap this back to "mapbox://styles/mapbox/dark-v11" and
+ * the stock basemap returns. Every layer this file adds is style-independent --
+ * it brings its own sources and appends to the top of whatever style loads -- so
+ * nothing here depends on the custom style existing.
  */
-private const val MAPBOX_DARK = "mapbox://styles/mapbox/dark-v11"
+private const val MAP_STYLE = "mapbox://styles/shukhra-t/cmryd7j1700nf01qt76jvf82q"
 
 /** Layer and source ids, namespaced so a future style cannot collide with them. */
 private const val BOUNDARY_SOURCE = "mm-country-boundaries"
@@ -161,7 +168,7 @@ fun MapScreen(
             // Logo and attribution are retained -- licensing requirement.
             scaleBar = {},
             compass = {},
-            style = { MapStyle(style = MAPBOX_DARK) }
+            style = { MapStyle(style = MAP_STYLE) }
         ) {
             // ---- The playable world ------------------------------------------
             //
