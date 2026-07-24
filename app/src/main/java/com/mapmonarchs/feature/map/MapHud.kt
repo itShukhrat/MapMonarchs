@@ -46,6 +46,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import com.mapmonarchs.R
 import com.mapmonarchs.domain.model.Blocker
+import com.mapmonarchs.domain.model.Identity
 import com.mapmonarchs.feature.common.localizedHudLabel
 import com.mapmonarchs.feature.common.localizedMessage
 import androidx.compose.ui.semantics.contentDescription
@@ -115,7 +116,7 @@ fun MapHud(
             horizontalAlignment = Alignment.Start
         ) {
             IdentityChip(
-                label = state.identityLabel(),
+                label = identityChipLabel(state),
                 territoryColor = state.territoryColor(),
                 modifier = Modifier.wrapContentWidth()
             )
@@ -267,6 +268,20 @@ private fun Holdings(holdings: String, modifier: Modifier = Modifier) {
  * problem here, press to understand it", rather than the flat grey of a disabled
  * control that would invite no interaction at all.
  */
+/**
+ * Localized twin of [identityLabel]. Signed-in and preview identities render the
+ * real callsign (never translated); the placeholder states map to resources. No
+ * fabricated fallback name -- the same rule the domain function enforces.
+ */
+@Composable
+private fun identityChipLabel(state: MapUiState): String = when (val id = state.identity) {
+    is Identity.SignedIn -> id.callsign
+    is Identity.Preview -> id.callsign
+    is Identity.Resolving -> stringResource(R.string.blocker_hud_identifying)
+    is Identity.SignedOut -> stringResource(R.string.blocker_hud_no_identity)
+    is Identity.Unavailable -> stringResource(R.string.identity_label_unavailable)
+}
+
 /**
  * Localized twin of [captureLabel]. In-flight and settled capture states are
  * progress, not blockers, so they report first; everything else is the blocker's

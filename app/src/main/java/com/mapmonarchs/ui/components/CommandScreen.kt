@@ -44,6 +44,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
+import com.mapmonarchs.R
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.stateDescription
@@ -107,7 +109,7 @@ fun CommandScreen(
             verticalAlignment = Alignment.CenterVertically
         ) {
             TextCommand(
-                label = "BACK",
+                label = stringResource(R.string.common_back),
                 onClick = onBack,
                 modifier = Modifier
                     .offset(x = (-10).dp)
@@ -425,6 +427,11 @@ fun CommandAction(
         ready -> TextPrimary
         else -> DisabledFg
     }
+    // Precomputed here: the .semantics {} block below is not a composable scope,
+    // so stringResource cannot be called inside it.
+    val unavailableCd = (state as? ActionState.Unavailable)?.let {
+        stringResource(R.string.a11y_unavailable, label, it.reason)
+    }
 
     Box(
         modifier = modifier
@@ -462,7 +469,7 @@ fun CommandAction(
             .semantics {
                 if (state is ActionState.Unavailable) {
                     disabled()
-                    contentDescription = "$label. Unavailable: ${state.reason}"
+                    unavailableCd?.let { contentDescription = it }
                 }
             }
             .padding(horizontal = 20.dp, vertical = 16.dp),
@@ -527,6 +534,8 @@ fun ChoiceRow(
         },
         label = "choiceMark"
     )
+    // Precomputed: the .semantics {} block below is not a composable scope.
+    val selectedState = stringResource(if (selected) R.string.a11y_selected else R.string.a11y_not_selected)
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -543,7 +552,7 @@ fun ChoiceRow(
             // announces the active one, matching the filled-hex cue.
             .semantics {
                 this.selected = selected
-                stateDescription = if (selected) "Selected" else "Not selected"
+                stateDescription = selectedState
                 contentDescription = "$label. $detail"
             }
             .padding(vertical = 14.dp),

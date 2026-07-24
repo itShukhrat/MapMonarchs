@@ -16,8 +16,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import com.mapmonarchs.R
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.mapmonarchs.ui.theme.Contested
@@ -40,8 +42,9 @@ fun ErrorStrip(
     message: String,
     onRetry: () -> Unit,
     modifier: Modifier = Modifier,
-    retryLabel: String = "RETRY"
+    retryLabel: String = stringResource(R.string.common_retry)
 ) {
+    val errorCd = stringResource(R.string.a11y_error_prefix, message)
     Row(
         modifier = modifier
             .clip(RoundedCornerShape(14.dp))
@@ -53,7 +56,7 @@ fun ErrorStrip(
             .border(1.dp, Contested.copy(alpha = 0.55f), RoundedCornerShape(14.dp))
             .padding(horizontal = 14.dp, vertical = 12.dp)
             .testTag(UiTags.ERROR_STRIP)
-            .semantics { contentDescription = "Error: $message" },
+            .semantics { contentDescription = errorCd },
         verticalAlignment = Alignment.CenterVertically
     ) {
         // A LIT status mark, not a 6dp dot.

@@ -299,4 +299,53 @@
         <item quantity="one">Juda koʻp urinish. %1$d soniya kuting va qayta urinib koʻring.</item>
         <item quantity="other">Juda koʻp urinish. %1$d soniya kuting va qayta urinib koʻring.</item>
     </plurals>
+
+    <!-- ===== Diagnostics: world-position notes ===== -->
+    <string name="diag_world_inside">Siz oʻyin dunyosi ichidasiz. Egallash xizmati joylashtirilgach, bu yerdagi hududni egallash mumkin boʻladi.</string>
+    <string name="diag_world_outside_known">Siz %1$s hududidasiz. Hududni faqat %2$s ichida egallash mumkin, shuning uchun bu yerda xarita xiralashtirilgan va egallash oʻchiq.</string>
+    <string name="diag_world_outside_unknown">Siz %1$s tashqarisidasiz, shuning uchun bu yerda xarita xiralashtirilgan va egallash oʻchiq.</string>
+    <string name="diag_world_unknown">Chegara xizmati javob bermadi, shuning uchun siz %1$s ichidamisiz — tasdiqlay olmaymiz. Bu egallashni bloklamaydi — muvaffaqiyatsiz tekshiruv siz chiqib ketganingizni isbotlamaydi. %2$s</string>
+    <string name="diag_world_not_checked">Hali tekshirilmagan. Joylashuv aniqlangach, bu hal boʻladi.</string>
+
+    <!-- ===== Diagnostics: status values ===== -->
+    <string name="diag_val_granted">BERILGAN</string>
+    <string name="diag_val_denied">RAD ETILGAN</string>
+    <string name="diag_val_none">YOʻQ</string>
+    <string name="diag_val_automatic">AVTOMATIK</string>
+    <string name="diag_val_code_required">KOD KERAK</string>
+
+    <!-- ===== Diagnostics: capture notes ===== -->
+    <string name="diag_capture_preview_note">Koʻrib chiqish rejimi faol. Siz egallagan hamma narsa shu qurilmada simulyatsiya qilinadi, xotirada saqlanadi va chiqqaningizda oʻchiriladi. Hech narsa serverga yuborilmaydi va ularning hech biri haqiqiy hudud emas.</string>
+    <string name="diag_capture_live_note">Egallash backendi ishlayapti va server tomonidan boshqariladi. Geksni egallash sizning xom joylashuvingizni yuboradi; server katakni hisoblaydi, firibgarlikka qarshi tekshiruvlarni qoʻllaydi va urinishni yozib oladi. Siz egallagan hamma narsa haqiqiy.</string>
+
+    <!-- ===== Diagnostics: sign-in capability notes ===== -->
+    <string name="diag_auth_unproven">Bu loyihada email — kirishning yagona yoʻli, va bu qurilmaga hech qanday kod yetib kelgani tasdiqlanmagan. Shuning uchun kirish mavjud emas, balki TASDIQLANMAGAN — yoqilgan provayder ishlayotgan degani emas.</string>
+    <string name="diag_auth_not_probed">Kirish sozlamalari hali tekshirilmagan. QAYTA TEKSHIRISH tugmasini bosing.</string>
+    <string name="diag_auth_probing">Serverdan qaysi kirish usullarini qabul qilishini soʻrayapmiz.</string>
+    <string name="diag_auth_unavailable">Server kirish qanday sozlangani haqidagi soʻrovga javob bermadi, shuning uchun bu qatorlar taxmin qilish oʻrniga NOMAʼLUM deb koʻrsatiladi. %1$s</string>
+    <string name="diag_auth_code_required_note">Bu loyihada hisoblar avtomatik tasdiqlanmaydi, shuning uchun kimdir kirishidan oldin kod haqiqatan ham email orqali yetib kelishi kerak. Demak, pochta yetkazish majburiy, ixtiyoriy emas.</string>
+
+    <!-- ===== Diagnostics: delivery notes ===== -->
+    <string name="diag_delivery_never">Bu oʻrnatmadan hali hech qachon kirish kodi soʻralmagan, shuning uchun bu yerda email ishlashi hali sinovdan oʻtmagan. KIRISH ekranidan kod soʻrash — bu sinovning oʻzi.</string>
+    <string name="diag_delivery_requested">Server kod yuborish soʻrovini qabul qildi, lekin hali hech qanday kod muvaffaqiyatli kiritilmadi. Bu yetkazish TASDIQLANMAGAN degani — qabul qilingan soʻrov yetib kelgan email degani emas. Agar hech narsa pochta qutisiga kelmagan boʻlsa, bu loyiha uchun sozlangan pochta xizmatini tekshiring.</string>
+    <string name="diag_delivery_delivered">Kod bu manzilga yetib keldi va qabul qilindi. Bu loyihada email yetkazish ishlashi tasdiqlangan.</string>
+    <string name="diag_delivery_failed">Soʻnggi yuborish urinishi rad etildi. %1$s</string>
+    <string name="diag_delivery_unknown">Bu qurilmada yetkazish yozuvi bor, lekin uni oʻqib boʻlmadi — ehtimol ilovaning boshqa versiyasi tomonidan yozilgan. Yetkazishni tasdiqlanmagan deb hisoblang va yangi kod soʻrang.</string>
+
+    <!-- ===== Sign-in: unavailable reasons (screen reader) ===== -->
+    <string name="signin_reason_sending">kod allaqachon yuborilmoqda</string>
+    <string name="signin_reason_need_email">avval email manzilini kiriting</string>
+    <string name="signin_reason_checking">kod tekshirilmoqda</string>
+    <string name="signin_reason_need_code">oltita raqamning barchasini kiriting</string>
+
+    <!-- ===== Accessibility prefixes ===== -->
+    <string name="a11y_error_prefix">Xato: %1$s</string>
+    <string name="a11y_unavailable">%1$s. Mavjud emas: %2$s</string>
+
+    <!-- ===== Common ===== -->
+    <string name="common_retry">QAYTA URINISH</string>
+    <string name="common_back">ORQAGA</string>
+    <string name="identity_label_unavailable">SHAXS MAVJUD EMAS</string>
+    <string name="a11y_selected">Tanlangan</string>
+    <string name="a11y_not_selected">Tanlanmagan</string>
 </resources>

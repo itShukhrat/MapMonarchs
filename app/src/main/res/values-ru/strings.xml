@@ -300,4 +300,53 @@
         <item quantity="many">Слишком много попыток. Подождите %1$d секунд и повторите.</item>
         <item quantity="other">Слишком много попыток. Подождите %1$d секунды и повторите.</item>
     </plurals>
+
+    <!-- ===== Diagnostics: world-position notes ===== -->
+    <string name="diag_world_inside">Вы внутри игрового мира. Территорию здесь можно будет захватить, как только сервис захвата будет развёрнут.</string>
+    <string name="diag_world_outside_known">Вы находитесь в %1$s. Территорию можно захватывать только внутри %2$s, поэтому здесь карта затемнена, а захват отключён.</string>
+    <string name="diag_world_outside_unknown">Вы за пределами %1$s, поэтому здесь карта затемнена, а захват отключён.</string>
+    <string name="diag_world_unknown">Сервис границ не ответил, поэтому мы не можем подтвердить, находитесь ли вы внутри %1$s. Это не блокирует захват — неудачная проверка не доказывает, что вы вышли. %2$s</string>
+    <string name="diag_world_not_checked">Ещё не проверено. Это определится, как только будет принято определение местоположения.</string>
+
+    <!-- ===== Diagnostics: status values ===== -->
+    <string name="diag_val_granted">РАЗРЕШЕНО</string>
+    <string name="diag_val_denied">ОТКЛОНЕНО</string>
+    <string name="diag_val_none">НЕТ</string>
+    <string name="diag_val_automatic">АВТОМАТИЧЕСКИ</string>
+    <string name="diag_val_code_required">НУЖЕН КОД</string>
+
+    <!-- ===== Diagnostics: capture notes ===== -->
+    <string name="diag_capture_preview_note">Режим предпросмотра активен. Всё, что вы захватываете, симулируется на этом устройстве, хранится в памяти и отбрасывается при выходе. Ничего не отправляется на сервер, и это не настоящая территория.</string>
+    <string name="diag_capture_live_note">Бэкенд захвата работает и авторитетен на стороне сервера. Захват гекса отправляет ваше исходное местоположение; сервер вычисляет ячейку, применяет анти-чит-проверки и записывает попытку. Всё, что вы захватываете, реально.</string>
+
+    <!-- ===== Diagnostics: sign-in capability notes ===== -->
+    <string name="diag_auth_unproven">Электронная почта — единственный способ входа в этом проекте, и ни один код не подтверждён как доставленный на это устройство. Поэтому вход НЕ ПОДТВЕРЖДЁН, а не доступен — включённый провайдер не означает работающий.</string>
+    <string name="diag_auth_not_probed">Конфигурация входа ещё не проверена. Нажмите ПЕРЕПРОВЕРИТЬ.</string>
+    <string name="diag_auth_probing">Запрашиваем у сервера, какие способы входа он принимает.</string>
+    <string name="diag_auth_unavailable">Сервер не ответил на запрос о том, как настроен вход, поэтому эти строки показывают НЕИЗВЕСТНО, а не догадки. %1$s</string>
+    <string name="diag_auth_code_required_note">Аккаунты в этом проекте не подтверждаются автоматически, поэтому код должен действительно прийти по почте, прежде чем кто-либо сможет войти. Поэтому доставка почты обязательна, а не опциональна.</string>
+
+    <!-- ===== Diagnostics: delivery notes ===== -->
+    <string name="diag_delivery_never">С этой установки ещё ни разу не запрашивался код входа, поэтому работает ли здесь почта — пока не проверено. Запрос кода на экране ВХОД — это и есть проверка.</string>
+    <string name="diag_delivery_requested">Сервер принял запрос на отправку кода, но ни один код ещё не был успешно введён. Это значит, что доставка НЕ ПОДТВЕРЖДЕНА — принятый запрос не означает доставленное письмо. Если ничего не пришло во входящие, ищите причину в почтовом сервисе, настроенном для этого проекта.</string>
+    <string name="diag_delivery_delivered">Код дошёл до этого адреса и был принят. Доставка почты подтверждена для этого проекта.</string>
+    <string name="diag_delivery_failed">Последняя попытка отправки была отклонена. %1$s</string>
+    <string name="diag_delivery_unknown">На этом устройстве есть запись о доставке, но её не удалось прочитать — скорее всего, она записана другой версией приложения. Считайте доставку неподтверждённой и запросите новый код.</string>
+
+    <!-- ===== Sign-in: unavailable reasons (screen reader) ===== -->
+    <string name="signin_reason_sending">код уже отправляется</string>
+    <string name="signin_reason_need_email">сначала введите адрес электронной почты</string>
+    <string name="signin_reason_checking">проверяем код</string>
+    <string name="signin_reason_need_code">введите все шесть цифр</string>
+
+    <!-- ===== Accessibility prefixes ===== -->
+    <string name="a11y_error_prefix">Ошибка: %1$s</string>
+    <string name="a11y_unavailable">%1$s. Недоступно: %2$s</string>
+
+    <!-- ===== Common ===== -->
+    <string name="common_retry">ПОВТОРИТЬ</string>
+    <string name="common_back">НАЗАД</string>
+    <string name="identity_label_unavailable">ЛИЧНОСТЬ НЕДОСТУПНА</string>
+    <string name="a11y_selected">Выбрано</string>
+    <string name="a11y_not_selected">Не выбрано</string>
 </resources>

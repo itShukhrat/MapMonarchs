@@ -121,8 +121,8 @@ private fun EmailStep(
         // screen reader hears why the control will not respond; previously they
         // heard nothing at all and had no way to learn the field was the problem.
         state = when {
-            state.sending -> ActionState.Unavailable("a code is already being sent")
-            !state.email.looksLikeEmail() -> ActionState.Unavailable("enter an email address first")
+            state.sending -> ActionState.Unavailable(stringResource(R.string.signin_reason_sending))
+            !state.email.looksLikeEmail() -> ActionState.Unavailable(stringResource(R.string.signin_reason_need_email))
             else -> ActionState.Ready
         },
         modifier = Modifier
@@ -177,8 +177,8 @@ private fun CodeStep(
         ),
         onClick = onVerifyCode,
         state = when {
-            state.verifying -> ActionState.Unavailable("checking the code")
-            !state.code.looksLikeCode() -> ActionState.Unavailable("enter all six digits")
+            state.verifying -> ActionState.Unavailable(stringResource(R.string.signin_reason_checking))
+            !state.code.looksLikeCode() -> ActionState.Unavailable(stringResource(R.string.signin_reason_need_code))
             else -> ActionState.Ready
         },
         modifier = Modifier

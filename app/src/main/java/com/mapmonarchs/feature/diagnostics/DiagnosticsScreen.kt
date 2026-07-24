@@ -182,18 +182,19 @@ fun DiagnosticsScreen(
         }
         when (val w = state.worldPosition) {
             is WorldPosition.Inside -> BodyNote(
-                "You are inside the playable world. Ground here can be claimed once the " +
-                    "capture service is deployed.",
+                stringResource(R.string.diag_world_inside),
                 modifier = Modifier.padding(top = 12.dp)
             )
 
             is WorldPosition.Outside -> BodyNote(
                 if (w.country != null) {
-                    "You are in ${w.country}. Territory can only be claimed inside " +
-                        "$PLAYABLE_COUNTRY_NAME, so the map is dimmed here and claiming is off."
+                    stringResource(
+                        R.string.diag_world_outside_known,
+                        w.country,
+                        stringResource(R.string.country_name)
+                    )
                 } else {
-                    "You are outside $PLAYABLE_COUNTRY_NAME, so the map is dimmed here " +
-                        "and claiming is off."
+                    stringResource(R.string.diag_world_outside_unknown, stringResource(R.string.country_name))
                 },
                 modifier = Modifier.padding(top = 12.dp)
             )
@@ -202,14 +203,12 @@ fun DiagnosticsScreen(
             // not evidence they left the country -- which means that without saying
             // so here, a failing boundary service would be completely invisible.
             is WorldPosition.Unknown -> BodyNote(
-                "The boundary service did not answer, so we cannot confirm whether you " +
-                    "are inside $PLAYABLE_COUNTRY_NAME. Claiming is not blocked by this -- " +
-                    "a failed check is not proof you left. " + w.reason,
+                stringResource(R.string.diag_world_unknown, stringResource(R.string.country_name), w.reason),
                 modifier = Modifier.padding(top = 12.dp)
             )
 
             is WorldPosition.NotChecked -> BodyNote(
-                "Not checked yet. This resolves once a position fix is accepted.",
+                stringResource(R.string.diag_world_not_checked),
                 modifier = Modifier.padding(top = 12.dp)
             )
         }
@@ -217,7 +216,7 @@ fun DiagnosticsScreen(
         CommandCard(title = stringResource(R.string.diag_location)) {
             StatusRow(
                 label = stringResource(R.string.diag_permission),
-                value = if (state.locationPermissionGranted) "GRANTED" else "DENIED",
+                value = if (state.locationPermissionGranted) stringResource(R.string.diag_val_granted) else stringResource(R.string.diag_val_denied),
                 valueColor = if (state.locationPermissionGranted) SovereignGlow else Contested,
                 modifier = Modifier.testTag(DiagnosticsTags.PERMISSION)
             )
@@ -238,7 +237,7 @@ fun DiagnosticsScreen(
             )
             StatusRow(
                 label = stringResource(R.string.diag_last_rejection),
-                value = (state.capture as? CaptureState.Blocked)?.reason?.name ?: "NONE",
+                value = (state.capture as? CaptureState.Blocked)?.reason?.name ?: stringResource(R.string.diag_val_none),
                 valueColor = TextMuted
             )
             StatusRow(label = stringResource(R.string.diag_cadence), value = stringResource(trackingMode.labelRes), valueColor = TextMuted)
@@ -253,16 +252,12 @@ fun DiagnosticsScreen(
         }
         if (state.previewMode) {
             BodyNote(
-                "Preview mode is active. Everything you claim is simulated on this device, " +
-                    "held in memory, and discarded when you leave. Nothing is sent to the " +
-                    "server and none of it is real territory.",
+                stringResource(R.string.diag_capture_preview_note),
                 modifier = Modifier.padding(top = 12.dp)
             )
         }
         BodyNote(
-            "The capture backend is live and server-authoritative. Claiming a hex " +
-                "submits your raw position; the server derives the cell, enforces the " +
-                "anti-cheat gates, and records the attempt. Everything you claim is real.",
+            stringResource(R.string.diag_capture_live_note),
             modifier = Modifier.padding(top = 8.dp)
         )
 
@@ -316,7 +311,7 @@ private fun ColumnScope.AuthCapabilityRows(diagnostics: DiagnosticsState) {
         label = stringResource(R.string.diag_account_confirmation),
         value = when (probe) {
             is CapabilitiesProbe.Observed ->
-                if (probe.capabilities.mailerAutoconfirm) "AUTOMATIC" else "CODE REQUIRED"
+                if (probe.capabilities.mailerAutoconfirm) stringResource(R.string.diag_val_automatic) else stringResource(R.string.diag_val_code_required)
             is CapabilitiesProbe.Probing -> stringResource(R.string.diag_checking)
             else -> stringResource(R.string.diag_unknown)
         },
@@ -332,38 +327,33 @@ private fun AuthCapabilityNotes(diagnostics: DiagnosticsState) {
     val readiness = signInReadiness(probe, diagnostics.delivery)
     if (readiness == SignInReadiness.UNPROVEN) {
         BodyNote(
-            "Email is the only sign-in route on this project, and no code has been " +
-                "confirmed as arriving on this device. So sign-in is UNPROVEN rather " +
-                "than available -- an enabled provider is not a working one.",
+            stringResource(R.string.diag_auth_unproven),
             modifier = Modifier.padding(top = 12.dp)
         )
     }
     when (probe) {
         is CapabilitiesProbe.NotProbed ->
             BodyNote(
-                "Sign-in configuration has not been checked yet. Press RE-CHECK.",
+                stringResource(R.string.diag_auth_not_probed),
                 modifier = Modifier.padding(top = 12.dp)
             )
 
         is CapabilitiesProbe.Probing ->
             BodyNote(
-                "Asking the server which sign-in methods it accepts.",
+                stringResource(R.string.diag_auth_probing),
                 modifier = Modifier.padding(top = 12.dp)
             )
 
         is CapabilitiesProbe.Unavailable ->
             BodyNote(
-                "The server did not answer when asked how sign-in is configured, so these " +
-                    "rows read UNKNOWN rather than guessing. " + probe.error.playerMessage(),
+                stringResource(R.string.diag_auth_unavailable, probe.error.localizedMessage()),
                 modifier = Modifier.padding(top = 12.dp)
             )
 
         is CapabilitiesProbe.Observed ->
             if (!probe.capabilities.mailerAutoconfirm) {
                 BodyNote(
-                    "Accounts are not auto-confirmed on this project, so a code must " +
-                        "genuinely arrive by email before anyone can sign in. Mail delivery " +
-                        "is therefore required, not optional.",
+                    stringResource(R.string.diag_auth_code_required_note),
                     modifier = Modifier.padding(top = 12.dp)
                 )
             }
@@ -414,39 +404,31 @@ private fun DeliveryNotes(diagnostics: DiagnosticsState) {
     when (val delivery = diagnostics.delivery) {
         is DeliveryProof.NeverAttempted ->
             BodyNote(
-                "No sign-in code has ever been requested from this install, so whether " +
-                    "email works here is still untested. Requesting one from the SIGN IN " +
-                    "screen is the test.",
+                stringResource(R.string.diag_delivery_never),
                 modifier = Modifier.padding(top = 12.dp)
             )
 
         is DeliveryProof.Requested ->
             BodyNote(
-                "The server accepted a request to send a code, but no code has been " +
-                    "successfully entered yet. That means delivery is UNPROVEN -- an " +
-                    "accepted request is not an arrived email. If nothing reached the " +
-                    "inbox, the mail service configured for this project is where to look.",
+                stringResource(R.string.diag_delivery_requested),
                 modifier = Modifier.padding(top = 12.dp)
             )
 
         is DeliveryProof.Delivered ->
             BodyNote(
-                "A code reached this address and was accepted. Email delivery is proven " +
-                    "to work on this project.",
+                stringResource(R.string.diag_delivery_delivered),
                 modifier = Modifier.padding(top = 12.dp)
             )
 
         is DeliveryProof.Failed ->
             BodyNote(
-                "The last send attempt was refused. " + delivery.error.playerMessage(),
+                stringResource(R.string.diag_delivery_failed, delivery.error.localizedMessage()),
                 modifier = Modifier.padding(top = 12.dp)
             )
 
         is DeliveryProof.Unknown ->
             BodyNote(
-                "A delivery record exists on this device but could not be read -- most " +
-                    "likely written by a different version of the app. Treat delivery as " +
-                    "unproven and request a fresh code.",
+                stringResource(R.string.diag_delivery_unknown),
                 modifier = Modifier.padding(top = 12.dp)
             )
     }

@@ -380,4 +380,53 @@
         <item quantity="one">Too many attempts. Wait %1$d second and try again.</item>
         <item quantity="other">Too many attempts. Wait %1$d seconds and try again.</item>
     </plurals>
+
+    <!-- ===== Diagnostics: world-position notes ===== -->
+    <string name="diag_world_inside">You are inside the playable world. Ground here can be claimed once the capture service is deployed.</string>
+    <string name="diag_world_outside_known">You are in %1$s. Territory can only be claimed inside %2$s, so the map is dimmed here and claiming is off.</string>
+    <string name="diag_world_outside_unknown">You are outside %1$s, so the map is dimmed here and claiming is off.</string>
+    <string name="diag_world_unknown">The boundary service did not answer, so we cannot confirm whether you are inside %1$s. Claiming is not blocked by this — a failed check is not proof you left. %2$s</string>
+    <string name="diag_world_not_checked">Not checked yet. This resolves once a position fix is accepted.</string>
+
+    <!-- ===== Diagnostics: status values ===== -->
+    <string name="diag_val_granted">GRANTED</string>
+    <string name="diag_val_denied">DENIED</string>
+    <string name="diag_val_none">NONE</string>
+    <string name="diag_val_automatic">AUTOMATIC</string>
+    <string name="diag_val_code_required">CODE REQUIRED</string>
+
+    <!-- ===== Diagnostics: capture notes ===== -->
+    <string name="diag_capture_preview_note">Preview mode is active. Everything you claim is simulated on this device, held in memory, and discarded when you leave. Nothing is sent to the server and none of it is real territory.</string>
+    <string name="diag_capture_live_note">The capture backend is live and server-authoritative. Claiming a hex submits your raw position; the server derives the cell, enforces the anti-cheat gates, and records the attempt. Everything you claim is real.</string>
+
+    <!-- ===== Diagnostics: sign-in capability notes ===== -->
+    <string name="diag_auth_unproven">Email is the only sign-in route on this project, and no code has been confirmed as arriving on this device. So sign-in is UNPROVEN rather than available — an enabled provider is not a working one.</string>
+    <string name="diag_auth_not_probed">Sign-in configuration has not been checked yet. Press RE-CHECK.</string>
+    <string name="diag_auth_probing">Asking the server which sign-in methods it accepts.</string>
+    <string name="diag_auth_unavailable">The server did not answer when asked how sign-in is configured, so these rows read UNKNOWN rather than guessing. %1$s</string>
+    <string name="diag_auth_code_required_note">Accounts are not auto-confirmed on this project, so a code must genuinely arrive by email before anyone can sign in. Mail delivery is therefore required, not optional.</string>
+
+    <!-- ===== Diagnostics: delivery notes ===== -->
+    <string name="diag_delivery_never">No sign-in code has ever been requested from this install, so whether email works here is still untested. Requesting one from the SIGN IN screen is the test.</string>
+    <string name="diag_delivery_requested">The server accepted a request to send a code, but no code has been successfully entered yet. That means delivery is UNPROVEN — an accepted request is not an arrived email. If nothing reached the inbox, the mail service configured for this project is where to look.</string>
+    <string name="diag_delivery_delivered">A code reached this address and was accepted. Email delivery is proven to work on this project.</string>
+    <string name="diag_delivery_failed">The last send attempt was refused. %1$s</string>
+    <string name="diag_delivery_unknown">A delivery record exists on this device but could not be read — most likely written by a different version of the app. Treat delivery as unproven and request a fresh code.</string>
+
+    <!-- ===== Sign-in: unavailable reasons (screen reader) ===== -->
+    <string name="signin_reason_sending">a code is already being sent</string>
+    <string name="signin_reason_need_email">enter an email address first</string>
+    <string name="signin_reason_checking">checking the code</string>
+    <string name="signin_reason_need_code">enter all six digits</string>
+
+    <!-- ===== Accessibility prefixes ===== -->
+    <string name="a11y_error_prefix">Error: %1$s</string>
+    <string name="a11y_unavailable">%1$s. Unavailable: %2$s</string>
+
+    <!-- ===== Common ===== -->
+    <string name="common_retry">RETRY</string>
+    <string name="common_back">BACK</string>
+    <string name="identity_label_unavailable">IDENTITY UNAVAILABLE</string>
+    <string name="a11y_selected">Selected</string>
+    <string name="a11y_not_selected">Not selected</string>
 </resources>
