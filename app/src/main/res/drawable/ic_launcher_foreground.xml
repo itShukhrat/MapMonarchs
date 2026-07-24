@@ -1,39 +1,117 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  The crest, as the launcher mark.
+  THE SOVEREIGN CELL - the launcher mark.
 
-  NOT NEW ART: this is the same concentric-hexagon geometry the product already
-  speaks in IdentityCrest, BrandIntro, LockMotif and the command dock. The icon
-  is the app stating its own shape language rather than a separate logo that
-  would have to be kept in sync with it.
+  NOT NEW ART: this is the same concentric pointy-top hexagon geometry the
+  product already speaks in HexagonShape, IdentityCrest, BrandIntro, LockMotif
+  and the command dock. The icon states the app's own shape language rather than
+  being a separate logo that would have to be kept in sync with it.
 
-  SAFE ZONE: adaptive icons mask the outer 18dp on round and squircle launchers,
-  so every visible element sits inside the central 72x72 area - the outer ring
-  has a circumradius of 33, well within the 36 limit.
+  WHAT CHANGED FROM THE PREVIOUS VERSION, AND WHY:
+
+  1. STRUCTURE IS STEEL, ONLY THE CORE IS SOVEREIGN. Every ring used to be
+     Sovereign blue at a different alpha, which made the accent the whole mark
+     rather than one thing inside it. The product's governing rule is that HELD
+     TERRITORY is the most saturated element on any surface; an icon made
+     entirely of the territory colour contradicts the rule it exists to
+     announce. Structure now reads as machined steel and the single lit cell is
+     the only saturated thing here - the same hierarchy the map uses.
+
+  2. THE APEX NODE. A cell caps the top vertex. This is where "Monarchs" lives:
+     sovereignty as a keystone in the geometry, never a drawn crown. It is the
+     one detail that makes this mark ours rather than a generic nested hexagon.
+
+  SAFE ZONE: adaptive launchers mask the outer 18dp, and only the central 66dp
+  circle (radius 33) is guaranteed on every mask shape. The outer ring has a
+  circumradius of 29.5 and the apex node reaches 32.88 - the tallest point of
+  the mark - so nothing clips, including on aggressive round masks.
+
+  Geometry is derived, not drawn by hand: vertices at 60k-90 degrees, inner ring
+  0.58x, core 0.325x, apex node 0.115x of the outer circumradius.
+
+  THIS IS THE COMPACT CUT, NOT THE BRAND MASTER. An adaptive icon ships ONE
+  vector that the system scales, and a launcher renders it at roughly 48-64dp -
+  never large. Verified on device at that size, the brand master's 0.22x core
+  shrank to a faint dot, which loses the single element that is never allowed to
+  disappear. The core is therefore opened up to 0.325x and the strokes carry
+  slightly more mass here than in docs/brand/sovereign-cell.svg. Same geometry
+  system, optically sized for the size it is actually seen at - the same reason
+  a typeface ships a caption cut.
 -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
     android:width="108dp"
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
-    <!-- Outer ring: the frame. -->
+
+    <!--
+      Outer hexagon: the seal boundary, and the entire silhouette. This is the
+      last element that may ever be removed - at the smallest sizes the mark is
+      this shape plus the lit core and nothing else.
+    -->
     <path
-        android:pathData="M82.58,70.5L54,87L25.42,70.5L25.42,37.5L54,21L82.58,37.5z"
-        android:strokeColor="#4C8DFF"
-        android:strokeWidth="2.5"
-        android:strokeAlpha="0.38"
-        android:strokeLineJoin="round"
-        android:strokeLineCap="round" />
-    <!-- Mid ring: the accent proper. -->
+        android:pathData="M54,24.5L79.55,39.25L79.55,68.75L54,83.5L28.45,68.75L28.45,39.25z"
+        android:strokeWidth="2.8"
+        android:strokeLineJoin="miter">
+        <aapt:attr name="android:strokeColor">
+            <gradient
+                android:type="linear"
+                android:startX="54" android:startY="21.12"
+                android:endX="54" android:endY="83.5">
+                <item android:offset="0" android:color="#FFF1F5FB" />
+                <item android:offset="0.5" android:color="#FFC4CEDD" />
+                <item android:offset="1" android:color="#FF8A94A6" />
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <!-- Inner hexagon: the keep. Concentric crest logic, and the first thing
+         dropped when the mark is reduced. -->
     <path
-        android:pathData="M73.92,65.5L54,77L34.08,65.5L34.08,42.5L54,31L73.92,42.5z"
-        android:strokeColor="#4C8DFF"
-        android:strokeWidth="3"
-        android:strokeAlpha="0.85"
-        android:strokeLineJoin="round"
-        android:strokeLineCap="round" />
-    <!-- Core: held ground. -->
+        android:pathData="M54,36.89L68.82,45.45L68.82,62.55L54,71.11L39.18,62.55L39.18,45.45z"
+        android:strokeWidth="1.9"
+        android:strokeAlpha="0.9"
+        android:strokeLineJoin="miter">
+        <aapt:attr name="android:strokeColor">
+            <gradient
+                android:type="linear"
+                android:startX="54" android:startY="36.89"
+                android:endX="54" android:endY="71.11">
+                <item android:offset="0" android:color="#FFE6ECF6" />
+                <item android:offset="1" android:color="#FF8A94A6" />
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <!-- Apex node: the sovereign keystone. Steel, not blue - it is structure,
+         not territory. -->
     <path
-        android:pathData="M64.39,60L54,66L43.61,60L43.61,48L54,42L64.39,48z"
-        android:fillColor="#7FB0FF" />
+        android:pathData="M54,21.12L56.93,22.81L56.93,26.19L54,27.88L51.07,26.19L51.07,22.81z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:type="linear"
+                android:startX="54" android:startY="21.12"
+                android:endX="54" android:endY="27.88">
+                <item android:offset="0" android:color="#FFF1F5FB" />
+                <item android:offset="1" android:color="#FFB9C4D4" />
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <!-- Held ground. The only saturated element in the mark, and the one that
+         never disappears at any size. -->
+    <path
+        android:pathData="M54,44.4L62.31,49.2L62.31,58.8L54,63.6L45.69,58.8L45.69,49.2z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:type="radial"
+                android:centerX="54" android:centerY="51.5"
+                android:gradientRadius="13">
+                <item android:offset="0" android:color="#FF9CC0FF" />
+                <item android:offset="0.55" android:color="#FF4C8DFF" />
+                <item android:offset="1" android:color="#FF2E63C4" />
+            </gradient>
+        </aapt:attr>
+    </path>
 </vector>

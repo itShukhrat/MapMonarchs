@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  THE SOVEREIGN CELL - themed-icon (monochrome) variant.
+
+  WHY THIS FILE EXISTS AT ALL. The adaptive icon previously pointed <monochrome>
+  at the full-colour foreground. Android 13+ tints that drawable with a single
+  theme colour and discards the hues - but it KEEPS per-path alpha, so the rings
+  drawn at 0.38 and 0.85 came out as three different greys of one colour. A
+  themed icon is meant to be one flat silhouette; that produced a washed,
+  muddy mark whose hierarchy was accidental rather than designed.
+
+  Everything here is therefore FULL OPACITY and a single colour. The system
+  supplies both the tint and the background; we supply only the shape.
+
+  HIERARCHY WITHOUT COLOUR. With the accent gone, the mark has to survive on
+  form alone - which is the whole reason sovereignty is encoded as geometry
+  here and not as a drawn crown. It still reads because the three elements are
+  separated by clear negative space (core 6.49, inner ring 17.11, outer 29.5)
+  and because the solid core and solid apex node are the only filled shapes
+  among strokes.
+
+  Stroke weights are nudged up slightly versus the colour foreground: a tint at
+  low contrast against a themed background needs more mass than steel on
+  obsidian does.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108"
+    android:tint="#FFFFFFFF">
+
+    <!-- Outer hexagon: the silhouette. -->
+    <path
+        android:pathData="M54,24.5L79.55,39.25L79.55,68.75L54,83.5L28.45,68.75L28.45,39.25z"
+        android:strokeColor="#FFFFFFFF"
+        android:strokeWidth="3.0"
+        android:strokeLineJoin="miter" />
+
+    <!-- Inner hexagon: the keep. -->
+    <path
+        android:pathData="M54,36.89L68.82,45.45L68.82,62.55L54,71.11L39.18,62.55L39.18,45.45z"
+        android:strokeColor="#FFFFFFFF"
+        android:strokeWidth="2.2"
+        android:strokeLineJoin="miter" />
+
+    <!-- Apex node: the sovereign keystone. Solid, so it reads against strokes. -->
+    <path
+        android:pathData="M54,21.12L56.93,22.81L56.93,26.19L54,27.88L51.07,26.19L51.07,22.81z"
+        android:fillColor="#FFFFFFFF" />
+
+    <!-- Held ground. Solid, and never removed. -->
+    <path
+        android:pathData="M54,44.4L62.31,49.2L62.31,58.8L54,63.6L45.69,58.8L45.69,49.2z"
+        android:fillColor="#FFFFFFFF" />
+</vector>

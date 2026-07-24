@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" width="240" height="240" role="img" aria-label="MapMonarchs">
+  <title>MapMonarchs — The Sovereign Cell</title>
+  <defs>
+    <linearGradient id="steel" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#F1F5FB"/><stop offset=".5" stop-color="#C4CEDD"/><stop offset="1" stop-color="#8A94A6"/>
+    </linearGradient>
+    <radialGradient id="core" cx=".5" cy=".42" r=".7">
+      <stop offset="0" stop-color="#9CC0FF"/><stop offset=".55" stop-color="#4C8DFF"/><stop offset="1" stop-color="#2E63C4"/>
+    </radialGradient>
+    <radialGradient id="field" cx=".5" cy=".43" r=".72">
+      <stop offset="0" stop-color="#141C28"/><stop offset=".55" stop-color="#0B0F16"/><stop offset="1" stop-color="#07090D"/>
+    </radialGradient>
+  </defs>
+  <rect width="240" height="240" rx="52" fill="url(#field)"/>
+  <polygon points="120,24 203.14,72 203.14,168 120,216 36.86,168 36.86,72" fill="none" stroke="url(#steel)" stroke-width="8" stroke-linejoin="miter"/>
+  <polygon points="120,64.32 168.22,92.16 168.22,147.84 120,175.68 71.78,147.84 71.78,92.16" fill="none" stroke="url(#steel)" stroke-width="5.5" stroke-linejoin="miter" opacity="0.9"/>
+  <polygon points="120,13 129.53,18.5 129.53,29.5 120,35 110.47,29.5 110.47,18.5" fill="url(#steel)"/>
+  <polygon points="120,98.88 138.29,109.44 138.29,130.56 120,141.12 101.71,130.56 101.71,109.44" fill="url(#core)"/>
+</svg>
