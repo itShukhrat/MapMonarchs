@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Background layer for the crown launcher mark.
+
+  The supplied logo is a pre-composed tile: the crown art and its blue-to-green
+  gradient are baked into one raster. An Android adaptive icon needs those as
+  two separate layers, because the launcher masks the background to its own
+  shape (circle, squircle, rounded square) and the foreground has to survive
+  that crop. Shipping the flat tile as a single layer would have let the mask
+  cut the crown's outer finials off.
+
+  So the gradient is rebuilt here as a vector and the crown is keyed out to a
+  transparent PNG (ic_launcher_crown_fg). The two endpoint colours were sampled
+  from the source tile itself - taken from the most and least advanced points
+  along its diagonal, ignoring anti-aliased edge pixels - so this is the
+  original gradient, not an approximation of it by eye.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path android:pathData="M0,0h108v108h-108z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:type="linear"
+                android:startX="0" android:startY="0"
+                android:endX="108" android:endY="108">
+                <item android:offset="0" android:color="#FF1A3AA1" />
+                <item android:offset="1" android:color="#FF0FAF87" />
+            </gradient>
+        </aapt:attr>
+    </path>
+</vector>
