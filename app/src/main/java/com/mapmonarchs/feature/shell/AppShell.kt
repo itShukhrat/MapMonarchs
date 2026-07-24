@@ -33,6 +33,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.mapmonarchs.data.local.AppLocale
 import com.mapmonarchs.data.local.FirstRunStore
 import com.mapmonarchs.data.local.TrackingPreferences
 import androidx.compose.runtime.LaunchedEffect
@@ -251,6 +252,8 @@ fun AppShell(modifier: Modifier = Modifier) {
                     trackingPrefs.mode = mode
                     viewModel.onTrackingModeChanged(mode)
                 },
+                currentLanguageTag = AppLocale.currentTag(context),
+                onLanguageChange = { tag -> AppLocale.setLanguage(context, tag) },
                 onOpenSystemSettings = { context.openAppSettings() },
                 onBack = { navigator.back() }
             )

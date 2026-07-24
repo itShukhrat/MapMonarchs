@@ -429,4 +429,17 @@
     <string name="identity_label_unavailable">IDENTITY UNAVAILABLE</string>
     <string name="a11y_selected">Selected</string>
     <string name="a11y_not_selected">Not selected</string>
+
+    <!-- ===== Settings: language ===== -->
+    <string name="settings_language">Language</string>
+    <string name="settings_language_note">Choose the language for all in-app text. English is the fallback for anything not yet translated.</string>
+    <string name="settings_language_system">System default</string>
+    <string name="settings_language_system_detail">Match your device language</string>
+    <string name="settings_language_name_english">English</string>
+    <string name="settings_language_name_russian">Russian</string>
+    <string name="settings_language_name_uzbek">Uzbek</string>
+    <!-- Language endonyms: a language's own name is the same in every locale. -->
+    <string name="lang_autonym_english" translatable="false">English</string>
+    <string name="lang_autonym_russian" translatable="false">Русский</string>
+    <string name="lang_autonym_uzbek" translatable="false">Oʻzbekcha</string>
 </resources>

@@ -348,4 +348,13 @@
     <string name="identity_label_unavailable">SHAXS MAVJUD EMAS</string>
     <string name="a11y_selected">Tanlangan</string>
     <string name="a11y_not_selected">Tanlanmagan</string>
+
+    <!-- ===== Settings: language ===== -->
+    <string name="settings_language">Til</string>
+    <string name="settings_language_note">Ilovadagi barcha matn uchun tilni tanlang. Hali tarjima qilinmagan matnlar uchun ingliz tili zaxira sifatida ishlatiladi.</string>
+    <string name="settings_language_system">Tizim tili</string>
+    <string name="settings_language_system_detail">Qurilma tiliga mos</string>
+    <string name="settings_language_name_english">Inglizcha</string>
+    <string name="settings_language_name_russian">Ruscha</string>
+    <string name="settings_language_name_uzbek">Oʻzbekcha</string>
 </resources>

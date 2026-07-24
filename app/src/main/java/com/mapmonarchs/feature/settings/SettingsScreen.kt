@@ -8,6 +8,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import com.mapmonarchs.R
 import androidx.compose.ui.unit.dp
+import com.mapmonarchs.data.local.AppLanguage
 import com.mapmonarchs.data.local.TrackingMode
 import com.mapmonarchs.ui.components.BodyNote
 import com.mapmonarchs.ui.components.ChoiceRow
@@ -38,10 +39,13 @@ fun SettingsScreen(
     locationGranted: Boolean,
     trackingMode: TrackingMode,
     onTrackingModeChange: (TrackingMode) -> Unit,
+    currentLanguageTag: String,
+    onLanguageChange: (String) -> Unit,
     onOpenSystemSettings: () -> Unit,
     onBack: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val activeLanguage = AppLanguage.fromTag(currentLanguageTag)
     CommandScreen(
         title = stringResource(R.string.settings_title),
         onBack = onBack,
@@ -75,6 +79,24 @@ fun SettingsScreen(
                     .padding(top = 8.dp)
                     .testTag(SettingsTags.OPEN_SYSTEM)
             )
+        }
+
+        // Language sits high because it reframes everything below it. Each row is
+        // a peer choice, so it reuses the same radio-style ChoiceRow as cadence.
+        CommandCard(title = stringResource(R.string.settings_language)) {
+            BodyNote(
+                stringResource(R.string.settings_language_note),
+                modifier = Modifier.padding(top = 8.dp)
+            )
+            AppLanguage.entries.forEach { language ->
+                ChoiceRow(
+                    label = stringResource(language.labelRes),
+                    detail = stringResource(language.detailRes),
+                    selected = language == activeLanguage,
+                    onClick = { onLanguageChange(language.tag) },
+                    modifier = Modifier.testTag("language_${language.name}")
+                )
+            }
         }
 
         // The cadence choices are a control group, so they share one panel. The

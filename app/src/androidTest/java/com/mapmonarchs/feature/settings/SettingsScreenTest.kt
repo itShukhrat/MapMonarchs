@@ -40,6 +40,8 @@ class SettingsScreenTest {
                     locationGranted = granted,
                     trackingMode = TrackingMode.BALANCED,
                     onTrackingModeChange = {},
+                    currentLanguageTag = "",
+                    onLanguageChange = {},
                     onOpenSystemSettings = {},
                     onBack = {}
                 )

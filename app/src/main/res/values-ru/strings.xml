@@ -349,4 +349,13 @@
     <string name="identity_label_unavailable">ЛИЧНОСТЬ НЕДОСТУПНА</string>
     <string name="a11y_selected">Выбрано</string>
     <string name="a11y_not_selected">Не выбрано</string>
+
+    <!-- ===== Settings: language ===== -->
+    <string name="settings_language">Язык</string>
+    <string name="settings_language_note">Выберите язык для всего текста в приложении. Английский используется как запасной для ещё не переведённого.</string>
+    <string name="settings_language_system">Системный</string>
+    <string name="settings_language_system_detail">Как на устройстве</string>
+    <string name="settings_language_name_english">Английский</string>
+    <string name="settings_language_name_russian">Русский</string>
+    <string name="settings_language_name_uzbek">Узбекский</string>
 </resources>
