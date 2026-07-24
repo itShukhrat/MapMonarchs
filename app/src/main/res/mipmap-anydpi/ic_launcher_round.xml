@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- See ic_launcher.xml: same crest layers, round-mask variant. -->
+<!-- See ic_launcher.xml: same crown layers, round-mask variant. -->
 <adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
-    <background android:drawable="@drawable/ic_launcher_background" />
-    <foreground android:drawable="@drawable/ic_launcher_foreground" />
-    <monochrome android:drawable="@drawable/ic_launcher_monochrome" />
+    <background android:drawable="@drawable/ic_launcher_crown_bg" />
+    <foreground android:drawable="@drawable/ic_launcher_crown_fg" />
+    <monochrome android:drawable="@drawable/ic_launcher_crown_mono" />
 </adaptive-icon>

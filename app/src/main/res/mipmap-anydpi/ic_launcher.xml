@@ -1,22 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  ONE MARK ACROSS THE LAUNCH PATH.
+  THE CROWN MARK - the canonical MapMonarchs logo, and the whole launch identity.
 
-  Android 12+ draws this adaptive icon as the system splash, which makes it the
-  frame immediately before BrandIntro. It therefore has to be the SAME mark the
-  intro assembles and the same one IdentityCrest wears afterwards, or the player
-  watches the brand change symbol twice inside the first two seconds.
+  Android 12+ draws this adaptive icon as the system splash, so these layers are
+  literally the frame immediately before BrandIntro. BrandIntro animates the same
+  artwork (ic_brand_crown), so there is no symbol swap anywhere between tapping
+  the icon and reaching onboarding.
 
-  The crown artwork is still in the tree (ic_launcher_crown_*) and is not
-  referenced. It remains a valid marketing asset; it is not the product's mark,
-  because the rest of the app - dock, HUD, capture button, identity, empire - is
-  hexagonal and a launcher icon cannot be the one surface that disagrees.
+  WHY THE LAYERS ARE SPLIT. The supplied logo is a pre-composed tile with the
+  crown and its gradient baked into one raster. A launcher masks the background
+  layer to its own shape and crops everything in it, so shipping the flat tile
+  would let a circular mask slice the crown's outer finials off. The crown is
+  therefore keyed onto its own transparent layer, sized inside the 66dp safe
+  circle, over a vector rebuild of the gradient.
+
+  Source artwork and the reconstruction notes live in docs/brand/ so a future
+  edit does not have to re-guess the shape.
 -->
 <adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
-    <background android:drawable="@drawable/ic_launcher_background" />
-    <foreground android:drawable="@drawable/ic_launcher_foreground" />
+    <background android:drawable="@drawable/ic_launcher_crown_bg" />
+    <foreground android:drawable="@drawable/ic_launcher_crown_fg" />
     <!-- Themed icons get a flat full-opacity silhouette: the system tints
-         monochrome but preserves per-path alpha, so the colour foreground would
-         render as several greys of one hue. -->
-    <monochrome android:drawable="@drawable/ic_launcher_monochrome" />
+         monochrome but preserves per-pixel alpha, so the colour foreground
+         would render as an uneven wash. -->
+    <monochrome android:drawable="@drawable/ic_launcher_crown_mono" />
 </adaptive-icon>

@@ -4,6 +4,7 @@ import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -25,33 +26,28 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.draw.scale
-import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.PathMeasure
-import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.graphics.StrokeJoin
-import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.CompositingStrategy
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.res.stringResource
 import com.mapmonarchs.R
 import com.mapmonarchs.ui.motion.rememberAnimationsEnabled
 import com.mapmonarchs.ui.theme.MapMonarchsBrush
-import com.mapmonarchs.ui.theme.SlateEdge
 import com.mapmonarchs.ui.theme.Sovereign
-import com.mapmonarchs.ui.theme.SovereignGlow
 import com.mapmonarchs.ui.theme.TextMuted
 import com.mapmonarchs.ui.theme.TextPrimary
 import kotlinx.coroutines.delay
-import kotlin.math.PI
 import kotlin.math.abs
-import kotlin.math.cos
-import kotlin.math.sin
 
 object BrandIntroTags {
     const val SCREEN = "brand_intro"
@@ -61,7 +57,7 @@ object BrandIntroTags {
 private const val INTRO_MS = 1750L
 
 /** The reveal itself. The remainder of [INTRO_MS] is a settled hold, not motion. */
-private const val REVEAL_MS = 1150
+private const val REVEAL_MS = 1000
 
 /**
  * The brand moment.
@@ -75,25 +71,28 @@ private const val REVEAL_MS = 1150
  * never claims to be working. Pretending to load would be theatre, and this app
  * does not do theatre about its own state.
  *
- * WHAT IT DRAWS, AND WHY IT MATTERS THAT IT IS EXACTLY THIS: the mark assembles
- * into the crest at IdentityCrest's proportions -- 0.94 / 0.70 / 0.44 of the
- * radius, the same three rings the player then wears as their own identity and
- * sees again on the EMPIRE surface. The intro is not a separate logo animation;
- * it is the player's crest being struck before it is handed to them. Those radii
- * are duplicated deliberately and must move together: if IdentityCrest is
- * retuned, this follows it.
+ * IT ANIMATES THE ACTUAL LOGO, NOT A REDRAWING OF IT. The painter here is
+ * ic_brand_crown -- the same crown artwork the launcher icon and therefore the
+ * Android 12+ system splash are built from, keyed out of the supplied tile.
+ * Because it is the same pixels rather than a reinterpretation, there is no
+ * symbol swap anywhere between tapping the icon and reaching onboarding. A
+ * hand-traced approximation was rejected for exactly this reason: it would have
+ * been a fourth version of the mark.
  *
- * HOW IT ASSEMBLES: each ring is TRACED rather than faded. The perimeter is
- * drawn from the top vertex outward through the path, so the crest reads as
- * being struck into the surface -- a seal being cut -- instead of a logo
- * dissolving in. Fading is what a splash screen does; cutting is what a mint
- * does, and this product is about ground that is claimed rather than given.
+ * HOW IT REVEALS: a soft radial mask opens from the CENTRE of the artwork, which
+ * is where the logo puts its compass. The motion therefore comes out of the mark
+ * rather than being applied on top of it -- the crown resolves outward from its
+ * own focal point instead of sliding, spinning, or bouncing in. A single
+ * restrained bloom of the Sovereign accent lands as the reveal completes and
+ * then settles; it does not pulse, because a pulse reads as a heartbeat, which
+ * implies waiting, which would be the loading lie this screen refuses to tell.
  *
- * The rings are ordered outside-in: the frame is established, then what it
- * holds, then the held cell ignites once. That single bloom is the only moment
- * of luminance in the sequence, and it settles rather than pulsing -- a pulse
- * would read as a heartbeat, which implies waiting, which would be the loading
- * lie this screen refuses to tell.
+ * ON THE FIELD BEHIND IT: the crown is shown on the app's obsidian screen rather
+ * than on the logo's own blue-green tile. That tile exists because an app icon
+ * must fill a square; reproducing it full-screen would read as a screenshot of
+ * an icon pasted onto the app, and would push a second colour across a surface
+ * the rest of the product keeps to one accent. The MARK is preserved exactly;
+ * only the backdrop it needs at 108dp is not carried onto a 1080px screen.
  *
  * SKIPPABLE, AND HONEST ABOUT MOTION: a tap anywhere hands over immediately, and
  * when the system asks for reduced motion the sequence is skipped entirely
@@ -140,10 +139,6 @@ fun BrandIntro(
         label = "introWordmark"
     )
 
-    // One instance, reused for every ring in every frame. Allocating a measure
-    // per ring per frame would be 6 short-lived objects every 16ms for no gain.
-    val measure = remember { PathMeasure() }
-
     Box(
         modifier = modifier
             .fillMaxSize()
@@ -158,78 +153,68 @@ fun BrandIntro(
         contentAlignment = Alignment.Center
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Canvas(
-                modifier = Modifier
-                    .size(148.dp)
-                    // The whole mark settles the last fraction into place rather
-                    // than arriving at final size. Small enough to be felt and
-                    // not seen -- anything larger reads as a zoom effect.
-                    .scale(0.965f + 0.035f * reveal)
-            ) {
-                val cx = size.width / 2f
-                val cy = size.height / 2f
-                val unit = size.minDimension / 2f
 
-                // Vertices match IdentityCrest exactly; only the START vertex
-                // differs, so the trace begins at the apex instead of mid-edge.
-                // Same hexagon, deliberately cut from the top.
-                fun hex(r: Float): Path = Path().apply {
-                    for (i in 0 until 6) {
-                        val a = PI.toFloat() / 3f * i - PI.toFloat() / 2f
-                        val x = cx + r * cos(a)
-                        val y = cy + r * sin(a)
-                        if (i == 0) moveTo(x, y) else lineTo(x, y)
+            Box(contentAlignment = Alignment.Center) {
+
+                // Held light behind the mark. One bloom, then rest.
+                val bloom = 1f - abs(2f * reveal - 1f)
+                Canvas(modifier = Modifier.size(248.dp)) {
+                    val r = size.minDimension / 2f
+                    val a = 0.05f * reveal + 0.09f * bloom
+                    if (a > 0.001f) {
+                        drawCircle(
+                            brush = Brush.radialGradient(
+                                0f to Sovereign.copy(alpha = a),
+                                1f to Color.Transparent,
+                                center = center,
+                                radius = r
+                            ),
+                            radius = r,
+                            center = center
+                        )
                     }
-                    close()
                 }
 
-                /** The leading fraction [t] of a ring's perimeter. */
-                fun traced(path: Path, t: Float): Path {
-                    if (t >= 1f) return path
-                    val out = Path()
-                    measure.setPath(path, false)
-                    measure.getSegment(0f, measure.length * t, out, true)
-                    return out
-                }
-
-                // Each ring owns a slice of the reveal, so they settle in
-                // sequence: the frame arrives, then what it holds.
-                fun phase(from: Float, to: Float): Float =
-                    ((reveal - from) / (to - from)).coerceIn(0f, 1f)
-
-                val outer = phase(0f, 0.42f)
-                val mid = phase(0.22f, 0.66f)
-                val core = phase(0.52f, 0.88f)
-
-                // A single bloom at the moment the core lands, easing back to a
-                // low resting glow. Triangular, so it has one peak and no beat.
-                val bloom = 1f - abs(2f * core - 1f)
-                val restingGlow = 0.07f * core
-
-                drawCircle(
-                    Sovereign.copy(alpha = restingGlow + 0.11f * bloom),
-                    unit * (0.90f + 0.10f * bloom),
-                    Offset(cx, cy)
-                )
-
-                // Outer frame: the boundary of the crest.
-                drawPath(
-                    traced(hex(unit * 0.94f), outer),
-                    SlateEdge.copy(alpha = 0.85f),
-                    style = Stroke(width = 1.2.dp.toPx(), cap = StrokeCap.Round, join = StrokeJoin.Round)
-                )
-                // Inner ring: the accent proper, and the only stroke that carries
-                // Sovereign.
-                drawPath(
-                    traced(hex(unit * 0.70f), mid),
-                    Sovereign.copy(alpha = 0.80f),
-                    style = Stroke(width = 1.4.dp.toPx(), cap = StrokeCap.Round, join = StrokeJoin.Round)
-                )
-                // Held ground: filled, not stroked. It is the one solid thing in
-                // the mark, exactly as it is the one solid thing in the game.
-                drawPath(
-                    hex(unit * 0.44f * (0.86f + 0.14f * core)),
-                    SovereignGlow.copy(alpha = core)
+                Image(
+                    painter = painterResource(R.drawable.ic_brand_crown),
+                    // Decorative: the whole screen already carries the brand
+                    // description, and announcing the mark twice is noise.
+                    contentDescription = null,
+                    contentScale = ContentScale.Fit,
+                    modifier = Modifier
+                        // 423x344 source; this holds the artwork's aspect exactly
+                        // so the crown is never stretched.
+                        .size(width = 176.dp, height = 143.dp)
+                        .graphicsLayer {
+                            val s = 0.94f + 0.06f * reveal
+                            scaleX = s
+                            scaleY = s
+                            // Required for the DstIn mask below to affect only
+                            // this image rather than everything drawn beneath it.
+                            compositingStrategy = CompositingStrategy.Offscreen
+                        }
+                        .drawWithContent {
+                            drawContent()
+                            if (reveal < 1f) {
+                                // Opens from the artwork's centre, where the logo
+                                // places its compass. Clamped away from zero: a
+                                // radial brush with radius 0 has no gradient to
+                                // interpolate.
+                                val radius = (size.maxDimension * 0.78f)
+                                    .times(reveal)
+                                    .coerceAtLeast(0.01f)
+                                drawRect(
+                                    brush = Brush.radialGradient(
+                                        0f to Color.Black,
+                                        0.72f to Color.Black,
+                                        1f to Color.Transparent,
+                                        center = center,
+                                        radius = radius
+                                    ),
+                                    blendMode = BlendMode.DstIn
+                                )
+                            }
+                        }
                 )
             }
 
@@ -238,7 +223,7 @@ fun BrandIntro(
                 style = MaterialTheme.typography.labelLarge,
                 color = TextPrimary,
                 modifier = Modifier
-                    .padding(top = 30.dp)
+                    .padding(top = 22.dp)
                     .alpha(wordmark)
                     .scale(0.98f + 0.02f * wordmark)
             )
