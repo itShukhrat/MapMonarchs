@@ -17,12 +17,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import com.mapmonarchs.R
 import androidx.compose.ui.unit.dp
 import com.mapmonarchs.ui.components.CommandAction
-import com.mapmonarchs.ui.components.HexagonShape
-import com.mapmonarchs.ui.theme.Sovereign
+import androidx.compose.foundation.Image
+import androidx.compose.ui.layout.ContentScale
 import com.mapmonarchs.ui.theme.TextMuted
 import com.mapmonarchs.domain.model.PLAYABLE_COUNTRY_NAME
 import com.mapmonarchs.ui.theme.TextPrimary
@@ -62,11 +63,23 @@ fun OnboardingScreen(onContinue: () -> Unit, modifier: Modifier = Modifier) {
             .testTag(OnboardingTags.ROOT),
         verticalArrangement = androidx.compose.foundation.layout.Arrangement.Center
     ) {
-        Box(
-            modifier = Modifier
-                .size(52.dp)
-                .clip(HexagonShape)
-                .background(Sovereign)
+        // THE HANDOVER FRAME. BrandIntro finishes on the crown and this screen is
+        // the very next thing drawn, so it carries the same mark rather than a
+        // different one. This used to be a solid Sovereign hexagon, which meant
+        // the brand changed symbol in the gap between the intro ending and
+        // onboarding appearing -- the one seam in the launch path the player
+        // actually sees.
+        //
+        // Same asset the icon, the system splash and the intro use, so there is
+        // no fourth version of the mark to keep in sync. 64x52 holds the
+        // artwork's 423x344 aspect exactly and keeps the previous 52dp height,
+        // so the layout below it does not move.
+        Image(
+            painter = painterResource(R.drawable.ic_brand_crown),
+            // Decorative: the wordmark directly beneath already names the brand.
+            contentDescription = null,
+            contentScale = ContentScale.Fit,
+            modifier = Modifier.size(width = 64.dp, height = 52.dp)
         )
 
         Text(

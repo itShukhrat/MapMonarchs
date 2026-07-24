@@ -49,7 +49,7 @@ A pixel is crown if it is light and unsaturated against the saturated gradient:
 
 ## Launch path
 
-`launcher icon → system splash → BrandIntro` all use this same artwork. Android
+`launcher icon → system splash → BrandIntro → onboarding` all use this same artwork. Android
 12+ draws the adaptive icon as the splash, so icon and splash are identical by
 construction, and `BrandIntro` animates `ic_brand_crown` — the same pixels, not
 a reinterpretation. Device proof: `launch-crown-*.png`.
