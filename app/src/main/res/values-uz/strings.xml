@@ -342,6 +342,29 @@
     <string name="a11y_error_prefix">Xato: %1$s</string>
     <string name="a11y_unavailable">%1$s. Mavjud emas: %2$s</string>
 
+    <!-- ===== Profile hub ===== -->
+    <string name="route_profile">PROFIL</string>
+    <string name="profile_unknown">—</string>
+    <string name="profile_standing">MAVQE</string>
+    <string name="profile_held_ground">EGALLANGAN YER</string>
+    <string name="profile_rank">DARAJA</string>
+    <string name="profile_standing_note">Egallangan yer serverdan egalik oʻqilgunga qadar NOMAʼLUM deb koʻrsatiladi, daraja uchun esa hali ochilmagan reyting jadvali kerak. Ikkalasi ham nol deb koʻrsatilmaydi, chunki nol maʼlumot haqida emas, siz haqingizda daʼvo boʻlardi.</string>
+    <string name="profile_badges">NISHONLAR</string>
+    <string name="profile_badges_empty">Hozircha nishonlar mavjud emas. Ularni server vaqt davomida ushlab turilgan hudud uchun beradi, shuning uchun birinchisi egallash va egalik ishga tushganda mumkin boʻladi — bu ekran qayta chizilganda emas.</string>
+    <string name="profile_records">REKORDLAR</string>
+    <string name="profile_records_empty">Hali hech narsa yozilmagan. Rekordlar server qabul qilgan egallashlardan shakllanadi, shuning uchun ular shu qurilmadagi maʼlumotdan emas, haqiqiy yurishdan paydo boʻladi.</string>
+    <string name="profile_account">HISOB</string>
+    <string name="profile_tier">TARIF</string>
+    <string name="profile_tier_free">BEPUL</string>
+    <string name="profile_tier_pro">PRO</string>
+    <string name="profile_picture">PROFIL RASMI</string>
+    <string name="profile_picture_available">MAVJUD</string>
+    <string name="profile_locked">YOPIQ</string>
+    <string name="profile_picture_note">Profil rasmi — Pro imkoniyati. Unga qadar sizning yuzingiz gerbingizdir: u shaxsingizdan kelib chiqadi, shuning uchun u allaqachon shubhasiz sizniki.</string>
+    <string name="profile_no_purchase_yet">Pro’ni hali sotib boʻlmaydi: bu qurilmada toʻlov integratsiyasi yoʻq. Bu yerda hech narsa sotib olish taklifi emas, va uni tekshira oladigan server boʻlmaguncha hech qanday huquq berilmaydi.</string>
+    <string name="profile_view_pro">PRO NIMA BOʻLADI</string>
+    <string name="profile_manage_identity">SHAXSNI BOSHQARISH</string>
+
     <!-- ===== Common ===== -->
     <string name="common_retry">QAYTA URINISH</string>
     <string name="common_back">ORQAGA</string>

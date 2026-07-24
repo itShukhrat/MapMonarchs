@@ -188,6 +188,20 @@ sealed interface Route {
         )
     }
 
+    /**
+     * The player hub. Unlocked, because everything it shows is already true.
+     *
+     * It reads no data the backend has not confirmed: the callsign and session
+     * come from identity, held ground comes from ownership, and every surface
+     * with no data behind it yet -- rank, badges, records -- says so in its own
+     * words rather than rendering a plausible zero.
+     */
+    data object Profile : Route {
+        override val titleRes = R.string.route_profile
+        override val key = "PROFILE"
+        override val lock = null
+    }
+
     data object Shop : Route {
         override val titleRes = R.string.route_shop
         override val key = "SHOP"
@@ -235,11 +249,21 @@ val LOCKED_ROUTES: List<Route> = listOf(
 /**
  * A destination in the floating command bar.
  *
- * FIVE, not six. Five is what a thumb reaches across a 360dp screen without the
+ * STILL FIVE. Five is what a thumb reaches across a 360dp screen without the
  * hand shifting grip, and this bar sits over a map the player is walking with.
- * The sixth tab in the original sketch was PROFILE; identity lives inside
- * COMMAND instead, because it is a place you visit occasionally, not a place you
- * steer from.
+ * That constraint has not changed, so PROFILE was added by REPLACING a tab
+ * rather than by growing the bar to six.
+ *
+ * MISSIONS gave up the slot, not one of the working surfaces. It is locked, and
+ * CommandCenterScreen already lists every locked route that is NOT in this bar,
+ * so it lost no discoverability by moving -- it simply appears under the
+ * roadmap where the other unopened systems are. PROFILE, by contrast, is a
+ * surface the player uses continuously and can act on today.
+ *
+ * An earlier revision of this comment argued profile belonged inside COMMAND
+ * because it is "a place you visit occasionally". That was true when it held a
+ * callsign and a session row; it stopped being true once it carried the crest,
+ * held ground, account state and the pro gate.
  *
  * NAMING: these use each route's own title rather than a second set of nav
  * labels. "CLAIMS" in the bar opening a screen headed "TERRITORY" is the same
@@ -267,7 +291,7 @@ data class NavDestination(
 val NAV_DESTINATIONS: List<NavDestination> = listOf(
     NavDestination(Route.Map, NavGlyph.MAP),
     NavDestination(Route.Territory, NavGlyph.CLAIMS),
-    NavDestination(Route.Missions, NavGlyph.MISSIONS),
+    NavDestination(Route.Profile, NavGlyph.PROFILE),
     NavDestination(Route.Empire, NavGlyph.SOCIAL),
     NavDestination(Route.Command, NavGlyph.COMMAND)
 )

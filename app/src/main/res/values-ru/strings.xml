@@ -343,6 +343,29 @@
     <string name="a11y_error_prefix">Ошибка: %1$s</string>
     <string name="a11y_unavailable">%1$s. Недоступно: %2$s</string>
 
+    <!-- ===== Profile hub ===== -->
+    <string name="route_profile">ПРОФИЛЬ</string>
+    <string name="profile_unknown">—</string>
+    <string name="profile_standing">ПОЛОЖЕНИЕ</string>
+    <string name="profile_held_ground">УДЕРЖИВАЕМАЯ ЗЕМЛЯ</string>
+    <string name="profile_rank">РАНГ</string>
+    <string name="profile_standing_note">Удерживаемая земля показывается как НЕИЗВЕСТНО, пока владение не считано с сервера, а для ранга нужна таблица лидеров, которая ещё не открыта. Ни то, ни другое не показывается нулём, потому что ноль был бы утверждением о вас, а не о данных.</string>
+    <string name="profile_badges">ЗНАКИ ОТЛИЧИЯ</string>
+    <string name="profile_badges_empty">Знаков отличия пока не существует. Их выдаёт сервер за удержание территории со временем, поэтому первый станет возможен, когда захват и владение заработают — а не когда этот экран перерисуют.</string>
+    <string name="profile_records">РЕКОРДЫ</string>
+    <string name="profile_records_empty">Пока ничего не записано. Рекорды формируются из захватов, принятых сервером, поэтому они появятся от реальной ходьбы, а не из данных на этом устройстве.</string>
+    <string name="profile_account">АККАУНТ</string>
+    <string name="profile_tier">ТАРИФ</string>
+    <string name="profile_tier_free">БЕСПЛАТНЫЙ</string>
+    <string name="profile_tier_pro">PRO</string>
+    <string name="profile_picture">ФОТО ПРОФИЛЯ</string>
+    <string name="profile_picture_available">ДОСТУПНО</string>
+    <string name="profile_locked">ЗАКРЫТО</string>
+    <string name="profile_picture_note">Фото профиля — возможность Pro. До тех пор вашим лицом остаётся ваш герб: он выведен из вашей личности, поэтому он уже бесспорно ваш.</string>
+    <string name="profile_no_purchase_yet">Pro пока нельзя купить: в этой сборке нет платёжной интеграции. Ничто здесь не является предложением о покупке, и никакие права не могут быть выданы, пока нет сервера, способного их проверить.</string>
+    <string name="profile_view_pro">ЧЕМ БУДЕТ PRO</string>
+    <string name="profile_manage_identity">УПРАВЛЕНИЕ ЛИЧНОСТЬЮ</string>
+
     <!-- ===== Common ===== -->
     <string name="common_retry">ПОВТОРИТЬ</string>
     <string name="common_back">НАЗАД</string>

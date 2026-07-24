@@ -423,6 +423,32 @@
     <string name="a11y_error_prefix">Error: %1$s</string>
     <string name="a11y_unavailable">%1$s. Unavailable: %2$s</string>
 
+    <!-- ===== Profile hub =====
+         Three readouts here are deliberately UNKNOWN rather than zero. A profile
+         is where invented progress does the most damage, so each blank states
+         why it is blank and what would fill it. -->
+    <string name="route_profile">PROFILE</string>
+    <string name="profile_unknown">—</string>
+    <string name="profile_standing">STANDING</string>
+    <string name="profile_held_ground">HELD GROUND</string>
+    <string name="profile_rank">RANK</string>
+    <string name="profile_standing_note">Held ground reads UNKNOWN until ownership is read back from the server, and rank needs the leaderboard, which is not open yet. Neither is shown as zero, because zero would be a claim about you rather than about the data.</string>
+    <string name="profile_badges">BADGES</string>
+    <string name="profile_badges_empty">No badges exist yet. They are awarded by the server for ground held over time, so the first one becomes possible when capture and ownership are both live — not when this screen is redesigned.</string>
+    <string name="profile_records">RECORDS</string>
+    <string name="profile_records_empty">Nothing has been recorded yet. Records are written from claims the server accepted, so this fills in from real walking rather than from anything stored on this device.</string>
+    <string name="profile_account">ACCOUNT</string>
+    <string name="profile_tier">TIER</string>
+    <string name="profile_tier_free">FREE</string>
+    <string name="profile_tier_pro">PRO</string>
+    <string name="profile_picture">PROFILE PICTURE</string>
+    <string name="profile_picture_available">AVAILABLE</string>
+    <string name="profile_locked">LOCKED</string>
+    <string name="profile_picture_note">A profile picture is a Pro capability. Until then your crest is your face — it is derived from your identity, so it is already unarguably yours.</string>
+    <string name="profile_no_purchase_yet">Pro cannot be bought yet: this build has no payment integration. Nothing here is a purchase prompt, and no entitlement can be granted until there is a server able to verify one.</string>
+    <string name="profile_view_pro">WHAT PRO WILL BE</string>
+    <string name="profile_manage_identity">MANAGE IDENTITY</string>
+
     <!-- ===== Common ===== -->
     <string name="common_retry">RETRY</string>
     <string name="common_back">BACK</string>

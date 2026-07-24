@@ -41,7 +41,7 @@ import kotlin.math.sin
 /** The optical grid every glyph is designed against. */
 val NavIconSize = 24.dp
 
-enum class NavGlyph { MAP, CLAIMS, MISSIONS, SOCIAL, COMMAND }
+enum class NavGlyph { MAP, CLAIMS, MISSIONS, SOCIAL, PROFILE, COMMAND }
 
 /** Flat-top hexagon, matching the territory geometry drawn on the map. */
 private fun hexPath(cx: Float, cy: Float, r: Float): Path = Path().apply {
@@ -114,6 +114,27 @@ fun NavIconGlyph(
                     drawPath(hexPath(cx - o, cy, rr), color, style = st)
                     drawPath(hexPath(cx + o, cy, rr), color, style = st)
                 }
+            }
+
+            // The player's own cell, seated: one mark held above a base.
+            //
+            // Deliberately NOT a person silhouette. A head-and-shoulders icon is
+            // the single most generic mark in mobile software and would be the
+            // one glyph in this bar that stopped speaking the game's language.
+            // This is the same cell every other glyph is built from, raised to
+            // the position the crest reserves for whoever holds it.
+            NavGlyph.PROFILE -> {
+                val hr = ir * 0.46f
+                val hy = cy - ir * 0.34f
+                if (filled) drawPath(hexPath(cx, hy, hr), color)
+                else drawPath(hexPath(cx, hy, hr), color, style = st)
+                drawLine(
+                    color,
+                    Offset(cx - ir * 0.86f, cy + ir * 0.62f),
+                    Offset(cx + ir * 0.86f, cy + ir * 0.62f),
+                    strokeWidth = if (filled) sw * 1.5f else sw,
+                    cap = StrokeCap.Round
+                )
             }
 
             // Instruments: readout lines inside the cell.

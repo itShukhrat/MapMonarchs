@@ -46,10 +46,14 @@ import com.mapmonarchs.feature.help.HelpScreen
 import com.mapmonarchs.feature.identity.IdentityScreen
 import com.mapmonarchs.feature.locked.LockedScreen
 import com.mapmonarchs.feature.map.MapScreen
+import com.mapmonarchs.feature.map.holdingsLabel
 import com.mapmonarchs.feature.map.resolveBlocker
+import com.mapmonarchs.feature.map.territoryColor
 import com.mapmonarchs.feature.map.MapViewModel
 import com.mapmonarchs.feature.map.MapViewModelFactory
+import com.mapmonarchs.domain.model.NoBillingEntitlements
 import com.mapmonarchs.feature.onboarding.BrandIntro
+import com.mapmonarchs.feature.profile.ProfileScreen
 import com.mapmonarchs.feature.onboarding.OnboardingScreen
 import com.mapmonarchs.feature.safety.SafetyScreen
 import com.mapmonarchs.ui.motion.SCREEN_TRANSITION_MS
@@ -200,6 +204,21 @@ fun AppShell(modifier: Modifier = Modifier) {
                     // a button reading LOCATION OFF can never open a sign-in form.
                     navigator.navigateTo(remedyRouteFor(resolveBlocker(state)))
                 }
+            )
+
+            route == Route.Profile -> ProfileScreen(
+                identity = state.identity,
+                territoryColor = state.territoryColor(),
+                // Passed through as the map knows it, including its unknown
+                // marker. Recomputing a count here would give the product two
+                // answers for one fact.
+                holdings = state.holdingsLabel(),
+                // Resolved through the seam, not read from a flag: when billing
+                // exists this line is the only thing that changes.
+                entitlement = remember { NoBillingEntitlements }.current(),
+                onBack = { navigator.back() },
+                onManageIdentity = { navigator.navigateTo(Route.Identity) },
+                onOpenShop = { navigator.navigateTo(Route.Shop) }
             )
 
             route == Route.Identity -> IdentityScreen(
