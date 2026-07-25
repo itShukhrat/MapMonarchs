@@ -25,6 +25,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -36,6 +37,9 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.mapmonarchs.data.local.AppLocale
 import com.mapmonarchs.data.local.FirstRunStore
 import com.mapmonarchs.data.local.TrackingPreferences
+import com.mapmonarchs.data.remote.SupabaseProvider
+import com.mapmonarchs.data.repository.SupabaseProfileRepository
+import com.mapmonarchs.domain.repository.Outcome
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.DisposableEffect
 import com.mapmonarchs.domain.model.Identity
@@ -51,10 +55,11 @@ import com.mapmonarchs.feature.map.resolveBlocker
 import com.mapmonarchs.feature.map.territoryColor
 import com.mapmonarchs.feature.map.MapViewModel
 import com.mapmonarchs.feature.map.MapViewModelFactory
-import com.mapmonarchs.domain.model.NoBillingEntitlements
+import com.mapmonarchs.domain.model.Entitlement
 import com.mapmonarchs.domain.model.PlayerRecords
 import com.mapmonarchs.feature.badges.BadgesScreen
 import com.mapmonarchs.feature.onboarding.BrandIntro
+import com.mapmonarchs.feature.profile.ProfileDossier
 import com.mapmonarchs.feature.profile.ProfileScreen
 import com.mapmonarchs.feature.records.RecordsScreen
 import com.mapmonarchs.feature.subscription.SubscriptionScreen
@@ -100,11 +105,25 @@ fun AppShell(modifier: Modifier = Modifier) {
     val viewModel: MapViewModel = viewModel(factory = MapViewModelFactory(context))
     val state by viewModel.uiState.collectAsState()
 
-    // One entitlement source for every gated surface. Resolved through the seam
-    // rather than read from a flag; NoBillingEntitlements returns Free for every
-    // player in this build, and swapping this line is the whole of the change
-    // when Play Billing lands.
-    val entitlement = remember { NoBillingEntitlements.current() }
+    // The player's dossier -- badges, records, entitlement -- read from the
+    // server, keyed on identity so it reloads when they sign in or out. Signed
+    // out (the universal state today) the repository short-circuits to honest
+    // empties with no network call, so this makes no failing requests until
+    // someone is actually signed in. A failed read degrades to the same empties
+    // rather than fabricating a value; nothing here invents progress.
+    val profileRepo = remember { SupabaseProfileRepository(SupabaseProvider.client) }
+    val dossier by produceState(ProfileDossier.EMPTY, state.identity) {
+        value = if (state.identity is Identity.SignedIn) {
+            ProfileDossier(
+                earnedBadges = (profileRepo.earnedBadges() as? Outcome.Success)?.value ?: emptyMap(),
+                records = (profileRepo.playerRecords() as? Outcome.Success)?.value ?: PlayerRecords.NONE,
+                entitlement = (profileRepo.entitlement() as? Outcome.Success)?.value ?: Entitlement.Free,
+            )
+        } else {
+            ProfileDossier.EMPTY
+        }
+    }
+    val entitlement = dossier.entitlement
 
     if (!introDone) {
         BrandIntro(onDone = { introDone = true }, modifier = modifier)
@@ -229,7 +248,7 @@ fun AppShell(modifier: Modifier = Modifier) {
                 // Empty by design: earned badges come from user_badges, which is
                 // not wired because capture is not live. An empty map renders the
                 // whole cabinet locked, which is the true state.
-                earnedBadgeKeys = emptyMap(),
+                earnedBadgeKeys = dossier.earnedBadges,
                 onBack = { navigator.back() },
                 onManageIdentity = { navigator.navigateTo(Route.Identity) },
                 onOpenBadges = { navigator.navigateTo(Route.Badges) },
@@ -238,13 +257,13 @@ fun AppShell(modifier: Modifier = Modifier) {
             )
 
             route == Route.Badges -> BadgesScreen(
-                earnedKeys = emptyMap(),
+                earnedKeys = dossier.earnedBadges,
                 onBack = { navigator.back() }
             )
 
             route == Route.Records -> RecordsScreen(
                 // The only state the record store can honestly return today.
-                records = PlayerRecords.NONE,
+                records = dossier.records,
                 onBack = { navigator.back() }
             )
 
