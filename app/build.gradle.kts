@@ -38,10 +38,46 @@ android {
         buildConfigField("String", "SUPABASE_ANON_KEY", "\"${secret("SUPABASE_ANON_KEY")}\"")
     }
 
+    signingConfigs {
+        // Release signing comes from OUTSIDE the repo. The keystore path and its
+        // passwords live in local.properties (git-ignored) or the CI environment,
+        // never here -- an upload key committed to git is an upload key anyone who
+        // clones the repo can publish an update with. Absent, the release stays
+        // unsigned so a fresh clone still builds; a real release supplies these
+        // four values and is signed automatically. See RELEASE.md.
+        create("release") {
+            val storePath = secret("RELEASE_STORE_FILE")
+            if (storePath.isNotEmpty()) {
+                storeFile = rootProject.file(storePath)
+                storePassword = secret("RELEASE_STORE_PASSWORD")
+                keyAlias = secret("RELEASE_KEY_ALIAS")
+                keyPassword = secret("RELEASE_KEY_PASSWORD")
+            }
+        }
+    }
+
     buildTypes {
         release {
+            // R8 stays OFF, and that is a verified-safe choice rather than an
+            // oversight. The release variant is otherwise identical to the debug
+            // build that is device-verified, so it behaves the same. Turning R8
+            // ON is a size optimisation whose keep rules are already written in
+            // proguard-rules.pro -- but it must be re-verified against a SIGNED-IN
+            // read (kotlinx-serialization resolves serializers reflectively on the
+            // network path), and that path is not exercisable while sign-in is
+            // gated. Enabling it unverified would ship a risk this project refuses.
+            // Native Mapbox libraries dominate the artifact size anyway; the real
+            // size lever is the AAB's per-ABI split, not R8.
             optimization {
                 enable = false
+            }
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
+            // Signed only when a keystore was supplied; otherwise unsigned.
+            if (secret("RELEASE_STORE_FILE").isNotEmpty()) {
+                signingConfig = signingConfigs.getByName("release")
             }
         }
     }
