@@ -366,6 +366,83 @@
     <string name="profile_view_pro">ЧЕМ БУДЕТ PRO</string>
     <string name="profile_manage_identity">УПРАВЛЕНИЕ ЛИЧНОСТЬЮ</string>
 
+    <!-- ===== Profile hub links ===== -->
+    <string name="profile_open_badges">ВИТРИНА НАГРАД</string>
+    <string name="profile_badges_value">%1$d / %2$d</string>
+    <string name="profile_open_records">ЖУРНАЛ СВОДОК</string>
+    <string name="profile_records_value">ПОКА НЕТ</string>
+
+    <!-- ===== Badges ===== -->
+    <string name="route_badges">ЗНАКИ ОТЛИЧИЯ</string>
+    <string name="badges_earned_of_total">получено %1$d из %2$d</string>
+    <string name="badges_intro">Каждый знак отличия зарабатывается настоящими захватами, принятыми сервером, — здесь ничего не выдаётся за открытие приложения. Захват ещё не активен, поэтому не получено ни одного. Это витрина, к которой вы идёте.</string>
+    <string name="badge_cat_field">ПОЛЕ</string>
+    <string name="badge_cat_endurance">ВЫДЕРЖКА</string>
+    <string name="badge_cat_command">КОМАНДОВАНИЕ</string>
+    <string name="badge_state_earned">ПОЛУЧЕНО</string>
+    <string name="badge_state_locked">ЗАКРЫТО</string>
+    <string name="badge_state_blocked">НУЖЕН РЕЙТИНГ</string>
+    <string name="badge_first_capture_title">Первая земля</string>
+    <string name="badge_first_capture_criteria">Захватите свой первый гекс.</string>
+    <string name="badge_first_hold_title">Удержано за ночь</string>
+    <string name="badge_first_hold_criteria">Сохраните гекс с одного дня на следующий.</string>
+    <string name="badge_hold_10_title">Десять ячеек</string>
+    <string name="badge_hold_10_criteria">Удерживайте десять гексов одновременно.</string>
+    <string name="badge_hold_50_title">Пятьдесят ячеек</string>
+    <string name="badge_hold_50_criteria">Удерживайте пятьдесят гексов одновременно.</string>
+    <string name="badge_border_hold_title">Рубеж</string>
+    <string name="badge_border_hold_criteria">Удерживайте гекс на государственной границе.</string>
+    <string name="badge_streak_7_title">Семь дней</string>
+    <string name="badge_streak_7_criteria">Захватывайте землю семь дней подряд.</string>
+    <string name="badge_streak_30_title">Тридцать дней</string>
+    <string name="badge_streak_30_criteria">Захватывайте землю тридцать дней подряд.</string>
+    <string name="badge_rank_100_title">Топ-100</string>
+    <string name="badge_rank_100_criteria">Войдите в топ-100 таблицы лидеров.</string>
+    <string name="badge_rank_10_title">Топ-10</string>
+    <string name="badge_rank_10_criteria">Войдите в топ-10 таблицы лидеров.</string>
+
+    <!-- ===== Records ===== -->
+    <string name="route_records">РЕКОРДЫ</string>
+    <string name="records_none_header">ИСТОРИИ ПОКА НЕТ</string>
+    <string name="records_none_body">Ваша история начинается с первого принятого захвата. Пока захват не активен, записывать нечего, поэтому каждая строка показывает НЕИЗВЕСТНО, а не ноль — ноль был бы утверждением о вас, а не о данных.</string>
+    <string name="records_field">ПОЛЕ</string>
+    <string name="records_endurance">ВЫДЕРЖКА</string>
+    <string name="records_first_capture">ПЕРВЫЙ ЗАХВАТ</string>
+    <string name="records_total_captures">ВСЕГО ЗАХВАТОВ</string>
+    <string name="records_hexes_ever">ГЕКСОВ УДЕРЖАНО</string>
+    <string name="records_peak_held">ПИК ОДНОВРЕМЕННО</string>
+    <string name="records_current_streak">ТЕКУЩАЯ СЕРИЯ</string>
+    <string name="records_longest_streak">ЛУЧШАЯ СЕРИЯ</string>
+    <plurals name="records_days">
+        <item quantity="one">%1$d день</item>
+        <item quantity="few">%1$d дня</item>
+        <item quantity="many">%1$d дней</item>
+        <item quantity="other">%1$d дня</item>
+    </plurals>
+
+    <!-- ===== Subscription ===== -->
+    <string name="route_subscription">ПОДПИСКА</string>
+    <string name="subscription_plan">ТАРИФ</string>
+    <string name="subscription_current">ТЕКУЩИЙ ТАРИФ</string>
+    <string name="subscription_what_is_pro">ЧТО ТАКОЕ PRO</string>
+    <string name="subscription_fairness">Pro никогда не покупает преимущество в захвате земли. Каждая возможность — косметика, удобство аккаунта или более полный обзор вашей собственной истории. Земля берётся пешком или не берётся вовсе — это правило не продаётся.</string>
+    <string name="subscription_upgrade_unavailable">ОФОРМИТЬ — ПОКА НЕДОСТУПНО</string>
+    <string name="subscription_upgrade_reason">в этой сборке нет платёжной интеграции</string>
+    <string name="subscription_no_billing_note">В этой сборке нет платёжной интеграции, поэтому Pro нельзя купить и никакие права не могут быть выданы. Здесь с вас ничего не списывается, и ничто не является предложением о покупке.</string>
+    <string name="subscription_manage">ВОССТАНОВИТЬ / УПРАВЛЯТЬ</string>
+    <string name="subscription_benefit_live">АКТИВНО</string>
+    <string name="subscription_benefit_soon">СКОРО</string>
+    <string name="pro_benefit_avatar_title">Фото профиля</string>
+    <string name="pro_benefit_avatar_detail">Загрузите настоящее фото вместо герба. У бесплатных игроков остаётся герб, выведенный из их личности.</string>
+    <string name="pro_benefit_crest_title">Варианты герба</string>
+    <string name="pro_benefit_crest_detail">Косметические отделки для герба. Только внешний вид — герб по-прежнему значит то же самое.</string>
+    <string name="pro_benefit_frame_title">Рамки профиля</string>
+    <string name="pro_benefit_frame_detail">Косметические рамки вокруг заголовка профиля.</string>
+    <string name="pro_benefit_history_title">Полная история</string>
+    <string name="pro_benefit_history_detail">Смотрите весь журнал рекордов, а не только недавние вехи.</string>
+    <string name="pro_benefit_support_title">Приоритетная поддержка</string>
+    <string name="pro_benefit_support_detail">Ваши вопросы быстрее доходят до человека.</string>
+
     <!-- ===== Common ===== -->
     <string name="common_retry">ПОВТОРИТЬ</string>
     <string name="common_back">НАЗАД</string>

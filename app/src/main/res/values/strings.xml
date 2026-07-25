@@ -449,6 +449,81 @@
     <string name="profile_view_pro">WHAT PRO WILL BE</string>
     <string name="profile_manage_identity">MANAGE IDENTITY</string>
 
+    <!-- ===== Profile hub links ===== -->
+    <string name="profile_open_badges">MEDAL CABINET</string>
+    <string name="profile_badges_value">%1$d / %2$d</string>
+    <string name="profile_open_records">INTELLIGENCE LOG</string>
+    <string name="profile_records_value">NONE YET</string>
+
+    <!-- ===== Badges (medal cabinet). Every badge is a rule the server can evaluate. ===== -->
+    <string name="route_badges">BADGES</string>
+    <string name="badges_earned_of_total">%1$d of %2$d earned</string>
+    <string name="badges_intro">Every badge is earned from real claims the server accepts — nothing here is awarded for opening the app. Capture is not live yet, so none are earned. This is the cabinet you are playing toward.</string>
+    <string name="badge_cat_field">FIELD</string>
+    <string name="badge_cat_endurance">ENDURANCE</string>
+    <string name="badge_cat_command">COMMAND</string>
+    <string name="badge_state_earned">EARNED</string>
+    <string name="badge_state_locked">LOCKED</string>
+    <string name="badge_state_blocked">NEEDS RANKING</string>
+    <string name="badge_first_capture_title">First Ground</string>
+    <string name="badge_first_capture_criteria">Claim your first hex.</string>
+    <string name="badge_first_hold_title">Held Overnight</string>
+    <string name="badge_first_hold_criteria">Keep a hex from one day into the next.</string>
+    <string name="badge_hold_10_title">Ten Cells</string>
+    <string name="badge_hold_10_criteria">Hold ten hexes at the same time.</string>
+    <string name="badge_hold_50_title">Fifty Cells</string>
+    <string name="badge_hold_50_criteria">Hold fifty hexes at the same time.</string>
+    <string name="badge_border_hold_title">Frontier</string>
+    <string name="badge_border_hold_criteria">Hold a hex on the national border.</string>
+    <string name="badge_streak_7_title">Seven Days</string>
+    <string name="badge_streak_7_criteria">Claim ground on seven days in a row.</string>
+    <string name="badge_streak_30_title">Thirty Days</string>
+    <string name="badge_streak_30_criteria">Claim ground on thirty days in a row.</string>
+    <string name="badge_rank_100_title">Top 100</string>
+    <string name="badge_rank_100_criteria">Reach the top 100 on the leaderboard.</string>
+    <string name="badge_rank_10_title">Top 10</string>
+    <string name="badge_rank_10_criteria">Reach the top 10 on the leaderboard.</string>
+
+    <!-- ===== Records (intelligence log). Game history, never fitness. ===== -->
+    <string name="route_records">RECORDS</string>
+    <string name="records_none_header">NO HISTORY YET</string>
+    <string name="records_none_body">Your history begins at your first accepted claim. Until capture is live there is nothing to record, so every line reads unknown rather than zero — a zero would be a claim about you, not about the data.</string>
+    <string name="records_field">FIELD</string>
+    <string name="records_endurance">ENDURANCE</string>
+    <string name="records_first_capture">FIRST CAPTURE</string>
+    <string name="records_total_captures">TOTAL CAPTURES</string>
+    <string name="records_hexes_ever">HEXES EVER HELD</string>
+    <string name="records_peak_held">PEAK HELD AT ONCE</string>
+    <string name="records_current_streak">CURRENT STREAK</string>
+    <string name="records_longest_streak">LONGEST STREAK</string>
+    <plurals name="records_days">
+        <item quantity="one">%1$d day</item>
+        <item quantity="other">%1$d days</item>
+    </plurals>
+
+    <!-- ===== Subscription (Free vs Pro). Fairness-neutral benefits only. ===== -->
+    <string name="route_subscription">SUBSCRIPTION</string>
+    <string name="subscription_plan">PLAN</string>
+    <string name="subscription_current">CURRENT PLAN</string>
+    <string name="subscription_what_is_pro">WHAT PRO IS</string>
+    <string name="subscription_fairness">Pro never buys an advantage in taking ground. Every benefit is cosmetic, an account convenience, or a fuller view of your own history. Ground is won on foot or it is not won — that rule is not for sale.</string>
+    <string name="subscription_upgrade_unavailable">UPGRADE — NOT YET AVAILABLE</string>
+    <string name="subscription_upgrade_reason">no billing integration in this build</string>
+    <string name="subscription_no_billing_note">There is no payment integration in this build, so Pro cannot be purchased and no entitlement can be granted. Nothing here charges you, and nothing here is a purchase prompt.</string>
+    <string name="subscription_manage">RESTORE / MANAGE</string>
+    <string name="subscription_benefit_live">ACTIVE</string>
+    <string name="subscription_benefit_soon">SOON</string>
+    <string name="pro_benefit_avatar_title">Profile picture</string>
+    <string name="pro_benefit_avatar_detail">Upload a real photo in place of your crest. Free players keep the crest, which is derived from their identity.</string>
+    <string name="pro_benefit_crest_title">Crest variants</string>
+    <string name="pro_benefit_crest_detail">Cosmetic finishes for your crest. Appearance only — the crest still means the same thing.</string>
+    <string name="pro_benefit_frame_title">Profile frames</string>
+    <string name="pro_benefit_frame_detail">Cosmetic borders around your profile header.</string>
+    <string name="pro_benefit_history_title">Full history</string>
+    <string name="pro_benefit_history_detail">See your complete record log rather than recent milestones.</string>
+    <string name="pro_benefit_support_title">Priority support</string>
+    <string name="pro_benefit_support_detail">Your questions reach a person sooner.</string>
+
     <!-- ===== Common ===== -->
     <string name="common_retry">RETRY</string>
     <string name="common_back">BACK</string>

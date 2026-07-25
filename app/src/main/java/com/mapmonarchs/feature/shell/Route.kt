@@ -202,6 +202,31 @@ sealed interface Route {
         override val lock = null
     }
 
+    /**
+     * Sub-screens of the profile hub. Unlocked, because each is honest about
+     * having no data yet rather than being withheld. They are reached FROM
+     * profile and are not dock destinations -- the dock stays at five, and these
+     * are places you drill into, not places you steer from.
+     */
+    data object Badges : Route {
+        override val titleRes = R.string.route_badges
+        override val key = "BADGES"
+        override val lock = null
+    }
+
+    data object Records : Route {
+        override val titleRes = R.string.route_records
+        override val key = "RECORDS"
+        override val lock = null
+    }
+
+    /** The Pro surface. Unlocked so the comparison is visible; purchase is gated honestly inside. */
+    data object Subscription : Route {
+        override val titleRes = R.string.route_subscription
+        override val key = "SUBSCRIPTION"
+        override val lock = null
+    }
+
     data object Shop : Route {
         override val titleRes = R.string.route_shop
         override val key = "SHOP"

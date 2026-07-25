@@ -52,8 +52,12 @@ import com.mapmonarchs.feature.map.territoryColor
 import com.mapmonarchs.feature.map.MapViewModel
 import com.mapmonarchs.feature.map.MapViewModelFactory
 import com.mapmonarchs.domain.model.NoBillingEntitlements
+import com.mapmonarchs.domain.model.PlayerRecords
+import com.mapmonarchs.feature.badges.BadgesScreen
 import com.mapmonarchs.feature.onboarding.BrandIntro
 import com.mapmonarchs.feature.profile.ProfileScreen
+import com.mapmonarchs.feature.records.RecordsScreen
+import com.mapmonarchs.feature.subscription.SubscriptionScreen
 import com.mapmonarchs.feature.onboarding.OnboardingScreen
 import com.mapmonarchs.feature.safety.SafetyScreen
 import com.mapmonarchs.ui.motion.SCREEN_TRANSITION_MS
@@ -95,6 +99,12 @@ fun AppShell(modifier: Modifier = Modifier) {
 
     val viewModel: MapViewModel = viewModel(factory = MapViewModelFactory(context))
     val state by viewModel.uiState.collectAsState()
+
+    // One entitlement source for every gated surface. Resolved through the seam
+    // rather than read from a flag; NoBillingEntitlements returns Free for every
+    // player in this build, and swapping this line is the whole of the change
+    // when Play Billing lands.
+    val entitlement = remember { NoBillingEntitlements.current() }
 
     if (!introDone) {
         BrandIntro(onDone = { introDone = true }, modifier = modifier)
@@ -215,10 +225,35 @@ fun AppShell(modifier: Modifier = Modifier) {
                 holdings = state.holdingsLabel(),
                 // Resolved through the seam, not read from a flag: when billing
                 // exists this line is the only thing that changes.
-                entitlement = remember { NoBillingEntitlements }.current(),
+                entitlement = entitlement,
+                // Empty by design: earned badges come from user_badges, which is
+                // not wired because capture is not live. An empty map renders the
+                // whole cabinet locked, which is the true state.
+                earnedBadgeKeys = emptyMap(),
                 onBack = { navigator.back() },
                 onManageIdentity = { navigator.navigateTo(Route.Identity) },
-                onOpenShop = { navigator.navigateTo(Route.Shop) }
+                onOpenBadges = { navigator.navigateTo(Route.Badges) },
+                onOpenRecords = { navigator.navigateTo(Route.Records) },
+                onOpenSubscription = { navigator.navigateTo(Route.Subscription) }
+            )
+
+            route == Route.Badges -> BadgesScreen(
+                earnedKeys = emptyMap(),
+                onBack = { navigator.back() }
+            )
+
+            route == Route.Records -> RecordsScreen(
+                // The only state the record store can honestly return today.
+                records = PlayerRecords.NONE,
+                onBack = { navigator.back() }
+            )
+
+            route == Route.Subscription -> SubscriptionScreen(
+                entitlement = entitlement,
+                onBack = { navigator.back() },
+                // Never invoked in this build (the manage button is hidden while
+                // PURCHASE_AVAILABLE is false); wired for when billing lands.
+                onManageBilling = { }
             )
 
             route == Route.Identity -> IdentityScreen(

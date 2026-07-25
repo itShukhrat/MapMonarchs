@@ -365,6 +365,81 @@
     <string name="profile_view_pro">PRO NIMA BOʻLADI</string>
     <string name="profile_manage_identity">SHAXSNI BOSHQARISH</string>
 
+    <!-- ===== Profile hub links ===== -->
+    <string name="profile_open_badges">NISHONLAR VITRINASI</string>
+    <string name="profile_badges_value">%1$d / %2$d</string>
+    <string name="profile_open_records">MAʼLUMOT JURNALI</string>
+    <string name="profile_records_value">HALI YOʻQ</string>
+
+    <!-- ===== Badges ===== -->
+    <string name="route_badges">NISHONLAR</string>
+    <string name="badges_earned_of_total">%2$d dan %1$d ta olingan</string>
+    <string name="badges_intro">Har bir nishon server qabul qilgan haqiqiy egallashlar uchun beriladi — bu yerda hech narsa ilovani ochganingiz uchun berilmaydi. Egallash hali faol emas, shuning uchun birortasi olinmagan. Bu siz intilayotgan vitrinadir.</string>
+    <string name="badge_cat_field">MAYDON</string>
+    <string name="badge_cat_endurance">MATONAT</string>
+    <string name="badge_cat_command">QOʻMONDONLIK</string>
+    <string name="badge_state_earned">OLINGAN</string>
+    <string name="badge_state_locked">YOPIQ</string>
+    <string name="badge_state_blocked">REYTING KERAK</string>
+    <string name="badge_first_capture_title">Birinchi yer</string>
+    <string name="badge_first_capture_criteria">Birinchi geksingizni egallang.</string>
+    <string name="badge_first_hold_title">Tunda ushlangan</string>
+    <string name="badge_first_hold_criteria">Geksni bir kundan keyingi kunga saqlang.</string>
+    <string name="badge_hold_10_title">Oʻn katak</string>
+    <string name="badge_hold_10_criteria">Bir vaqtda oʻnta geksni ushlang.</string>
+    <string name="badge_hold_50_title">Ellik katak</string>
+    <string name="badge_hold_50_criteria">Bir vaqtda ellikta geksni ushlang.</string>
+    <string name="badge_border_hold_title">Chegara</string>
+    <string name="badge_border_hold_criteria">Davlat chegarasidagi geksni ushlang.</string>
+    <string name="badge_streak_7_title">Yetti kun</string>
+    <string name="badge_streak_7_criteria">Ketma-ket yetti kun yer egallang.</string>
+    <string name="badge_streak_30_title">Oʻttiz kun</string>
+    <string name="badge_streak_30_criteria">Ketma-ket oʻttiz kun yer egallang.</string>
+    <string name="badge_rank_100_title">Top 100</string>
+    <string name="badge_rank_100_criteria">Reyting jadvalida top 100 ga kiring.</string>
+    <string name="badge_rank_10_title">Top 10</string>
+    <string name="badge_rank_10_criteria">Reyting jadvalida top 10 ga kiring.</string>
+
+    <!-- ===== Records ===== -->
+    <string name="route_records">REKORDLAR</string>
+    <string name="records_none_header">HALI TARIX YOʻQ</string>
+    <string name="records_none_body">Tarixingiz birinchi qabul qilingan egallashdan boshlanadi. Egallash faol boʻlgunga qadar yozadigan narsa yoʻq, shuning uchun har bir qator nol emas, NOMAʼLUM deb koʻrsatiladi — nol maʼlumot haqida emas, siz haqingizda daʼvo boʻlardi.</string>
+    <string name="records_field">MAYDON</string>
+    <string name="records_endurance">MATONAT</string>
+    <string name="records_first_capture">BIRINCHI EGALLASH</string>
+    <string name="records_total_captures">JAMI EGALLASHLAR</string>
+    <string name="records_hexes_ever">USHLANGAN GEKSLAR</string>
+    <string name="records_peak_held">ENG KOʻP BIR VAQTDA</string>
+    <string name="records_current_streak">JORIY SERIYA</string>
+    <string name="records_longest_streak">ENG UZUN SERIYA</string>
+    <plurals name="records_days">
+        <item quantity="one">%1$d kun</item>
+        <item quantity="other">%1$d kun</item>
+    </plurals>
+
+    <!-- ===== Subscription ===== -->
+    <string name="route_subscription">OBUNA</string>
+    <string name="subscription_plan">TARIF</string>
+    <string name="subscription_current">JORIY TARIF</string>
+    <string name="subscription_what_is_pro">PRO NIMA</string>
+    <string name="subscription_fairness">Pro hech qachon yer egallashda ustunlik sotib olmaydi. Har bir imkoniyat kosmetik, hisob qulayligi yoki oʻz tarixingizning toʻliqroq koʻrinishidir. Yer piyoda qoʻlga kiritiladi yoki umuman kiritilmaydi — bu qoida sotuvda emas.</string>
+    <string name="subscription_upgrade_unavailable">YANGILASH — HALI MAVJUD EMAS</string>
+    <string name="subscription_upgrade_reason">bu qurilmada toʻlov integratsiyasi yoʻq</string>
+    <string name="subscription_no_billing_note">Bu qurilmada toʻlov integratsiyasi yoʻq, shuning uchun Pro’ni sotib boʻlmaydi va hech qanday huquq berilmaydi. Bu yerda sizdan hech narsa yechilmaydi va hech narsa sotib olish taklifi emas.</string>
+    <string name="subscription_manage">TIKLASH / BOSHQARISH</string>
+    <string name="subscription_benefit_live">FAOL</string>
+    <string name="subscription_benefit_soon">TEZDA</string>
+    <string name="pro_benefit_avatar_title">Profil rasmi</string>
+    <string name="pro_benefit_avatar_detail">Gerb oʻrniga haqiqiy rasm yuklang. Bepul oʻyinchilarda gerb qoladi, u shaxsingizdan kelib chiqadi.</string>
+    <string name="pro_benefit_crest_title">Gerb koʻrinishlari</string>
+    <string name="pro_benefit_crest_detail">Gerb uchun kosmetik bezaklar. Faqat tashqi koʻrinish — gerb hamon oʻsha maʼnoni bildiradi.</string>
+    <string name="pro_benefit_frame_title">Profil ramkalari</string>
+    <string name="pro_benefit_frame_detail">Profil sarlavhasi atrofidagi kosmetik ramkalar.</string>
+    <string name="pro_benefit_history_title">Toʻliq tarix</string>
+    <string name="pro_benefit_history_detail">Faqat soʻnggi bosqichlar emas, butun rekordlar jurnalini koʻring.</string>
+    <string name="pro_benefit_support_title">Ustuvor yordam</string>
+    <string name="pro_benefit_support_detail">Savollaringiz odamga tezroq yetib boradi.</string>
+
     <!-- ===== Common ===== -->
     <string name="common_retry">QAYTA URINISH</string>
     <string name="common_back">ORQAGA</string>

@@ -37,9 +37,12 @@ class ProfileScreenTest {
                     territoryColor = null,
                     holdings = holdings,
                     entitlement = entitlement,
+                    earnedBadgeKeys = emptyMap(),
                     onBack = {},
                     onManageIdentity = {},
-                    onOpenShop = {}
+                    onOpenBadges = {},
+                    onOpenRecords = {},
+                    onOpenSubscription = {}
                 )
             }
         }
