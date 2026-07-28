@@ -42,29 +42,43 @@ download (the Mapbox native libraries are the bulk of the size):
 
 ## 3. Apply the backend migrations (blocks: any signed-in data)
 
-The profile surfaces read tables that must exist. Apply, in order, against the
-Supabase project:
+**APPLIED — 2026-07-25.** All migrations below are live on the MapMonarchs
+project (`gacptifoxlpribgdqhtz`, Postgres 17.6), verified against the shipped
+anon key:
 
-- `supabase/migrations/20260722120001_foundation.sql`
-- `supabase/migrations/20260722120002_capture_apply.sql`
-- `supabase/migrations/20260725120003_product_surfaces.sql`  ← badges, records, entitlements, RLS, `get_player_records()`
+- `20260722120001_foundation.sql` — profiles, hex_ownership, location_events *(already live)*
+- `20260722120002_capture_apply.sql` — apply_capture() *(already live)*
+- `20260725120003_product_surfaces.sql` — badges, records, entitlements, RLS, `get_player_records()` **← applied this pass**
+- `20260725120004_avatar_storage.sql` — `avatars` bucket + Pro-gated write policies **← applied this pass**
+- `20260725120005_capture_awards.sql` — awarding trigger on capture **← applied this pass**
 
-Until `…_product_surfaces.sql` is applied, a signed-in read returns "relation
-does not exist" and the client degrades to the honest empty state (no crash, no
-fake data). Signed-out, no read happens at all.
+Verified live: 4 product tables with RLS, exactly one SELECT policy each (no
+client write path), `badge_definitions` seeded with all 9 keys, and
+`get_player_records()` returning nulls (not zeros) for an unknown player. A
+signed-in read now returns real (empty) data instead of "relation does not
+exist"; signed-out, no read happens at all.
 
-## 4. Server-authoritative writes (blocks: real badges / records / Pro)
+## 4. Server-authoritative writes
 
-These tables are, by design, writable only by `service_role` — a client cannot
-forge a badge, a record, or a paid tier. The following must be built server-side
-(Edge Function / admin), because no client code can or should do them:
+These tables are writable only by the server — a client cannot forge a badge, a
+record, or a paid tier.
 
-- **Award badges** — insert into `user_badges` when the capture backend confirms
-  the earning condition (first capture, streak, hold count, border hold).
-- **Log record events** — insert into `record_events` on each accepted claim, so
-  `get_player_records()` has history to aggregate.
+- **Award badges / log records — LIVE.** `20260725120005_capture_awards.sql`
+  installs an `AFTER INSERT/UPDATE` trigger on `hex_ownership` (the only thing
+  `apply_capture()` writes) that, running as owner, logs a `record_event` and
+  awards the badges computable at capture time: **first_capture, hold_10,
+  hold_50**. Verified with a controlled capture that awarded + logged, then
+  rolled back to empty. When a real capture lands, these populate automatically.
+
+- **Still needs a scheduled job / more data (honestly left LOCKED):**
+  - `first_hold` — a hex surviving into the next day → a daily pg_cron job.
+  - `streak_7` / `streak_30` — active days in a row → a daily day-bucketing job.
+  - `border_hold` — a hex on the national border → needs cell geometry.
+  - `rank_top_100` / `rank_top_10` — needs the leaderboard (not built).
+
 - **Write entitlement** — insert into `entitlements` (`source='play'`) after
   server-side receipt verification, or (`source='grant'`) for an admin comp.
+  The read side is already live.
 
 ## 5. Billing (blocks: buying Pro)
 
@@ -75,15 +89,22 @@ disabled until a real purchase path exists. To enable it:
 - Add the Play Billing client + product-catalog mapping in the app.
 - Verify receipts server-side and write `entitlements` (step 4).
 
-Note: entitlement is **already** server-driven — an admin can `source='grant'`
-Pro today (after step 3) and the app will honour it with no billing client.
+Note: entitlement is **already** server-driven and live — an admin can
+`source='grant'` a row in `entitlements` today and the app will honour it with
+no billing client. To grant Pro to a user:
+`insert into entitlements(user_id, source) values ('<uuid>', 'grant');`
 
-## 6. Avatar storage (blocks: the one Pro benefit that needs storage)
+## 6. Avatar storage
 
-The Pro "profile picture" benefit is marked SOON because it needs a bucket:
+**Bucket + policies APPLIED** (`20260725120004_avatar_storage.sql`): a public
+`avatars` bucket with owner-only, **Pro-gated** write policies — a free player
+cannot upload even by calling the Storage API directly, because the insert/update
+policies check `entitlements` in the database. What remains is client-side and
+gated on billing existing:
 
-- Create a Supabase Storage bucket (e.g. `avatars`), owner-write RLS.
-- Add the upload path in the app, gated behind `Entitlement.Pro`.
+- Add the upload path in the app (write to `avatars/<uid>/…`), surfaced only for
+  `Entitlement.Pro`. Until billing (step 5) can produce a Pro user, no one
+  reaches it — which is why the profile picture reads LOCKED today.
 
 ## Optional: enable R8 (size)
 

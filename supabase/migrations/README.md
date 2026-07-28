@@ -5,10 +5,21 @@ backend -- paste it into the SQL Editor and Run (verified live: applies with no
 error). These migration files are the SAME content split for the Supabase CLI.
 Apply in lexical order; idempotent, so re-running is safe.
 
+All five are **applied and verified live** (2026-07-25).
+
 | # | file | what it deploys |
 |---|------|-----------------|
 | 1 | `20260722120001_foundation.sql` | `profiles`, `hex_ownership`, `location_events`, RLS, decay (`effective_strength`), the signup trigger, backfill, realtime |
 | 2 | `20260722120002_capture_apply.sql` | `apply_capture()` — the write-path, EXECUTE-revoked from clients |
+| 3 | `20260725120003_product_surfaces.sql` | `badge_definitions` (seeded, 9), `user_badges`, `record_events`, `entitlements`, RLS (SELECT-only for clients), `get_player_records()` |
+| 4 | `20260725120004_avatar_storage.sql` | `avatars` storage bucket + owner-only, **Pro-gated** write policies (the DB enforces "profile picture is Pro") |
+| 5 | `20260725120005_capture_awards.sql` | `on_hex_change()` trigger on `hex_ownership` — server-authoritative badge awarding (`first_capture`, `hold_10`, `hold_50`) + record logging |
+
+**Anti-cheat invariant across 3–5:** `user_badges`, `record_events`, and
+`entitlements` have a SELECT policy and **no client write policy**. They are
+written only by the awarding trigger (runs as owner) and by service-role paths
+(verified purchase / admin grant). A player can read their dossier; they can
+never forge it.
 
 ## The H3 extension is NOT available on this project — verified, not assumed
 
