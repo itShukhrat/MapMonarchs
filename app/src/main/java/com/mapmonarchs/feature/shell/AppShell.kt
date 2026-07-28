@@ -34,7 +34,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.mapmonarchs.BuildConfig
 import com.mapmonarchs.data.local.AppLocale
+import com.mapmonarchs.data.local.DebugEntitlementStore
 import com.mapmonarchs.data.local.FirstRunStore
 import com.mapmonarchs.data.local.TrackingPreferences
 import com.mapmonarchs.data.remote.SupabaseProvider
@@ -123,7 +125,19 @@ fun AppShell(modifier: Modifier = Modifier) {
             ProfileDossier.EMPTY
         }
     }
-    val entitlement = dossier.entitlement
+    // Real entitlement is server-driven (dossier.entitlement, from the
+    // entitlements table). In a DEBUG build only, a QA override can force the
+    // Pro DISPLAY states so a tester can see them without a purchase; it never
+    // writes the server and a release build ignores it (BuildConfig.DEBUG gate).
+    val debugStore = remember { DebugEntitlementStore(context) }
+    var debugSimulatePro by remember {
+        mutableStateOf(BuildConfig.DEBUG && debugStore.simulatePro)
+    }
+    val entitlement = if (BuildConfig.DEBUG && debugSimulatePro) {
+        Entitlement.Pro
+    } else {
+        dossier.entitlement
+    }
 
     if (!introDone) {
         BrandIntro(onDone = { introDone = true }, modifier = modifier)
@@ -327,6 +341,12 @@ fun AppShell(modifier: Modifier = Modifier) {
                 },
                 currentLanguageTag = AppLocale.currentTag(context),
                 onLanguageChange = { tag -> AppLocale.setLanguage(context, tag) },
+                // Debug-only QA control; the card is hidden entirely in release.
+                debugSimulatePro = debugSimulatePro,
+                onDebugSimulateProChange = { on ->
+                    debugSimulatePro = on
+                    debugStore.simulatePro = on
+                },
                 onOpenSystemSettings = { context.openAppSettings() },
                 onBack = { navigator.back() }
             )

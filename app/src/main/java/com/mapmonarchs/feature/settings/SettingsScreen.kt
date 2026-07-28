@@ -10,6 +10,7 @@ import com.mapmonarchs.R
 import androidx.compose.ui.unit.dp
 import com.mapmonarchs.data.local.AppLanguage
 import com.mapmonarchs.data.local.TrackingMode
+import com.mapmonarchs.BuildConfig
 import com.mapmonarchs.ui.components.BodyNote
 import com.mapmonarchs.ui.components.ChoiceRow
 import com.mapmonarchs.ui.components.CommandAction
@@ -23,6 +24,8 @@ import com.mapmonarchs.ui.theme.SovereignGlow
 object SettingsTags {
     const val PERMISSION_STATE = "settings_permission_state"
     const val OPEN_SYSTEM = "settings_open_system"
+    const val DEBUG_FREE = "settings_debug_free"
+    const val DEBUG_PRO = "settings_debug_pro"
 }
 
 /**
@@ -43,7 +46,11 @@ fun SettingsScreen(
     onLanguageChange: (String) -> Unit,
     onOpenSystemSettings: () -> Unit,
     onBack: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    // QA-only. Rendered as a control only in a debug build; the caller also
+    // gates the value behind BuildConfig.DEBUG so release cannot honour it.
+    debugSimulatePro: Boolean = false,
+    onDebugSimulateProChange: (Boolean) -> Unit = {},
 ) {
     val activeLanguage = AppLanguage.fromTag(currentLanguageTag)
     CommandScreen(
@@ -121,5 +128,34 @@ fun SettingsScreen(
 
         BodyNote(stringResource(R.string.settings_not_do_body))
 
+        // ---- QA (debug builds only) ----------------------------------------
+        // Compiled out of release by the BuildConfig.DEBUG guard: the whole card
+        // never renders, and AppShell also refuses to honour the flag in
+        // release. Strings are hardcoded English on purpose -- this is a tester
+        // tool, not shipping UI, so it is deliberately outside the localised set.
+        if (BuildConfig.DEBUG) {
+            SectionHeader("QA · DEBUG ONLY")
+            BodyNote(
+                "Simulates the Pro DISPLAY state on this device. It never touches " +
+                    "the server and is absent from release builds. Real Pro comes " +
+                    "only from a verified purchase or an admin grant."
+            )
+            CommandCard {
+                ChoiceRow(
+                    label = "FREE",
+                    detail = "Server-driven entitlement (the real state).",
+                    selected = !debugSimulatePro,
+                    onClick = { onDebugSimulateProChange(false) },
+                    modifier = Modifier.testTag(SettingsTags.DEBUG_FREE)
+                )
+                ChoiceRow(
+                    label = "PRO (simulated)",
+                    detail = "Force the Pro display state for QA.",
+                    selected = debugSimulatePro,
+                    onClick = { onDebugSimulateProChange(true) },
+                    modifier = Modifier.testTag(SettingsTags.DEBUG_PRO)
+                )
+            }
+        }
     }
 }

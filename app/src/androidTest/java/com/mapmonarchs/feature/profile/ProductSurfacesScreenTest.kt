@@ -82,4 +82,23 @@ class ProductSurfacesScreenTest {
         // point is that it does not pretend to sell something with no billing.
         rule.onNodeWithTag(SubscriptionTags.UPGRADE).performScrollTo().assertIsDisplayed()
     }
+
+    @Test
+    fun subscriptionForAProPlayerShowsTheActivePlanAndNoUpgrade() {
+        // The Pro path (reached in prod by a verified purchase / admin grant, and
+        // on-device via the debug simulator) must show the active plan and drop
+        // the upgrade control -- there is nothing to upgrade to.
+        rule.setContent {
+            MapMonarchsTheme {
+                SubscriptionScreen(
+                    entitlement = Entitlement.Pro,
+                    onBack = {},
+                    onManageBilling = {}
+                )
+            }
+        }
+        rule.onNodeWithTag(SubscriptionTags.PLAN).performScrollTo()
+            .assert(hasText("PRO", substring = true))
+        rule.onNodeWithTag(SubscriptionTags.UPGRADE).assertDoesNotExist()
+    }
 }
