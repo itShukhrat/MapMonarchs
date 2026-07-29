@@ -2,6 +2,7 @@ package com.mapmonarchs.feature.diagnostics
 
 import com.mapmonarchs.domain.model.CapabilitiesProbe
 import com.mapmonarchs.domain.model.DeliveryProof
+import com.mapmonarchs.domain.model.ProductSurfaces
 
 /**
  * Facts diagnostics reports that are not map state.
@@ -13,5 +14,8 @@ import com.mapmonarchs.domain.model.DeliveryProof
  */
 data class DiagnosticsState(
     val capabilities: CapabilitiesProbe = CapabilitiesProbe.NotProbed,
-    val delivery: DeliveryProof = DeliveryProof.NeverAttempted
+    val delivery: DeliveryProof = DeliveryProof.NeverAttempted,
+    // Populated only under BuildConfig.DEBUG (see MapViewModel.probeProductSurfaces);
+    // stays NotProbed in release, where nothing renders it.
+    val productSurfaces: ProductSurfaces = ProductSurfaces.NotProbed
 )

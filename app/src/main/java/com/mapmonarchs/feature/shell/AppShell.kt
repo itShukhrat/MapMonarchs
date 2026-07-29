@@ -327,6 +327,7 @@ fun AppShell(modifier: Modifier = Modifier) {
                         viewModel.resolveIdentity()
                         viewModel.loadTerritory()
                         viewModel.probeCapabilities()
+                        viewModel.probeProductSurfaces()
                     }
                 )
             }

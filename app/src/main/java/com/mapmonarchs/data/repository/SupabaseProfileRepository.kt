@@ -1,6 +1,7 @@
 package com.mapmonarchs.data.repository
 
 import android.util.Log
+import com.mapmonarchs.data.dto.BadgeKeyDto
 import com.mapmonarchs.data.dto.EntitlementDto
 import com.mapmonarchs.data.dto.PlayerRecordsDto
 import com.mapmonarchs.data.dto.UserBadgeDto
@@ -15,6 +16,7 @@ import com.mapmonarchs.domain.repository.ProfileRepository
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.auth.auth
 import io.github.jan.supabase.postgrest.postgrest
+import io.github.jan.supabase.postgrest.query.Columns
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.buildJsonObject
@@ -87,6 +89,24 @@ class SupabaseProfileRepository(
             } catch (t: Throwable) {
                 val error = t.toAppError()
                 Log.w(TAG, "entitlement failed: ${error.technical}", t)
+                Outcome.Failure(error)
+            }
+        }
+
+    // No session short-circuit on purpose: this is a global deployment fact read
+    // from a world-readable catalogue, so it must reach the network even signed
+    // out. One column, because the probe only needs to know the table answers and
+    // how many keys it serves.
+    override suspend fun badgeCatalogueSize(): Outcome<Int> =
+        withContext(Dispatchers.IO) {
+            try {
+                val rows = client.postgrest["badge_definitions"]
+                    .select(Columns.list("key"))
+                    .decodeList<BadgeKeyDto>()
+                Outcome.Success(rows.size)
+            } catch (t: Throwable) {
+                val error = t.toAppError()
+                Log.w(TAG, "badgeCatalogueSize failed: ${error.technical}", t)
                 Outcome.Failure(error)
             }
         }

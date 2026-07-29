@@ -11,6 +11,7 @@ import com.mapmonarchs.domain.repository.AuthRepository
 import com.mapmonarchs.domain.repository.CodeRequest
 import com.mapmonarchs.domain.repository.CodeVerification
 import com.mapmonarchs.domain.repository.Outcome
+import com.mapmonarchs.domain.repository.ProfileRepository
 import com.mapmonarchs.feature.auth.SignInState
 import com.mapmonarchs.domain.model.WorldPosition
 import com.mapmonarchs.domain.repository.TerritoryRepository
@@ -24,7 +25,9 @@ import com.mapmonarchs.data.local.DeliveryProofStore
 import com.mapmonarchs.data.local.TrackingMode
 import com.mapmonarchs.domain.model.CapabilitiesProbe
 import com.mapmonarchs.domain.model.DeliveryProof
+import com.mapmonarchs.domain.model.ProductSurfaces
 import com.mapmonarchs.domain.model.deliveryProofFor
+import com.mapmonarchs.BuildConfig
 import com.mapmonarchs.feature.diagnostics.DiagnosticsState
 import com.mapmonarchs.location.LocationTracker
 import kotlinx.coroutines.Job
@@ -50,7 +53,8 @@ class MapViewModel(
     private val repository: TerritoryRepository,
     private val authRepository: AuthRepository,
     private val deliveryProofStore: DeliveryProofStore,
-    private val worldBoundaryRepository: WorldBoundaryRepository
+    private val worldBoundaryRepository: WorldBoundaryRepository,
+    private val profileRepository: ProfileRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(
@@ -96,6 +100,32 @@ class MapViewModel(
         // knows, and it must be visible even if the network probe never answers.
         _diagnostics.value = _diagnostics.value.copy(delivery = deliveryProofStore.read())
         probeCapabilities()
+        probeProductSurfaces()
+    }
+
+    /**
+     * Confirms the product-surfaces migration is deployed and reachable from this
+     * device, for the debug-only diagnostics readout.
+     *
+     * Guarded here rather than at the call sites: a release build never renders
+     * the result, so it must not spend a network read producing it. In debug it
+     * maps the read to an observed fact -- Deployed / Missing / Unavailable --
+     * never a default.
+     */
+    fun probeProductSurfaces() {
+        if (!BuildConfig.DEBUG) return
+        viewModelScope.launch {
+            _diagnostics.value = _diagnostics.value.copy(productSurfaces = ProductSurfaces.Probing)
+            val surfaces = when (val outcome = profileRepository.badgeCatalogueSize()) {
+                is Outcome.Success -> ProductSurfaces.Deployed(outcome.value)
+                is Outcome.Failure -> when (outcome.error) {
+                    is AppError.SchemaMissing -> ProductSurfaces.Missing
+                    else -> ProductSurfaces.Unavailable(outcome.error)
+                }
+            }
+            Log.i(TAG, "product surfaces: $surfaces")
+            _diagnostics.value = _diagnostics.value.copy(productSurfaces = surfaces)
+        }
     }
 
     /** Asks the backend what it permits, rather than assuming. */

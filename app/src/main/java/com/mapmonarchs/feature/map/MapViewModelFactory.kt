@@ -7,6 +7,7 @@ import com.mapmonarchs.data.local.DeliveryProofStore
 import com.mapmonarchs.data.remote.SupabaseProvider
 import com.mapmonarchs.data.repository.MapboxWorldBoundaryRepository
 import com.mapmonarchs.data.repository.SupabaseAuthRepository
+import com.mapmonarchs.data.repository.SupabaseProfileRepository
 import com.mapmonarchs.data.repository.SupabaseTerritoryRepository
 import com.mapmonarchs.domain.validation.MovementValidator
 import com.mapmonarchs.location.LocationTracker
@@ -32,7 +33,8 @@ class MapViewModelFactory(context: Context) : ViewModelProvider.Factory {
             repository = SupabaseTerritoryRepository(client),
             authRepository = SupabaseAuthRepository(client),
             deliveryProofStore = DeliveryProofStore(appContext),
-            worldBoundaryRepository = MapboxWorldBoundaryRepository()
+            worldBoundaryRepository = MapboxWorldBoundaryRepository(),
+            profileRepository = SupabaseProfileRepository(client)
         ) as T
     }
 }

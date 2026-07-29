@@ -39,4 +39,17 @@ interface ProfileRepository {
      * honour it, without any billing client existing.
      */
     suspend fun entitlement(): Outcome<Entitlement>
+
+    /**
+     * How many badge definitions the backend serves -- a deployment probe for the
+     * product-surfaces migration, not per-player data.
+     *
+     * DELIBERATELY NOT SESSION-GATED, unlike every other read here. Whether the
+     * migration is deployed is a GLOBAL fact, and badge_definitions is a
+     * world-readable catalogue, so this reaches the network even when signed out.
+     * That is the whole point: it proves the schema is live independently of who,
+     * if anyone, is signed in. A failure is an [Outcome.Failure] -- SchemaMissing
+     * when the table is absent -- never a fabricated count.
+     */
+    suspend fun badgeCatalogueSize(): Outcome<Int>
 }

@@ -18,6 +18,7 @@ import com.mapmonarchs.domain.model.CapabilitiesProbe
 import com.mapmonarchs.domain.model.DeliveryProof
 import com.mapmonarchs.domain.model.Identity
 import com.mapmonarchs.domain.model.PLAYABLE_COUNTRY_NAME
+import com.mapmonarchs.domain.model.ProductSurfaces
 import com.mapmonarchs.domain.model.WorldPosition
 import com.mapmonarchs.domain.model.SignInReadiness
 import com.mapmonarchs.domain.model.signInReadiness
@@ -52,6 +53,7 @@ object DiagnosticsTags {
     const val SIGN_IN_POSSIBLE = "diag_signin_possible"
     const val AUTOCONFIRM = "diag_autoconfirm"
     const val WORLD = "diag_world"
+    const val PRODUCT_SURFACES = "diag_product_surfaces"
 }
 
 /**
@@ -270,6 +272,16 @@ fun DiagnosticsScreen(
             )
         }
 
+        // QA (debug builds only). The player-facing screen above deliberately
+        // stays free of schema internals; this card is for a tester confirming a
+        // backend deploy from the device. Compiled out of release by the guard,
+        // and MapViewModel refuses to even run the probe there. Strings are
+        // hardcoded English on purpose -- a tester tool, outside the localised set,
+        // exactly like the QA entitlement simulator in Settings.
+        if (BuildConfig.DEBUG) {
+            ProductSurfacesCard(diagnostics.productSurfaces)
+        }
+
         CommandAction(
             label = stringResource(R.string.diag_recheck),
             onClick = onRefresh,
@@ -278,6 +290,41 @@ fun DiagnosticsScreen(
                 .testTag(DiagnosticsTags.REFRESH)
         )
 
+    }
+}
+
+// Debug-only readout of whether the product-surfaces migration is deployed and
+// reachable from this device. Reports what the catalogue read OBSERVED, or
+// UNKNOWN -- never a remembered value -- same as every other row on this screen.
+@Composable
+private fun ProductSurfacesCard(surfaces: ProductSurfaces) {
+    CommandCard(title = "PROFILE BACKEND · DEBUG ONLY") {
+        StatusRow(
+            label = "Migration",
+            value = when (surfaces) {
+                is ProductSurfaces.NotProbed -> "UNKNOWN"
+                is ProductSurfaces.Probing -> "CHECKING"
+                is ProductSurfaces.Deployed -> "DEPLOYED"
+                is ProductSurfaces.Missing -> "NOT DEPLOYED"
+                is ProductSurfaces.Unavailable -> when (surfaces.error) {
+                    is AppError.Offline -> "NO NETWORK"
+                    else -> "ERROR"
+                }
+            },
+            valueColor = if (surfaces is ProductSurfaces.Deployed) SovereignGlow else Contested,
+            modifier = Modifier.testTag(DiagnosticsTags.PRODUCT_SURFACES)
+        )
+        StatusRow(
+            label = "Badge catalogue",
+            value = (surfaces as? ProductSurfaces.Deployed)?.catalogueSize?.toString() ?: UNKNOWN_HOLDINGS,
+            valueColor = TextMuted
+        )
+    }
+    if (surfaces is ProductSurfaces.Unavailable) {
+        BodyNote(
+            surfaces.error.localizedMessage(),
+            modifier = Modifier.padding(top = 12.dp)
+        )
     }
 }
 

@@ -23,6 +23,17 @@ data class UserBadgeDto(
     @SerialName("earned_at") val earnedAt: String,
 )
 
+/**
+ * Just the key of a public.badge_definitions row. Used only to COUNT the
+ * catalogue for the deployment probe, so it deliberately pulls one column rather
+ * than the whole definition -- the probe cares that the table answers and how
+ * many keys it serves, nothing more.
+ */
+@Serializable
+data class BadgeKeyDto(
+    val key: String,
+)
+
 /** A row of public.entitlements. Absence of a row means Free -- not modelled here. */
 @Serializable
 data class EntitlementDto(

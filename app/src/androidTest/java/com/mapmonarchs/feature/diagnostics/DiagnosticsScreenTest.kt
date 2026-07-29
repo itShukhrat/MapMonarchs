@@ -16,6 +16,7 @@ import com.mapmonarchs.domain.model.AuthCapabilities
 import com.mapmonarchs.domain.model.CapabilitiesProbe
 import com.mapmonarchs.domain.model.DeliveryProof
 import com.mapmonarchs.domain.model.Identity
+import com.mapmonarchs.domain.model.ProductSurfaces
 import com.mapmonarchs.domain.model.WorldPosition
 import com.mapmonarchs.feature.map.CaptureState
 import com.mapmonarchs.feature.map.MapUiState
@@ -70,13 +71,18 @@ class DiagnosticsScreenTest {
     private fun show(
         state: MapUiState = mapState(),
         capabilities: CapabilitiesProbe = CapabilitiesProbe.Observed(liveCapabilities),
-        delivery: DeliveryProof = DeliveryProof.NeverAttempted
+        delivery: DeliveryProof = DeliveryProof.NeverAttempted,
+        productSurfaces: ProductSurfaces = ProductSurfaces.NotProbed
     ) {
         rule.setContent {
             MapMonarchsTheme {
                 DiagnosticsScreen(
                     state = state,
-                    diagnostics = DiagnosticsState(capabilities = capabilities, delivery = delivery),
+                    diagnostics = DiagnosticsState(
+                        capabilities = capabilities,
+                        delivery = delivery,
+                        productSurfaces = productSurfaces
+                    ),
                     trackingMode = TrackingMode.BALANCED,
                     onBack = {},
                     onRefresh = {}
@@ -288,5 +294,43 @@ class DiagnosticsScreenTest {
         // do with the wiring under test.
         rule.onNodeWithTag(DiagnosticsTags.REFRESH).performScrollTo().performClick()
         assertEquals(1, refreshes)
+    }
+
+    // --- product-surfaces deployment probe (debug builds only) ---------------
+    // The card renders only under BuildConfig.DEBUG; the androidTest apk is a
+    // debug build, so it is present here.
+
+    @Test
+    fun aReadableCatalogueReportsTheMigrationDeployedWithItsSize() {
+        show(productSurfaces = ProductSurfaces.Deployed(catalogueSize = 9))
+        rule.onNodeWithTag(DiagnosticsTags.PRODUCT_SURFACES).performScrollTo()
+            .assert(hasText("DEPLOYED", substring = true))
+        // The observed count is shown, not a hardcoded expectation.
+        rule.onNodeWithText("9", substring = true).assertExists()
+    }
+
+    @Test
+    fun anAbsentTableReportsTheMigrationNotDeployed() {
+        show(productSurfaces = ProductSurfaces.Missing)
+        rule.onNodeWithTag(DiagnosticsTags.PRODUCT_SURFACES).performScrollTo()
+            .assert(hasText("NOT DEPLOYED", substring = true))
+    }
+
+    @Test
+    fun anUnprobedCatalogueReadsUnknownRatherThanGuessing() {
+        // The default state on a screen that has not run the probe: it must not
+        // claim the backend is either present or absent.
+        show(productSurfaces = ProductSurfaces.NotProbed)
+        rule.onNodeWithTag(DiagnosticsTags.PRODUCT_SURFACES).performScrollTo()
+            .assert(hasText("UNKNOWN", substring = true))
+    }
+
+    @Test
+    fun anUnreachableCatalogueSurfacesItsCause() {
+        val error = AppError.Offline("dns failure")
+        show(productSurfaces = ProductSurfaces.Unavailable(error))
+        rule.onNodeWithTag(DiagnosticsTags.PRODUCT_SURFACES).performScrollTo()
+            .assert(hasText("NO NETWORK", substring = true))
+        rule.onNodeWithText(error.playerMessage(), substring = true).assertExists()
     }
 }
