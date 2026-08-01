@@ -189,8 +189,7 @@ class BlockerResolutionTest {
             Blocker.IdentityUnavailable(AppError.AuthUnavailable("x")),
             Blocker.NotSignedIn,
             Blocker.OutsidePlayableWorld("Kazakhstan"),
-            Blocker.OutsidePlayableWorld(null),
-            Blocker.CaptureNotDeployed
+            Blocker.OutsidePlayableWorld(null)
         )
         blockers.forEach {
             assertTrue("blank label for $it", it.hudLabel().isNotBlank())

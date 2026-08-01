@@ -410,13 +410,15 @@ class MapViewModel(
 
     /**
      * In preview: simulates a claim locally.
-     * Otherwise: GATED (hard rule 5) -- attempt_capture() is not deployed, so
-     * firing it would produce a misleading failure. Explicitly inert with a log.
+     * Otherwise: submits a REAL capture. The `attempt_capture` Edge Function is
+     * deployed and server-authoritative (verified), so this is a live write, not
+     * an inert stub. The server re-checks every anti-cheat gate regardless of
+     * what the client sends.
      *
-     * The separation is enforced by canSubmitRealClaim(), which is checked below
-     * rather than merely asserted in a comment. An earlier version documented
-     * that guard without calling it, and placed a check() after an early return
-     * where it could never execute -- a safety claim with nothing behind it.
+     * The preview/real separation is enforced by canSubmitRealClaim(), which is
+     * checked below rather than merely asserted in a comment -- it is false in
+     * preview by construction, and also requires a signed-in session and an
+     * accepted fix before anything leaves the device.
      */
     fun onCaptureRequested() {
         val state = _uiState.value

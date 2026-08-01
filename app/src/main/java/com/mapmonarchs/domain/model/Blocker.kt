@@ -30,10 +30,13 @@ sealed interface Blocker {
     /**
      * Nothing stands in the way of the action currently offered.
      *
-     * Reachable only in preview, where claiming genuinely works because it is
-     * simulated locally. Outside preview [CaptureNotDeployed] is terminal --
-     * there is no server function to claim against, so "nothing is blocking you"
-     * is never true and is not representable.
+     * Reachable two ways, both real. In preview, claiming works because it is
+     * simulated locally. Outside preview, a signed-in player on an accepted fix
+     * inside the playable world is genuinely unblocked: the capture backend --
+     * the `attempt_capture` Edge Function and `apply_capture()` -- is deployed and
+     * server-authoritative (verified live), so the claim button fires a real
+     * capture. The only thing standing between a fresh install and this state is
+     * signing in, which the earlier blockers already name.
      */
     data object None : Blocker
 
@@ -60,15 +63,13 @@ sealed interface Blocker {
     /** No session. Previously fell through the diagnostics chain entirely. */
     data object NotSignedIn : Blocker
 
-    /**
-     * The schema gate, named specifically rather than as a vague "disabled".
-     *
-     * NOTE ON WHAT IS NOT HERE: a failed territory READ is not a blocker. Reading
-     * ownership and writing a capture are independent axes -- the map being stale
-     * does not stop the server arbitrating a claim -- and MapUiState documents
-     * that independence. Territory health has its own row in diagnostics.
-     */
-    data object CaptureNotDeployed : Blocker
+    // NOTE ON WHAT IS NOT A BLOCKER: a failed territory READ is deliberately
+    // absent. Reading ownership and writing a capture are independent axes -- a
+    // stale map does not stop the server arbitrating a claim -- so territory
+    // health has its own diagnostics row rather than a blocker. There was once a
+    // CaptureNotDeployed variant here for "no server function to claim against";
+    // it was removed when the attempt_capture Edge Function was verified deployed,
+    // because a blocker that can never occur is a lie the type keeps telling.
 
     /** Short, upper-case, for the capture button. Never punctuated. */
     fun hudLabel(): String = when (this) {
@@ -85,7 +86,6 @@ sealed interface Blocker {
         is IdentityResolving -> "IDENTIFYING"
         is IdentityUnavailable -> "NO IDENTITY"
         is NotSignedIn -> "SIGN IN TO CLAIM"
-        is CaptureNotDeployed -> "CLAIMING OFFLINE"
     }
 
     /**
@@ -144,12 +144,5 @@ sealed interface Blocker {
         is NotSignedIn ->
             "You are not signed in, so the server has no one to attribute territory to. " +
                 "Sign in with an email code to claim ground."
-
-
-        is CaptureNotDeployed ->
-            "The capture backend is deployed and server-authoritative. The in-app " +
-                "claim button is being finalised and verified before it goes live, so " +
-                "claiming from the app is not active yet. This is a client step, not " +
-                "something wrong with your position or your session."
     }
 }

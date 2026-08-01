@@ -133,10 +133,13 @@ fun resolveBlocker(state: MapUiState): Blocker = when {
 /**
  * Holdings readout.
  *
- * Outside preview this is ALWAYS unknown, and says so. There is no live source
- * for it: hex_ownership does not exist on the server yet, so any number here
- * would be invented. It previously read from a field that no caller could set --
- * honest by accident rather than by construction.
+ * Outside preview this is ALWAYS unknown, and says so. hex_ownership IS live on
+ * the server now, but the map's territory snapshot is a bounded RENDER load, not
+ * an authoritative per-player tally -- deriving a holdings count from it could
+ * undercount a player whose hexes fall outside the loaded set, and a wrong number
+ * is worse than an honest unknown. A real count needs its own
+ * `count(*) where owner_id = me` query, which does not exist yet. Until it does,
+ * the em dash is the truthful answer.
  */
 fun MapUiState.holdingsLabel(): String =
     if (previewMode) (previewHeld ?: 0).toString() else UNKNOWN_HOLDINGS

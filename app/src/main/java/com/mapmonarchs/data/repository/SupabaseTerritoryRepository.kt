@@ -46,10 +46,14 @@ class SupabaseTerritoryRepository(
         }
 
     /**
-     * GATED -- never executed against a real server. attempt_capture() has not
-     * been applied to the database. Compiles; that is all that is proven.
+     * LIVE. The `attempt_capture` Edge Function is deployed and verified against
+     * project gacptifoxlpribgdqhtz (an unauthenticated probe returns the
+     * function's own `{"ok":false,"reason":"not_authenticated"}`, not a platform
+     * 404), and `apply_capture()` behind it is applied. This path runs for real
+     * whenever a signed-in player submits a fix.
      *
-     * Note what is sent: raw lat/lng only. No hex index -- the server derives it.
+     * Note what is sent: raw lat/lng only. No hex index -- the server derives the
+     * H3 cell (h3-js in the Edge Function) so a hacked client cannot name its own.
      */
     override suspend fun attemptCapture(fix: LocationFix): Outcome<CaptureOutcome> =
         withContext(Dispatchers.IO) {

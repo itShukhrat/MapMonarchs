@@ -143,8 +143,7 @@ class RemedyRouteTest {
             Blocker.FixRejected(RejectionReason.MOCK_LOCATION),
             Blocker.IdentityResolving,
             Blocker.IdentityUnavailable(AppError.Offline("x")),
-            Blocker.NotSignedIn,
-            Blocker.CaptureNotDeployed
+            Blocker.NotSignedIn
         )
         val allowed = setOf(Route.Settings, Route.SignIn, Route.Diagnostics)
         blockers.forEach { blocker ->

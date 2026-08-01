@@ -54,7 +54,6 @@ fun Blocker.localizedHudLabel(): String = when (this) {
     is Blocker.IdentityResolving -> stringResource(R.string.blocker_hud_identifying)
     is Blocker.IdentityUnavailable -> stringResource(R.string.blocker_hud_no_identity)
     is Blocker.NotSignedIn -> stringResource(R.string.blocker_hud_sign_in)
-    is Blocker.CaptureNotDeployed -> stringResource(R.string.blocker_hud_claiming_offline)
 }
 
 /** Player-facing prose for diagnostics / help. Mirrors [Blocker.explanation]. */
@@ -81,5 +80,4 @@ fun Blocker.localizedExplanation(): String = when (this) {
     is Blocker.IdentityUnavailable ->
         stringResource(R.string.blocker_exp_identity_unavailable, error.localizedMessage())
     is Blocker.NotSignedIn -> stringResource(R.string.blocker_exp_not_signed_in)
-    is Blocker.CaptureNotDeployed -> stringResource(R.string.blocker_exp_capture_not_deployed)
 }

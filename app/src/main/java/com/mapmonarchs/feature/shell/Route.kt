@@ -365,6 +365,5 @@ fun remedyRouteFor(blocker: Blocker): Route = when (blocker) {
     is Blocker.IdentityResolving,
     is Blocker.AcquiringFix,
     is Blocker.FixRejected,
-    is Blocker.CaptureNotDeployed,
     is Blocker.None -> Route.Diagnostics
 }
