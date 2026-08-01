@@ -30,6 +30,7 @@ import com.mapmonarchs.domain.model.deliveryProofFor
 import com.mapmonarchs.BuildConfig
 import com.mapmonarchs.feature.diagnostics.DiagnosticsState
 import com.mapmonarchs.location.LocationTracker
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -101,6 +102,27 @@ class MapViewModel(
         _diagnostics.value = _diagnostics.value.copy(delivery = deliveryProofStore.read())
         probeCapabilities()
         probeProductSurfaces()
+        observeTerritory()
+    }
+
+    /**
+     * Live territory. The server pushes hex_ownership changes over Realtime and
+     * each one reloads the authoritative snapshot, so a hex captured by anyone --
+     * including this player -- appears without a manual RECHECK. Runs for the
+     * ViewModel's lifetime; the repository unsubscribes when this scope cancels. A
+     * realtime failure is logged and ends the stream rather than crashing: the map
+     * still works from the launch load and the RECHECK button.
+     */
+    private fun observeTerritory() {
+        viewModelScope.launch {
+            try {
+                repository.observeTerritoryChanges { loadTerritory() }
+            } catch (t: CancellationException) {
+                throw t
+            } catch (t: Throwable) {
+                Log.w(TAG, "territory realtime ended: ${t.message}", t)
+            }
+        }
     }
 
     /**

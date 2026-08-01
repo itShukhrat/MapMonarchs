@@ -14,7 +14,12 @@ import com.mapmonarchs.domain.repository.TerritoryRepository
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.functions.functions
 import io.github.jan.supabase.postgrest.postgrest
+import io.github.jan.supabase.realtime.PostgresAction
+import io.github.jan.supabase.realtime.channel
+import io.github.jan.supabase.realtime.postgresChangeFlow
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.JsonNull
 import kotlinx.serialization.json.JsonObject
@@ -92,4 +97,27 @@ class SupabaseTerritoryRepository(
                 Outcome.Failure(error)
             }
         }
+
+    override suspend fun observeTerritoryChanges(onChange: suspend () -> Unit) {
+        // Build the change flow BEFORE subscribing (the binding must be
+        // registered when the channel joins), then collect until cancelled.
+        val realtimeChannel = client.channel("mm-hex-ownership")
+        val changes = realtimeChannel.postgresChangeFlow<PostgresAction>(schema = "public") {
+            table = "hex_ownership"
+        }
+        try {
+            realtimeChannel.subscribe()
+            Log.i(TAG, "subscribed to hex_ownership realtime")
+            // Ignore the row payload; reload the authoritative snapshot instead so
+            // the client stays a reader of server truth, not a truster of the wire.
+            changes.collect { onChange() }
+        } finally {
+            // Cancellation cannot suspend, so leave the server channel under
+            // NonCancellable; best-effort, never masking the original cancellation.
+            withContext(NonCancellable) {
+                runCatching { realtimeChannel.unsubscribe() }
+                Log.i(TAG, "unsubscribed from hex_ownership realtime")
+            }
+        }
+    }
 }
