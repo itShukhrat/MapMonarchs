@@ -5,7 +5,7 @@ backend -- paste it into the SQL Editor and Run (verified live: applies with no
 error). These migration files are the SAME content split for the Supabase CLI.
 Apply in lexical order; idempotent, so re-running is safe.
 
-All five are **applied and verified live** (2026-07-25).
+All six are **applied and verified live** (1–5 on 2026-07-25; 6 on 2026-08-02).
 
 | # | file | what it deploys |
 |---|------|-----------------|
@@ -14,12 +14,20 @@ All five are **applied and verified live** (2026-07-25).
 | 3 | `20260725120003_product_surfaces.sql` | `badge_definitions` (seeded, 9), `user_badges`, `record_events`, `entitlements`, RLS (SELECT-only for clients), `get_player_records()` |
 | 4 | `20260725120004_avatar_storage.sql` | `avatars` storage bucket + owner-only, **Pro-gated** write policies (the DB enforces "profile picture is Pro") |
 | 5 | `20260725120005_capture_awards.sql` | `on_hex_change()` trigger on `hex_ownership` — server-authoritative badge awarding (`first_capture`, `hold_10`, `hold_50`) + record logging |
+| 6 | `20260802120006_harden_function_grants.sql` | **SECURITY:** re-revoke `apply_capture` from `anon`/`authenticated` (deployed grants had drifted, exposing it to the anon key — a full anti-cheat bypass), lock down the trigger functions from RPC, pin invoker search_path |
 
 **Anti-cheat invariant across 3–5:** `user_badges`, `record_events`, and
 `entitlements` have a SELECT policy and **no client write policy**. They are
 written only by the awarding trigger (runs as owner) and by service-role paths
 (verified purchase / admin grant). A player can read their dossier; they can
 never forge it.
+
+**Anti-cheat invariant for capture (2 + 6):** `apply_capture` is `SECURITY
+DEFINER` and callable ONLY by `service_role` (the `attempt_capture` Edge
+Function). It trusts its `_uid` parameter precisely because no client can reach
+it — migration 6 re-asserts that after the deployed grant to `anon` was found and
+revoked. Verified: an anon `POST /rest/v1/rpc/apply_capture` now returns
+`42501 permission denied`.
 
 ## The H3 extension is NOT available on this project — verified, not assumed
 

@@ -307,12 +307,13 @@ end; $$;
 
 -- Only the Edge Function (service_role) may call this. Clients are revoked, so a
 -- hacked client cannot bypass the Edge Function and submit a hand-picked cell.
+-- anon is revoked EXPLICITLY, not just via public: an explicit `grant ... to anon`
+-- (which is how the deployed state once drifted -- see migration
+-- 20260802120006_harden_function_grants) is NOT removed by `revoke ... from
+-- public`, so this must name anon to be self-healing on re-apply.
 revoke execute on function public.apply_capture(
   uuid, text, double precision, double precision, real, real, boolean
-) from public;
-revoke execute on function public.apply_capture(
-  uuid, text, double precision, double precision, real, real, boolean
-) from authenticated;
+) from public, anon, authenticated;
 grant execute on function public.apply_capture(
   uuid, text, double precision, double precision, real, real, boolean
 ) to service_role;
