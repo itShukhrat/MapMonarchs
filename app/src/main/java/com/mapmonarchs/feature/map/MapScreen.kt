@@ -30,8 +30,16 @@ import com.mapmonarchs.ui.theme.Fog
 import com.mapmonarchs.ui.theme.Sovereign
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
+import com.mapbox.geojson.Feature
+import com.mapbox.geojson.FeatureCollection
 import com.mapbox.geojson.Point
+import com.mapbox.geojson.Polygon
 import com.mapbox.maps.CameraOptions
+import com.mapbox.maps.Style
+import com.mapmonarchs.data.h3.H3Boundary
+import com.mapmonarchs.domain.model.HexOwnership
+import com.mapmonarchs.domain.model.Identity
+import com.mapmonarchs.ui.theme.Contested
 import com.mapbox.maps.dsl.cameraOptions
 import com.mapbox.maps.plugin.animation.MapAnimationOptions
 import com.mapbox.maps.extension.compose.MapEffect
@@ -73,6 +81,16 @@ private const val BORDER_LAYER = "mm-uz-border"
 private const val PLAYER_SOURCE = "mm-player"
 private const val PLAYER_HALO_LAYER = "mm-player-halo"
 private const val PLAYER_CORE_LAYER = "mm-player-core"
+
+// Real, server-owned territory. Two collections -- yours and everyone else's --
+// so the board reads "mine vs not mine" rather than a rainbow of players the
+// client cannot yet name.
+private const val TERRITORY_MINE_SOURCE = "mm-territory-mine"
+private const val TERRITORY_MINE_FILL = "mm-territory-mine-fill"
+private const val TERRITORY_MINE_LINE = "mm-territory-mine-line"
+private const val TERRITORY_OTHER_SOURCE = "mm-territory-other"
+private const val TERRITORY_OTHER_FILL = "mm-territory-other-fill"
+private const val TERRITORY_OTHER_LINE = "mm-territory-other-line"
 
 /** The one playable country. ISO 3166-1 alpha-2, as published by Mapbox. */
 private const val PLAYABLE_ISO = "UZ"
@@ -279,9 +297,9 @@ fun MapScreen(
                     )
                 }
             }
-            // Preview territory only. Real territory is drawn from server-owned
-            // ownership once the schema is deployed; this draws from an in-memory
-            // simulation and never from anything the server said.
+            // Preview territory: an in-memory simulation, drawn ONLY in preview
+            // and never from anything the server said. Real server-owned territory
+            // is drawn from hex_ownership in the MapEffect just below this block.
             if (state.previewMode) {
                 // Falls back to the palette, never to a literal. The literal here used to be
                 // the UI accent, so preview territory was drawn in the same colour
@@ -293,6 +311,44 @@ fun MapScreen(
                         fillOpacity = 0.45
                         fillOutlineColor = fill
                     }
+                }
+            }
+
+            // ---- Real, server-owned territory --------------------------------
+            //
+            // Drawn ONLY outside preview, and ONLY from hex_ownership the server
+            // recorded -- never invented. This is the line between preview (a
+            // local simulation) and the live board. Territory is the most
+            // saturated thing on screen: your ground in your palette colour,
+            // rivals' ground in one muted hostile tone, both above the fog and
+            // border and below the player puck (this MapEffect runs before the
+            // puck's, so the puck's persistent layers land on top).
+            //
+            // H3-to-boundary runs for real on an ARM device; on an x86_64
+            // emulator the h3 native lib cannot load, so H3Boundary returns
+            // nothing and this draws an empty collection -- honest, not a crash.
+            // Today the collection is empty everywhere because no capture has
+            // landed yet; it fills the instant one does.
+            MapEffect(state.territory, state.identity, state.previewMode) { mapView ->
+                mapView.mapboxMap.getStyle { style ->
+                    val hexes = if (state.previewMode) emptyList()
+                        else (state.territory as? TerritoryLoad.Loaded)?.hexes ?: emptyList()
+                    val myId = (state.identity as? Identity.SignedIn)?.userId
+                    val (mine, others) = hexes.partition { myId != null && it.ownerId == myId }
+
+                    val mineColor = (state.territoryColor() ?: Color(TERRITORY_PALETTE.first())).toArgb()
+                    upsertTerritory(
+                        style, TERRITORY_MINE_SOURCE, TERRITORY_MINE_FILL, TERRITORY_MINE_LINE,
+                        territoryFeatures(mine),
+                        fill = mineColor, line = SovereignGlow.toArgb(),
+                        fillOpacity = 0.55, lineOpacity = 0.95
+                    )
+                    upsertTerritory(
+                        style, TERRITORY_OTHER_SOURCE, TERRITORY_OTHER_FILL, TERRITORY_OTHER_LINE,
+                        territoryFeatures(others),
+                        fill = Contested.toArgb(), line = Contested.toArgb(),
+                        fillOpacity = 0.40, lineOpacity = 0.85
+                    )
                 }
             }
 
@@ -433,4 +489,60 @@ fun MapScreen(
             }
         )
     }
+}
+
+/**
+ * Boundaries of [hexes] as a Mapbox FeatureCollection, skipping any whose cell id
+ * cannot be converted (malformed, or H3 unavailable on this ABI). SDK types only
+ * appear at this render boundary; the ownership split that decides which hexes
+ * land here is a plain predicate the caller applies. Pure and side-effect free.
+ */
+private fun territoryFeatures(hexes: List<HexOwnership>): FeatureCollection {
+    val features = hexes.mapNotNull { hex ->
+        val ring = H3Boundary.ring(hex.h3Index)
+        // A drawable polygon needs at least a triangle plus the closing vertex.
+        if (ring.size < 4) return@mapNotNull null
+        val points = ring.map { (lat, lng) -> Point.fromLngLat(lng, lat) }
+        Feature.fromGeometry(Polygon.fromLngLats(listOf(points)))
+    }
+    return FeatureCollection.fromFeatures(features)
+}
+
+/**
+ * Adds a territory source with its fill + outline layers the first time, then
+ * only swaps the data on later calls. addPersistentLayer, like the player puck,
+ * so the layers survive the style reloads MapStyle triggers. Setting an empty
+ * collection is how territory clears on sign-out or when a rival loses a hex --
+ * the layers stay, the geometry empties, nothing lingers.
+ */
+private fun upsertTerritory(
+    style: Style,
+    sourceId: String,
+    fillId: String,
+    lineId: String,
+    features: FeatureCollection,
+    fill: Int,
+    line: Int,
+    fillOpacity: Double,
+    lineOpacity: Double,
+) {
+    val existing = style.getSourceAs<GeoJsonSource>(sourceId)
+    if (existing != null) {
+        existing.featureCollection(features)
+        return
+    }
+    style.addSource(geoJsonSource(sourceId) { featureCollection(features) })
+    style.addPersistentLayer(
+        fillLayer(fillId, sourceId) {
+            fillColor(fill)
+            fillOpacity(fillOpacity)
+        }
+    )
+    style.addPersistentLayer(
+        lineLayer(lineId, sourceId) {
+            lineColor(line)
+            lineWidth(1.5)
+            lineOpacity(lineOpacity)
+        }
+    )
 }

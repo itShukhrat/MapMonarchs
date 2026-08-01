@@ -89,6 +89,15 @@ android {
         compose = true
         buildConfig = true
     }
+    testOptions {
+        unitTests {
+            // android.util.Log and friends are stubs in host unit tests. Return
+            // defaults (Log.w -> 0) instead of throwing "not mocked", so pure
+            // logic that happens to log -- e.g. H3Boundary's degrade path -- can
+            // be verified off-device without pulling in a logging shim.
+            isReturnDefaultValues = true
+        }
+    }
 }
 
 dependencies {
@@ -113,6 +122,16 @@ dependencies {
     implementation(libs.supabase.functions)
     implementation(libs.ktor.client.okhttp)
     implementation(libs.play.services.location)
+
+    // Uber H3 (official Java binding). The ONLY place client-side H3 lives, and
+    // only to CONVERT a server-issued cell id into its boundary polygon for
+    // drawing -- never to decide which cell the player is in (that stays
+    // server-authoritative in the Edge Function). Ships android-arm/android-arm64
+    // native libs (real devices) and windows/linux/darwin (host unit tests); it
+    // does NOT ship android-x86_64, so it cannot load on an x86_64 emulator --
+    // H3Boundary degrades to drawing nothing there rather than crashing.
+    implementation(libs.h3)
+
 
     testImplementation(libs.junit)
     androidTestImplementation(platform(libs.androidx.compose.bom))

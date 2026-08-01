@@ -12,6 +12,7 @@ mapbox = "11.26.0"
 supabase = "3.6.0"
 ktor = "3.4.1"
 playServicesLocation = "21.3.0"
+h3 = "4.1.1"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -39,6 +40,7 @@ supabase-realtime = { group = "io.github.jan-tennert.supabase", name = "realtime
 supabase-functions = { group = "io.github.jan-tennert.supabase", name = "functions-kt" }
 ktor-client-okhttp = { group = "io.ktor", name = "ktor-client-okhttp", version.ref = "ktor" }
 play-services-location = { group = "com.google.android.gms", name = "play-services-location", version.ref = "playServicesLocation" }
+h3 = { group = "com.uber", name = "h3", version.ref = "h3" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
