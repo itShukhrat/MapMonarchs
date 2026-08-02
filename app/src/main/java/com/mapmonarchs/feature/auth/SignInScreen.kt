@@ -121,7 +121,10 @@ private fun EmailStep(
         // screen reader hears why the control will not respond; previously they
         // heard nothing at all and had no way to learn the field was the problem.
         state = when {
-            state.sending -> ActionState.Unavailable(stringResource(R.string.signin_reason_sending))
+            // A live spinner ON the button while the request is out, not a greyed
+            // control -- the round-trip is acknowledged by the control itself. The
+            // label still reads SENDING, so the reason survives for a screen reader.
+            state.sending -> ActionState.Loading
             !state.email.looksLikeEmail() -> ActionState.Unavailable(stringResource(R.string.signin_reason_need_email))
             else -> ActionState.Ready
         },
@@ -177,7 +180,7 @@ private fun CodeStep(
         ),
         onClick = onVerifyCode,
         state = when {
-            state.verifying -> ActionState.Unavailable(stringResource(R.string.signin_reason_checking))
+            state.verifying -> ActionState.Loading
             !state.code.looksLikeCode() -> ActionState.Unavailable(stringResource(R.string.signin_reason_need_code))
             else -> ActionState.Ready
         },
