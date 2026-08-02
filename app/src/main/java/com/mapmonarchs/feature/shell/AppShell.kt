@@ -67,6 +67,7 @@ import com.mapmonarchs.feature.records.RecordsScreen
 import com.mapmonarchs.feature.subscription.SubscriptionScreen
 import com.mapmonarchs.feature.onboarding.OnboardingScreen
 import com.mapmonarchs.feature.safety.SafetyScreen
+import com.mapmonarchs.ui.motion.NavDirection
 import com.mapmonarchs.ui.motion.screenTransform
 import com.mapmonarchs.ui.motion.rememberAnimationsEnabled
 import com.mapmonarchs.feature.settings.AboutScreen
@@ -216,10 +217,18 @@ fun AppShell(modifier: Modifier = Modifier) {
         // two rather than introducing the cost.
         AnimatedContent(
             targetState = navigator.current,
-            // Crossfade with a whisper of depth (a subtle scale, never a slide) so
-            // a destination settles into place rather than flatly dissolving. The
-            // shape of it lives in the shared motion vocabulary; see screenTransform.
-            transitionSpec = { screenTransform(animate) },
+            // Crossfade with depth (scale, never a slide). Drilling INTO a child
+            // screen goes forward/deeper and leaving it reverses; everything else --
+            // tab switches and anything touching the map -- is a gentle peer settle.
+            // The shape of it lives in the shared motion vocabulary; see screenTransform.
+            transitionSpec = {
+                val direction = when {
+                    targetState in DRILL_ROUTES && initialState !in DRILL_ROUTES -> NavDirection.FORWARD
+                    initialState in DRILL_ROUTES && targetState !in DRILL_ROUTES -> NavDirection.BACKWARD
+                    else -> NavDirection.PEER
+                }
+                screenTransform(animate, direction)
+            },
             label = "screen"
         ) { route ->
         val lock = route.lock

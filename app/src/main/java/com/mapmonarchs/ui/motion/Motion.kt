@@ -139,23 +139,41 @@ fun Modifier.riseIn(index: Int = 0, distance: Dp = 10.dp): Modifier {
  * alerting. Fixed at its bright end under reduced motion, so a still frame still
  * looks intentional rather than dimmed.
  */
+/** Which way through the shell a navigation is going, for [screenTransform]. */
+enum class NavDirection { FORWARD, BACKWARD, PEER }
+
 /**
  * The transform between full screens in the shell.
  *
- * A crossfade with a whisper of DEPTH, not a slide. The shell's screens are peers
- * and drill-downs, never a spatial stack, so directional motion would imply a
- * relationship that is not there -- and sliding a live GL map off-screen is
- * expensive for that lie. Instead the incoming screen scales the last ~1.5% into
- * place while the outgoing one recedes a touch, so navigation reads as one surface
- * settling forward and another falling back rather than a flat dissolve. Scale,
- * never translation, keeps it non-directional. Both halves ride the house
- * EmphasizedDecelerate curve; a hard cut when the system has disabled motion.
+ * A crossfade with DEPTH along z, expressed by scale rather than a slide -- the
+ * shell's screens are peers and drill-downs, not a horizontal filmstrip, and
+ * sliding a live GL map off-screen is expensive for a lie. [direction] shapes it:
+ *
+ *  - FORWARD (drilling in) pushes the new screen up from behind while the old one
+ *    recedes toward the viewer and fades -- "going deeper".
+ *  - BACKWARD (drilling out) returns the new screen from in front while the old
+ *    falls away -- the exact reverse, so leaving undoes entering.
+ *  - PEER (a tab switch, or anything touching the map) barely scales at all: a
+ *    gentle settle with no direction, and the only variant the map ever gets.
+ *
+ * All modest -- this is navigation, not a set-piece -- on the house
+ * EmphasizedDecelerate curve. A hard cut when the system has disabled motion.
  */
-fun screenTransform(animationsEnabled: Boolean): ContentTransform {
+fun screenTransform(
+    animationsEnabled: Boolean,
+    direction: NavDirection = NavDirection.PEER,
+): ContentTransform {
     val d = if (animationsEnabled) SCREEN_TRANSITION_MS else 0
     val spec = tween<Float>(durationMillis = d, easing = EmphasizedDecelerate)
-    return (fadeIn(spec) + scaleIn(spec, initialScale = 0.985f)) togetherWith
-        (fadeOut(spec) + scaleOut(spec, targetScale = 0.99f))
+    val enterScale: Float
+    val exitScale: Float
+    when (direction) {
+        NavDirection.FORWARD -> { enterScale = 0.94f; exitScale = 1.03f }
+        NavDirection.BACKWARD -> { enterScale = 1.04f; exitScale = 0.97f }
+        NavDirection.PEER -> { enterScale = 0.985f; exitScale = 0.99f }
+    }
+    return (fadeIn(spec) + scaleIn(spec, initialScale = enterScale)) togetherWith
+        (fadeOut(spec) + scaleOut(spec, targetScale = exitScale))
 }
 
 @Composable

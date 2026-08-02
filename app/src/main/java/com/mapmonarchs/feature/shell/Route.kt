@@ -324,6 +324,23 @@ val NAV_DESTINATIONS: List<NavDestination> = listOf(
 val ALL_ROUTES: List<Route> = COMMAND_ROUTES + REFERENCE_ROUTES + LOCKED_ROUTES
 
 /**
+ * Screens reached by drilling INTO another screen rather than by steering the
+ * dock -- Profile's sub-screens and the sign-in flow. The shell gives ENTERING
+ * one of these a forward "deeper" transition and LEAVING it the reverse, so the
+ * hierarchy is legible in motion. Everything else -- dock tabs, the command deck,
+ * the reference screens, and the map -- transitions as a peer.
+ *
+ * The map is deliberately NOT here: it must only ever get the gentle peer scale,
+ * because a heavier scale on a live GL surface is a cost the board should not pay.
+ */
+val DRILL_ROUTES: Set<Route> = setOf(
+    Route.Badges,
+    Route.Records,
+    Route.Subscription,
+    Route.SignIn,
+)
+
+/**
  * Where a blocked action should send the player.
  *
  * WHY THIS IS A PROJECTION OF [Blocker] AND NOT ITS OWN RULE: AppShell used to
