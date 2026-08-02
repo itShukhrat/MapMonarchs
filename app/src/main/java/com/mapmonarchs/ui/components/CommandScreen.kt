@@ -10,6 +10,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.draw.scale
 import com.mapmonarchs.ui.motion.rememberAnimationsEnabled
+import com.mapmonarchs.ui.motion.rememberBreath
+import com.mapmonarchs.ui.motion.riseIn
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -31,6 +33,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -266,9 +269,16 @@ fun SectionHeader(text: String, modifier: Modifier = Modifier) {
 fun CommandCard(
     title: String? = null,
     modifier: Modifier = Modifier,
+    /**
+     * Position in an entering group, for the stagger. Leave 0 (the default) and
+     * the card simply rises in on its own; pass an increasing index down a screen
+     * and the panels assemble top-to-bottom instead of appearing at once. Purely
+     * a first-appearance beat -- see Modifier.riseIn.
+     */
+    index: Int = 0,
     content: @Composable ColumnScope.() -> Unit
 ) {
-    Column(modifier = modifier.padding(top = 24.dp)) {
+    Column(modifier = modifier.riseIn(index).padding(top = 24.dp)) {
         if (title != null) {
             Text(
                 text = title,
@@ -351,6 +361,15 @@ sealed interface ActionState {
 
     /** [reason] is announced to screen readers and is never optional. */
     data class Unavailable(val reason: String) : ActionState
+
+    /**
+     * An async action in flight. The control keeps its label and its place but
+     * shows a working indicator and refuses re-taps, so a slow network is
+     * acknowledged BY THE BUTTON rather than by nothing happening -- the exact
+     * gap the press animation was added to close, extended across the round-trip.
+     * Distinct from [Unavailable]: this is "working", not "cannot".
+     */
+    data object Loading : ActionState
 }
 
 /**
@@ -403,8 +422,11 @@ fun CommandAction(
     state: ActionState = ActionState.Ready,
     emphasis: ActionEmphasis = ActionEmphasis.PRIMARY
 ) {
+    val loading = state is ActionState.Loading
     val ready = state is ActionState.Ready
-    val primary = emphasis == ActionEmphasis.PRIMARY && ready
+    // Loading keeps the PRIMARY appearance (it was the primary action a moment
+    // ago), so the control signals "working" without visually collapsing.
+    val primary = emphasis == ActionEmphasis.PRIMARY && (ready || loading)
     val shape = RoundedCornerShape(14.dp)
     val haptics = LocalHapticFeedback.current
 
@@ -420,6 +442,15 @@ fun CommandAction(
         },
         label = "commandActionPress"
     )
+
+    // A LIVE, idle primary action breathes; a loading one keeps a static lift; a
+    // secondary or unavailable one does not lift at all. rememberBreath is reached
+    // only for the breathing case, so quiet screens do not run an animation.
+    val glow: Modifier = when {
+        primary && ready -> primaryGlow(shape)
+        primary -> Modifier.shadow(12.dp, shape, ambientColor = SovereignHalo, spotColor = SovereignHalo)
+        else -> Modifier
+    }
 
     val edge = if (primary) Sovereign else SlateEdge
     val labelColor = when {
@@ -440,16 +471,11 @@ fun CommandAction(
             // in the product and it is pressed outdoors, one-handed, walking.
             .heightIn(min = 52.dp)
             .scale(press)
-            // Only a PRIMARY action lifts off the surface. A secondary one that
-            // glowed just as hard would put the screen back where it started:
-            // two controls, and no opinion about which one matters.
-            .then(
-                if (primary) {
-                    Modifier.shadow(12.dp, shape, ambientColor = SovereignHalo, spotColor = SovereignHalo)
-                } else {
-                    Modifier
-                }
-            )
+            // Only a PRIMARY action lifts off the surface -- and, when idle, it
+            // breathes (see glow above). A secondary one that glowed just as hard
+            // would put the screen back where it started: two controls, and no
+            // opinion about which one matters.
+            .then(glow)
             .clip(shape)
             .background(
                 if (primary) MapMonarchsBrush.actionReady
@@ -476,29 +502,40 @@ fun CommandAction(
         contentAlignment = Alignment.Center
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            // Non-colour cue for the live state, so emphasis survives greyscale
-            // and colour-vision deficiency. Filled on the primary action, hollow
-            // on a secondary one -- the same filled/hollow language the dock and
-            // ChoiceRow already use.
-            Box(
-                modifier = Modifier
-                    // 11dp, not 9: below about 10dp the six sides stop resolving
-                    // and it reads as a dot, which loses the only reason it is a
-                    // hexagon rather than a bullet.
-                    .size(11.dp)
-                    .rotate(90f)
-                    .clip(HexagonShape)
-                    .background(if (primary) Sovereign else Color.Transparent)
-                    .border(
-                        1.dp,
-                        when {
-                            primary -> Sovereign
-                            ready -> SlateEdge
-                            else -> DisabledFg
-                        },
-                        HexagonShape
-                    )
-            )
+            if (loading) {
+                // The mark's slot becomes a spinner while the round-trip is in
+                // flight: the button itself is now the progress indicator, so the
+                // player never taps into silence.
+                CircularProgressIndicator(
+                    modifier = Modifier.size(14.dp),
+                    strokeWidth = 2.dp,
+                    color = if (primary) SovereignGlow else TextMuted
+                )
+            } else {
+                // Non-colour cue for the live state, so emphasis survives greyscale
+                // and colour-vision deficiency. Filled on the primary action, hollow
+                // on a secondary one -- the same filled/hollow language the dock and
+                // ChoiceRow already use.
+                Box(
+                    modifier = Modifier
+                        // 11dp, not 9: below about 10dp the six sides stop resolving
+                        // and it reads as a dot, which loses the only reason it is a
+                        // hexagon rather than a bullet.
+                        .size(11.dp)
+                        .rotate(90f)
+                        .clip(HexagonShape)
+                        .background(if (primary) Sovereign else Color.Transparent)
+                        .border(
+                            1.dp,
+                            when {
+                                primary -> Sovereign
+                                ready -> SlateEdge
+                                else -> DisabledFg
+                            },
+                            HexagonShape
+                        )
+                )
+            }
             Text(
                 text = label,
                 style = MaterialTheme.typography.labelLarge,
@@ -507,6 +544,20 @@ fun CommandAction(
             )
         }
     }
+}
+
+/**
+ * The breathing lift for an idle primary action. A @Composable modifier, reached
+ * ONLY when the action is primary AND ready -- so rememberBreath (an infinite
+ * animation) never runs on a screen whose primary action is loading, disabled, or
+ * absent. The elevation swells ~11->14dp and back, a slow tide that says "this is
+ * live" without the alarm of a fast pulse.
+ */
+@Composable
+private fun primaryGlow(shape: androidx.compose.ui.graphics.Shape): Modifier {
+    val breath = rememberBreath()
+    val elevation = 11.dp + 3.dp * breath
+    return Modifier.shadow(elevation, shape, ambientColor = SovereignHalo, spotColor = SovereignHalo)
 }
 
 /**
