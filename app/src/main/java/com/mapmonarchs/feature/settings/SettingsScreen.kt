@@ -26,6 +26,8 @@ object SettingsTags {
     const val OPEN_SYSTEM = "settings_open_system"
     const val DEBUG_FREE = "settings_debug_free"
     const val DEBUG_PRO = "settings_debug_pro"
+    const val CRASH_OFF = "settings_crash_off"
+    const val CRASH_ON = "settings_crash_on"
 }
 
 /**
@@ -47,6 +49,11 @@ fun SettingsScreen(
     onOpenSystemSettings: () -> Unit,
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
+    // Crash-reporting consent (Crashlytics only). Default off; the caller
+    // persists it and applies it to Firebase. Behavioural analytics and the
+    // advertising id stay off regardless -- see FirebaseTelemetry.
+    crashReportingEnabled: Boolean = false,
+    onCrashReportingChange: (Boolean) -> Unit = {},
     // QA-only. Rendered as a control only in a debug build; the caller also
     // gates the value behind BuildConfig.DEBUG so release cannot honour it.
     debugSimulatePro: Boolean = false,
@@ -122,6 +129,31 @@ fun SettingsScreen(
                     modifier = Modifier.testTag("tracking_${mode.name}")
                 )
             }
+        }
+
+        // Crash reporting is a real, off-by-default choice -- Crashlytics only,
+        // which keeps it inside the "no background tracking, no advertising id"
+        // promise stated just below. Two peer rows reuse the radio-style
+        // ChoiceRow, like cadence and language above.
+        CommandCard(title = stringResource(R.string.settings_diagnostics)) {
+            BodyNote(
+                stringResource(R.string.settings_diagnostics_note),
+                modifier = Modifier.padding(top = 8.dp)
+            )
+            ChoiceRow(
+                label = stringResource(R.string.settings_diagnostics_off),
+                detail = stringResource(R.string.settings_diagnostics_off_detail),
+                selected = !crashReportingEnabled,
+                onClick = { onCrashReportingChange(false) },
+                modifier = Modifier.testTag(SettingsTags.CRASH_OFF)
+            )
+            ChoiceRow(
+                label = stringResource(R.string.settings_diagnostics_on),
+                detail = stringResource(R.string.settings_diagnostics_on_detail),
+                selected = crashReportingEnabled,
+                onClick = { onCrashReportingChange(true) },
+                modifier = Modifier.testTag(SettingsTags.CRASH_ON)
+            )
         }
 
         SectionHeader(stringResource(R.string.settings_not_do))

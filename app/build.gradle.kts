@@ -5,6 +5,8 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.kotlin.serialization)
+    alias(libs.plugins.google.services)
+    alias(libs.plugins.firebase.crashlytics)
 }
 
 // Secrets come from local.properties (git-ignored) -> BuildConfig.
@@ -132,6 +134,17 @@ dependencies {
     // H3Boundary degrades to drawing nothing there rather than crashing.
     implementation(libs.h3)
 
+    // Firebase — ADDITIVE ONLY. Supabase remains the backend of record (auth,
+    // data, entitlements, server-authoritative capture). These add client-side
+    // Analytics and crash reporting. Data collection defaults OFF in the
+    // manifest and turns on only with player consent. The Crashlytics Gradle
+    // plugin (applied above) is REQUIRED, not optional: it injects the build id
+    // the SDK reads at startup, and without it FirebaseInitProvider crashes the
+    // app on launch ("Crashlytics build ID is missing") regardless of the
+    // collection flag. (It also uploads the R8 mapping when R8 is on; it is off.)
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.analytics)
+    implementation(libs.firebase.crashlytics)
 
     testImplementation(libs.junit)
     androidTestImplementation(platform(libs.androidx.compose.bom))

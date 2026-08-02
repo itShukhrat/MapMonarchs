@@ -62,6 +62,12 @@
     <string name="settings_cadence_note">How often the app asks for a position while the map is open. Faster updates make claiming feel more responsive and cost more battery.</string>
     <string name="settings_not_do">WHAT WE DO NOT DO</string>
     <string name="settings_not_do_body">Location is only read while the map is open. There is no background tracking, and no advertising identifier. Other players can see which ground you hold — never your live position, and never the route you walked to reach it.</string>
+    <string name="settings_diagnostics">CRASH REPORTS</string>
+    <string name="settings_diagnostics_note">If the app crashes, send a crash report so the fault can be fixed. That is a stack trace from the moment it crashed — never your location, nothing in the background, and no advertising identifier. Off by default.</string>
+    <string name="settings_diagnostics_off">OFF</string>
+    <string name="settings_diagnostics_off_detail">No reports leave this device.</string>
+    <string name="settings_diagnostics_on">ON</string>
+    <string name="settings_diagnostics_on_detail">Send a crash report when the app crashes.</string>
 
     <!-- COMMAND DECK. Route titles are NOT here: they live on Route and are
          shared with the dock and the locked screens, so they move as one pass
@@ -347,7 +353,6 @@
     <string name="blocker_hud_identifying">IDENTIFYING</string>
     <string name="blocker_hud_no_identity">NO IDENTITY</string>
     <string name="blocker_hud_sign_in">SIGN IN TO CLAIM</string>
-    <string name="blocker_hud_claiming_offline">CLAIMING OFFLINE</string>
 
     <!-- ===== Domain: Blocker explanations (diagnostics / help) ===== -->
     <string name="blocker_exp_none">Nothing is blocking the action available to you right now.</string>
@@ -362,7 +367,6 @@
     <string name="blocker_exp_identity_resolving">Still establishing your session.</string>
     <string name="blocker_exp_identity_unavailable">Sign-in is unavailable, so the server cannot attribute territory to you. %1$s</string>
     <string name="blocker_exp_not_signed_in">You are not signed in, so the server has no one to attribute territory to. Sign in with an email code to claim ground.</string>
-    <string name="blocker_exp_capture_not_deployed">The capture backend is deployed and server-authoritative. The in-app claim button is being finalised and verified before it goes live, so claiming from the app is not active yet. This is a client step, not something wrong with your position or your session.</string>
 
     <!-- ===== Domain: AppError player messages ===== -->
     <string name="error_offline">No connection. Territory may be out of date.</string>

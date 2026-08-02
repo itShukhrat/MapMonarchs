@@ -32,6 +32,12 @@
     <string name="settings_cadence_note">Как часто приложение запрашивает местоположение, пока открыта карта. Более частые обновления делают захват отзывчивее и сильнее расходуют батарею.</string>
     <string name="settings_not_do">ЧЕГО МЫ НЕ ДЕЛАЕМ</string>
     <string name="settings_not_do_body">Местоположение считывается только пока открыта карта. Нет фонового отслеживания и нет рекламного идентификатора. Другие игроки видят, какой землёй вы владеете, — но никогда ваше текущее местоположение и никогда маршрут, которым вы шли.</string>
+    <string name="settings_diagnostics">ОТЧЁТЫ О СБОЯХ</string>
+    <string name="settings_diagnostics_note">Если приложение аварийно закроется, отправить отчёт о сбое, чтобы ошибку можно было исправить. Это трассировка стека в момент сбоя — никогда ваше местоположение, ничего в фоне и никакого рекламного идентификатора. По умолчанию выключено.</string>
+    <string name="settings_diagnostics_off">ВЫКЛ</string>
+    <string name="settings_diagnostics_off_detail">Отчёты не покидают это устройство.</string>
+    <string name="settings_diagnostics_on">ВКЛ</string>
+    <string name="settings_diagnostics_on_detail">Отправлять отчёт при аварийном закрытии.</string>
     <string name="command_title">КОМАНДНЫЙ ПУНКТ</string>
     <string name="command_your_session">ВАША СЕССИЯ</string>
     <string name="command_open">ОТКРЫТЬ</string>
@@ -265,7 +271,6 @@
     <string name="blocker_hud_identifying">ОПОЗНАНИЕ</string>
     <string name="blocker_hud_no_identity">НЕТ ЛИЧНОСТИ</string>
     <string name="blocker_hud_sign_in">ВОЙТИ ДЛЯ ЗАХВАТА</string>
-    <string name="blocker_hud_claiming_offline">ЗАХВАТ ОФФЛАЙН</string>
 
     <!-- ===== Domain: Blocker explanations (diagnostics / help) ===== -->
     <string name="blocker_exp_none">Сейчас ничто не мешает доступному вам действию.</string>
@@ -280,7 +285,6 @@
     <string name="blocker_exp_identity_resolving">Устанавливаем вашу сессию.</string>
     <string name="blocker_exp_identity_unavailable">Вход недоступен, поэтому сервер не может закрепить за вами территорию. %1$s</string>
     <string name="blocker_exp_not_signed_in">Вы не вошли в систему, поэтому серверу некому приписать территорию. Войдите с кодом из письма, чтобы захватывать территорию.</string>
-    <string name="blocker_exp_capture_not_deployed">Бэкенд захвата развёрнут и авторитетен на стороне сервера. Кнопка захвата в приложении дорабатывается и проверяется перед запуском, поэтому захват из приложения пока не активен. Это шаг на стороне клиента, а не проблема с вашим местоположением или сессией.</string>
 
     <!-- ===== Domain: AppError player messages ===== -->
     <string name="error_offline">Нет соединения. Территория может быть устаревшей.</string>

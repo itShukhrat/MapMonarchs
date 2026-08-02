@@ -38,7 +38,9 @@ import com.mapmonarchs.BuildConfig
 import com.mapmonarchs.data.local.AppLocale
 import com.mapmonarchs.data.local.DebugEntitlementStore
 import com.mapmonarchs.data.local.FirstRunStore
+import com.mapmonarchs.data.local.TelemetryPreferences
 import com.mapmonarchs.data.local.TrackingPreferences
+import com.mapmonarchs.telemetry.FirebaseTelemetry
 import com.mapmonarchs.data.remote.SupabaseProvider
 import com.mapmonarchs.data.repository.SupabaseProfileRepository
 import com.mapmonarchs.domain.repository.Outcome
@@ -95,6 +97,7 @@ fun AppShell(modifier: Modifier = Modifier) {
     val navigator = remember { ShellNavigator() }
     val firstRunStore = remember { FirstRunStore(context) }
     val trackingPrefs = remember { TrackingPreferences(context) }
+    val telemetryPrefs = remember { TelemetryPreferences(context) }
 
     // The brand moment runs on every cold start, not just first run: it is the
     // handover into a strategy surface, and a player who opens the app to walk
@@ -103,6 +106,15 @@ fun AppShell(modifier: Modifier = Modifier) {
     var introDone by remember { mutableStateOf(false) }
     var onboardingComplete by remember { mutableStateOf(firstRunStore.hasCompletedOnboarding()) }
     var trackingMode by remember { mutableStateOf(trackingPrefs.mode) }
+    var crashReportingEnabled by remember { mutableStateOf(telemetryPrefs.crashReportingEnabled) }
+
+    // Apply the stored crash-reporting consent to Firebase on every cold start,
+    // before any screen shows. The manifest defaults collection off; this brings
+    // Crashlytics up to the player's saved choice (and back down if revoked).
+    // Behavioural analytics and the ad id are never enabled -- see FirebaseTelemetry.
+    LaunchedEffect(Unit) {
+        FirebaseTelemetry.setCrashReportingEnabled(context, telemetryPrefs.crashReportingEnabled)
+    }
 
     val viewModel: MapViewModel = viewModel(factory = MapViewModelFactory(context))
     val state by viewModel.uiState.collectAsState()
@@ -259,9 +271,11 @@ fun AppShell(modifier: Modifier = Modifier) {
                 // Resolved through the seam, not read from a flag: when billing
                 // exists this line is the only thing that changes.
                 entitlement = entitlement,
-                // Empty by design: earned badges come from user_badges, which is
-                // not wired because capture is not live. An empty map renders the
-                // whole cabinet locked, which is the true state.
+                // Read from user_badges via the dossier. The map is empty because
+                // no capture has landed yet, not because it is unwired: the
+                // awarding trigger is live and will populate it on the first real
+                // claim. An empty map renders the whole cabinet locked -- the true
+                // current state.
                 earnedBadgeKeys = dossier.earnedBadges,
                 onBack = { navigator.back() },
                 onManageIdentity = { navigator.navigateTo(Route.Identity) },
@@ -342,6 +356,12 @@ fun AppShell(modifier: Modifier = Modifier) {
                 },
                 currentLanguageTag = AppLocale.currentTag(context),
                 onLanguageChange = { tag -> AppLocale.setLanguage(context, tag) },
+                crashReportingEnabled = crashReportingEnabled,
+                onCrashReportingChange = { on ->
+                    crashReportingEnabled = on
+                    telemetryPrefs.crashReportingEnabled = on
+                    FirebaseTelemetry.setCrashReportingEnabled(context, on)
+                },
                 // Debug-only QA control; the card is hidden entirely in release.
                 debugSimulatePro = debugSimulatePro,
                 onDebugSimulateProChange = { on ->

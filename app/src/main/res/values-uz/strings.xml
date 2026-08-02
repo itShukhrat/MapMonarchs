@@ -33,6 +33,12 @@
     <string name="settings_cadence_note">Xarita ochiq boʻlganda ilova joylashuvni qanchalik tez-tez soʻrashi. Tezroq yangilanishlar egallashni sezgirroq qiladi va batareyani koʻproq sarflaydi.</string>
     <string name="settings_not_do">BIZ NIMA QILMAYMIZ</string>
     <string name="settings_not_do_body">Joylashuv faqat xarita ochiq boʻlganda oʻqiladi. Fonda kuzatuv yoʻq va reklama identifikatori yoʻq. Boshqa oʻyinchilar qaysi yerni egallaganingizni koʻra oladi — lekin hech qachon jonli joylashuvingizni va hech qachon unga borgan yoʻlingizni emas.</string>
+    <string name="settings_diagnostics">NOSOZLIK HISOBOTLARI</string>
+    <string name="settings_diagnostics_note">Ilova ishdan chiqsa, xatoni tuzatish uchun nosozlik hisobotini yuborish. Bu ishdan chiqqan paytdagi stek izi — hech qachon joylashuvingiz emas, fonda hech narsa yoʻq va reklama identifikatori yoʻq. Standart holatda oʻchiq.</string>
+    <string name="settings_diagnostics_off">OʻCHIQ</string>
+    <string name="settings_diagnostics_off_detail">Hisobotlar bu qurilmadan chiqmaydi.</string>
+    <string name="settings_diagnostics_on">YOQILGAN</string>
+    <string name="settings_diagnostics_on_detail">Ilova ishdan chiqqanda hisobot yuborish.</string>
     <string name="command_title">QOʻMONDONLIK PUNKTI</string>
     <string name="command_your_session">SIZNING SESSIYANGIZ</string>
     <string name="command_open">OCHISH</string>
@@ -266,7 +272,6 @@
     <string name="blocker_hud_identifying">ANIQLANMOQDA</string>
     <string name="blocker_hud_no_identity">SHAXS YOʻQ</string>
     <string name="blocker_hud_sign_in">EGALLASH UCHUN KIRING</string>
-    <string name="blocker_hud_claiming_offline">EGALLASH OFFLAYN</string>
 
     <!-- ===== Domain: Blocker explanations (diagnostics / help) ===== -->
     <string name="blocker_exp_none">Hozir sizga mavjud boʻlgan amalga hech narsa toʻsqinlik qilmayapti.</string>
@@ -281,7 +286,6 @@
     <string name="blocker_exp_identity_resolving">Sessiyangiz hali oʻrnatilmoqda.</string>
     <string name="blocker_exp_identity_unavailable">Kirish mavjud emas, shuning uchun server hududni sizga biriktira olmaydi. %1$s</string>
     <string name="blocker_exp_not_signed_in">Siz tizimga kirmagansiz, shuning uchun server hududni hech kimga biriktira olmaydi. Hududni egallash uchun email kodi bilan kiring.</string>
-    <string name="blocker_exp_capture_not_deployed">Egallash backendi joylashtirilgan va server tomonidan boshqariladi. Ilovadagi egallash tugmasi ishga tushishidan oldin yakunlanmoqda va tekshirilmoqda, shuning uchun ilovadan egallash hali faol emas. Bu mijoz tomonidagi qadam — joylashuvingiz yoki sessiyangizdagi muammo emas.</string>
 
     <!-- ===== Domain: AppError player messages ===== -->
     <string name="error_offline">Aloqa yoʻq. Hudud eskirgan boʻlishi mumkin.</string>

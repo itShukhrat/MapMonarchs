@@ -16,6 +16,17 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.MapMonarchs">
+
+        <!-- Firebase data collection defaults OFF, to match this app's
+             privacy-first stance (TrackingPreferences / Safety & Privacy).
+             Firebase still initialises, but Analytics and Crashlytics send
+             nothing until the player consents, via
+             setAnalyticsCollectionEnabled(true) /
+             setCrashlyticsCollectionEnabled(true). -->
+        <meta-data android:name="firebase_analytics_collection_enabled" android:value="false" />
+        <meta-data android:name="firebase_crashlytics_collection_enabled" android:value="false" />
+        <meta-data android:name="google_analytics_adid_collection_enabled" android:value="false" />
+
         <activity
             android:name=".MainActivity"
             android:exported="true"

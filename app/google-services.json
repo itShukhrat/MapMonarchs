@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "494719106693",
+    "project_id": "mapmonarchs",
+    "storage_bucket": "mapmonarchs.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:494719106693:android:abcfda0184e6edbe7f73ec",
+        "android_client_info": {
+          "package_name": "com.mapmonarchs"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDjnCkqQYTDe5sqqdcr1-m3fHBFuWei-8M"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
