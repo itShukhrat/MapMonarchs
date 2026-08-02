@@ -22,6 +22,7 @@ import androidx.compose.ui.semantics.semantics
 import com.mapmonarchs.R
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.mapmonarchs.ui.motion.riseIn
 import com.mapmonarchs.ui.theme.Contested
 import com.mapmonarchs.ui.theme.TextPrimary
 import com.mapmonarchs.ui.theme.MapMonarchsBrush
@@ -47,6 +48,12 @@ fun ErrorStrip(
     val errorCd = stringResource(R.string.a11y_error_prefix, message)
     Row(
         modifier = modifier
+            // A failure RISES in rather than snapping over the content it explains.
+            // This surface is composed only when an error appears, so the one-shot
+            // entrance fires exactly when the failure does -- across every screen
+            // that shows a strip, with no change at the call sites. A no-op under
+            // reduced motion.
+            .riseIn(distance = 8.dp)
             .clip(RoundedCornerShape(14.dp))
             // The same glass the other HUD instruments are made of, so a failure
             // reads as part of the panel system rather than as a foreign box
