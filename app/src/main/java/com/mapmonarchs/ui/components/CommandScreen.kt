@@ -311,13 +311,38 @@ fun StatusRow(
     valueColor: Color = TextPrimary,
     onClick: (() -> Unit)? = null
 ) {
+    val haptics = LocalHapticFeedback.current
+    val interaction = remember { MutableInteractionSource() }
+    val pressed by interaction.collectIsPressedAsState()
+    val animate = rememberAnimationsEnabled()
+    // A clickable row used to acknowledge a press with the stock Material ripple --
+    // the one place the product's bespoke press language broke, jarring against the
+    // custom feedback every other control uses. It now answers with a faint accent
+    // wash (indication = null, same as CommandAction/TextCommand) and the shared
+    // tap haptic. Non-clickable rows are untouched.
+    val pressWash by animateFloatAsState(
+        targetValue = if (pressed) 1f else 0f,
+        animationSpec = tween(if (animate) 120 else 0),
+        label = "statusRowPress"
+    )
     Row(
         modifier = modifier
             .fillMaxWidth()
             .heightIn(min = 48.dp)
             .then(
                 if (onClick != null) {
-                    Modifier.clickable(role = Role.Button, onClick = onClick)
+                    Modifier
+                        .clip(RoundedCornerShape(10.dp))
+                        .clickable(
+                            role = Role.Button,
+                            interactionSource = interaction,
+                            indication = null,
+                            onClick = {
+                                haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                onClick()
+                            }
+                        )
+                        .background(Sovereign.copy(alpha = 0.09f * pressWash))
                 } else {
                     Modifier
                 }
