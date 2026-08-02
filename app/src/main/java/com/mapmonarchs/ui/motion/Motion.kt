@@ -2,6 +2,12 @@ package com.mapmonarchs.ui.motion
 
 import android.content.Context
 import android.provider.Settings
+import androidx.compose.animation.ContentTransform
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.animation.core.CubicBezierEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
@@ -133,6 +139,25 @@ fun Modifier.riseIn(index: Int = 0, distance: Dp = 10.dp): Modifier {
  * alerting. Fixed at its bright end under reduced motion, so a still frame still
  * looks intentional rather than dimmed.
  */
+/**
+ * The transform between full screens in the shell.
+ *
+ * A crossfade with a whisper of DEPTH, not a slide. The shell's screens are peers
+ * and drill-downs, never a spatial stack, so directional motion would imply a
+ * relationship that is not there -- and sliding a live GL map off-screen is
+ * expensive for that lie. Instead the incoming screen scales the last ~1.5% into
+ * place while the outgoing one recedes a touch, so navigation reads as one surface
+ * settling forward and another falling back rather than a flat dissolve. Scale,
+ * never translation, keeps it non-directional. Both halves ride the house
+ * EmphasizedDecelerate curve; a hard cut when the system has disabled motion.
+ */
+fun screenTransform(animationsEnabled: Boolean): ContentTransform {
+    val d = if (animationsEnabled) SCREEN_TRANSITION_MS else 0
+    val spec = tween<Float>(durationMillis = d, easing = EmphasizedDecelerate)
+    return (fadeIn(spec) + scaleIn(spec, initialScale = 0.985f)) togetherWith
+        (fadeOut(spec) + scaleOut(spec, targetScale = 0.99f))
+}
+
 @Composable
 fun rememberBreath(periodMillis: Int = 2600): Float {
     if (!rememberAnimationsEnabled()) return 1f

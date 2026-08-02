@@ -10,8 +10,6 @@ import android.provider.Settings
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.togetherWith
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.Box
@@ -69,7 +67,7 @@ import com.mapmonarchs.feature.records.RecordsScreen
 import com.mapmonarchs.feature.subscription.SubscriptionScreen
 import com.mapmonarchs.feature.onboarding.OnboardingScreen
 import com.mapmonarchs.feature.safety.SafetyScreen
-import com.mapmonarchs.ui.motion.SCREEN_TRANSITION_MS
+import com.mapmonarchs.ui.motion.screenTransform
 import com.mapmonarchs.ui.motion.rememberAnimationsEnabled
 import com.mapmonarchs.feature.settings.AboutScreen
 import com.mapmonarchs.feature.settings.SettingsScreen
@@ -218,10 +216,10 @@ fun AppShell(modifier: Modifier = Modifier) {
         // two rather than introducing the cost.
         AnimatedContent(
             targetState = navigator.current,
-            transitionSpec = {
-                val spec = tween<Float>(if (animate) SCREEN_TRANSITION_MS else 0)
-                fadeIn(spec) togetherWith fadeOut(spec)
-            },
+            // Crossfade with a whisper of depth (a subtle scale, never a slide) so
+            // a destination settles into place rather than flatly dissolving. The
+            // shape of it lives in the shared motion vocabulary; see screenTransform.
+            transitionSpec = { screenTransform(animate) },
             label = "screen"
         ) { route ->
         val lock = route.lock
