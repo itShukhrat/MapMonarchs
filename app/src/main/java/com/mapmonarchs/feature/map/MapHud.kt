@@ -1,5 +1,7 @@
 package com.mapmonarchs.feature.map
 import com.mapmonarchs.ui.motion.rememberAnimationsEnabled
+import com.mapmonarchs.ui.motion.rememberBreath
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.ui.draw.scale
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.getValue
@@ -162,7 +164,7 @@ fun MapHud(
 
         CaptureAction(
             label = captureButtonLabel(state),
-            ready = state.isCaptureActionable(),
+            phase = capturePhase(state),
             onReadyClick = onCapture,
             onBlockedClick = onExplainBlocker,
             modifier = Modifier
@@ -303,66 +305,79 @@ private fun captureButtonLabel(state: MapUiState): String {
     else stringResource(R.string.blocker_hud_claim)
 }
 
+/**
+ * The visual phase of the single action. The capture button used to know only
+ * "ready vs not", so a claim IN FLIGHT rendered in the same Contested style as a
+ * blocked one -- "CLAIMING" looked like a problem, not like progress, on the most
+ * important control in the game. These five phases each read as their own thing.
+ */
+private enum class CapturePhase { READY, BLOCKED, WORKING, SUCCEEDED, FAILED }
+
+private fun capturePhase(state: MapUiState): CapturePhase = when (state.capture) {
+    is CaptureState.InFlight -> CapturePhase.WORKING
+    is CaptureState.Succeeded -> CapturePhase.SUCCEEDED
+    is CaptureState.Failed -> CapturePhase.FAILED
+    else -> if (state.isCaptureActionable()) CapturePhase.READY else CapturePhase.BLOCKED
+}
+
 @Composable
 private fun CaptureAction(
     label: String,
-    ready: Boolean,
+    phase: CapturePhase,
     onReadyClick: () -> Unit,
     onBlockedClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val shape = RoundedCornerShape(14.dp)
     val haptics = LocalHapticFeedback.current
-    val captureCd = if (ready) stringResource(R.string.hud_a11y_claim)
-                    else stringResource(R.string.hud_a11y_cannot_claim, label)
+    val motionOn = rememberAnimationsEnabled()
+
+    // Positive phases (a live claim, a working one, a landed one) wear the accent;
+    // the two problem phases (blocked, failed) wear Contested and stay grounded.
+    // Depth carries the weight, never a saturated fill -- the fill colour is
+    // TERRITORY_PALETTE and this control sits inches from the player's own ground.
+    val positive = phase == CapturePhase.READY ||
+        phase == CapturePhase.WORKING ||
+        phase == CapturePhase.SUCCEEDED
+    val lifts = phase == CapturePhase.READY || phase == CapturePhase.SUCCEEDED
+
+    // A READY claim breathes, the same slow tide as every primary action. A landed
+    // claim gets one confirming pop; nothing else animates its lift.
+    val breath = if (phase == CapturePhase.READY) rememberBreath() else 1f
+    val elevation = when (phase) {
+        CapturePhase.READY -> 16.dp + 4.dp * breath
+        CapturePhase.SUCCEEDED -> 18.dp
+        else -> 0.dp
+    }
+    val pop by animateFloatAsState(
+        targetValue = if (phase == CapturePhase.SUCCEEDED && motionOn) 1.04f else 1f,
+        animationSpec = spring(dampingRatio = 0.4f, stiffness = Spring.StiffnessMedium),
+        label = "capturePop"
+    )
+
+    val captureCd = when (phase) {
+        CapturePhase.READY -> stringResource(R.string.hud_a11y_claim)
+        else -> stringResource(R.string.hud_a11y_cannot_claim, label)
+    }
     Box(
         modifier = modifier
-            // A READY claim lifts off the map on an accent-tinted shadow. This is
-            // the single most valuable action in the product and it was rendered
-            // as a thin outlined pill sitting flat on the basemap -- lower visual
-            // priority than the error strip above it.
-            //
-            // Depth is what carries the weight, not fill: the button still must
-            // not wear a saturated slab, because that colour is TERRITORY_PALETTE
-            // and this control sits inches from a player who may own ground drawn
-            // in exactly that colour.
-            //
-            // Blocked stays grounded and flat on purpose. The difference between
-            // "press this" and "this will not work yet" is legible before a single
-            // word is read.
-            .then(
-                if (ready) {
-                    Modifier.shadow(
-                        elevation = 18.dp,
-                        shape = shape,
-                        ambientColor = SovereignHalo,
-                        spotColor = SovereignHalo
-                    )
-                } else {
-                    Modifier
-                }
-            )
+            .scale(pop)
+            .then(if (lifts) Modifier.shadow(elevation, shape, ambientColor = SovereignHalo, spotColor = SovereignHalo) else Modifier)
             .clip(shape)
-            // THE WORST INSTANCE OF THE PALETTE COLLISION, and the last one fixed.
-            // This used to fill with Sovereign -- 0xFF4C8DFF, byte for byte
-            // TERRITORY_PALETTE[0]. It sits ON the map, inches from the player's
-            // own hexes, so for one player in eight the claim button and their
-            // ground were the same colour in the same frame. CommandAction had the
-            // same bug and was fixed first, which was backwards: that one lives on
-            // a plain dark screen where nothing competes.
-            .background(if (ready) MapMonarchsBrush.actionReady else SolidColor(Slate.copy(alpha = 0.94f)))
+            .background(if (positive) MapMonarchsBrush.actionReady else SolidColor(Slate.copy(alpha = 0.94f)))
             .border(
-                if (ready) 1.5.dp else 1.dp,
-                if (ready) Sovereign else Contested.copy(alpha = 0.45f),
+                if (positive) 1.5.dp else 1.dp,
+                if (positive) Sovereign else Contested.copy(alpha = 0.45f),
                 shape
             )
             .clickable(
                 role = Role.Button,
+                enabled = phase != CapturePhase.WORKING,
                 onClick = {
-                    // Blocked taps get feedback too: the press DID something, it
-                    // opened the explanation. Silence would read as a dead control.
+                    // Blocked/failed taps get feedback too: the press DID something,
+                    // it opened the explanation. Silence would read as a dead control.
                     haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                    if (ready) onReadyClick() else onBlockedClick()
+                    if (phase == CapturePhase.READY) onReadyClick() else onBlockedClick()
                 }
             )
             .padding(horizontal = 40.dp, vertical = 18.dp)
@@ -371,19 +386,32 @@ private fun CaptureAction(
         contentAlignment = Alignment.Center
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            // Same live-state mark as every other command in the product.
-            Box(
-                modifier = Modifier
-                    .size(11.dp)
-                    .rotate(90f)
-                    .clip(HexagonShape)
-                    .background(if (ready) Sovereign else Color.Transparent)
-                    .border(1.dp, if (ready) Sovereign else Contested.copy(alpha = 0.6f), HexagonShape)
-            )
+            when (phase) {
+                // In flight, the mark becomes a spinner: the button IS the progress
+                // indicator, so a claim mid-round-trip never taps into silence.
+                CapturePhase.WORKING -> CircularProgressIndicator(
+                    modifier = Modifier.size(13.dp),
+                    strokeWidth = 2.dp,
+                    color = SovereignGlow
+                )
+                // Filled on a live or landed claim; hollow on a blocked/failed one --
+                // the same filled/hollow live-state language as every other command.
+                else -> Box(
+                    modifier = Modifier
+                        .size(11.dp)
+                        .rotate(90f)
+                        .clip(HexagonShape)
+                        .background(if (positive) Sovereign else Color.Transparent)
+                        .border(1.dp, if (positive) Sovereign else Contested.copy(alpha = 0.6f), HexagonShape)
+                )
+            }
             Text(
                 text = label,
                 style = MaterialTheme.typography.labelLarge,
-                color = if (ready) SovereignGlow else TextMuted,
+                color = when (phase) {
+                    CapturePhase.FAILED -> Contested
+                    else -> if (positive) SovereignGlow else TextMuted
+                },
                 modifier = Modifier.padding(start = 12.dp)
             )
         }
