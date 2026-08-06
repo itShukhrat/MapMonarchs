@@ -24,7 +24,15 @@ sealed interface SignInState {
         val code: String = "",
         val error: AppError? = null,
         val verifying: Boolean = false,
-        val resent: Boolean = false
+        val resent: Boolean = false,
+        /**
+         * Seconds until RESEND is offered again. Counts down from a send/resend to
+         * 0. Non-zero means the cooldown is running, so the UI shows a calm timer
+         * instead of a live control -- and the ViewModel refuses a resend -- which
+         * keeps the player from walking into the backend's rate limit and getting
+         * an error where a countdown was the honest thing to show.
+         */
+        val resendInSeconds: Int = 0
     ) : SignInState
 
     /** Done. The shell navigates away. */

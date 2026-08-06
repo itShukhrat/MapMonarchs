@@ -198,6 +198,7 @@
     <string name="signin_no_code">NO CODE?</string>
     <string name="signin_no_code_body">Check spam. Delivery depends on the mail service this project is configured with, so it can take a moment.</string>
     <string name="signin_resend_code">RESEND CODE</string>
+    <string name="signin_resend_in">You can resend in %1$ds.</string>
     <string name="signin_different_address">USE A DIFFERENT ADDRESS</string>
 
     <!-- DIAGNOSTICS. The PRIMARY BLOCKER line and the per-probe failure notes

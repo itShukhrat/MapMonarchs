@@ -202,14 +202,26 @@ private fun CodeStep(
 
     SectionHeader(stringResource(R.string.signin_no_code))
     BodyNote(stringResource(R.string.signin_no_code_body))
-    TextCommand(
-        label = stringResource(R.string.signin_resend_code),
-        onClick = onResend,
-        modifier = Modifier
-            .padding(top = 4.dp)
-            .offset(x = (-10).dp)
-            .testTag(SignInTags.RESEND)
-    )
+    if (state.resendInSeconds > 0) {
+        // A calm timer, not a dead button: the control becomes a quiet countdown
+        // that says exactly when it returns, so the player waits instead of jabbing
+        // RESEND into the backend's rate limit.
+        BodyNote(
+            stringResource(R.string.signin_resend_in, state.resendInSeconds),
+            modifier = Modifier
+                .padding(top = 8.dp)
+                .testTag(SignInTags.RESEND)
+        )
+    } else {
+        TextCommand(
+            label = stringResource(R.string.signin_resend_code),
+            onClick = onResend,
+            modifier = Modifier
+                .padding(top = 4.dp)
+                .offset(x = (-10).dp)
+                .testTag(SignInTags.RESEND)
+        )
+    }
     TextCommand(
         label = stringResource(R.string.signin_different_address),
         onClick = onChangeEmail,

@@ -32,7 +32,9 @@ import com.mapmonarchs.feature.diagnostics.DiagnosticsState
 import com.mapmonarchs.location.LocationTracker
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
@@ -47,6 +49,13 @@ private const val TAG = "MapViewModel"
 
 /** Re-ask the boundary service only after the player has moved this far. */
 private const val CHECK_AFTER_METRES = 500.0
+
+/**
+ * How long RESEND stays closed after a code send. Long enough to cover mail
+ * latency and stay clear of the backend's rate limit, short enough not to trap a
+ * player whose code never arrived.
+ */
+private const val RESEND_COOLDOWN_SECONDS = 30
 
 class MapViewModel(
     private val locationTracker: LocationTracker,
@@ -78,6 +87,9 @@ class MapViewModel(
     /** Last fix that passed local plausibility -- the baseline for teleport checks. */
     private var lastAcceptedFix: LocationFix? = null
     private var trackingJob: Job? = null
+
+    /** Runs the sign-in RESEND countdown. Cancelled/replaced on each send. */
+    private var resendCooldownJob: Job? = null
 
     /** True only while MAP is the visible screen. Half of the tracking condition. */
     private var mapVisible: Boolean = false
@@ -230,22 +242,53 @@ class MapViewModel(
             // One place decides what a result means for delivery. This call site
             // cannot accidentally claim a 200 was an arrived email.
             recordDelivery(deliveryProofFor(result, current.email, System.currentTimeMillis()))
-            _signIn.value = when (result) {
-                is CodeRequest.Sent -> SignInState.EnteringCode(email = current.email.trim())
-                is CodeRequest.Failed -> current.copy(sending = false, error = result.error)
+            when (result) {
+                is CodeRequest.Sent -> {
+                    _signIn.value = SignInState.EnteringCode(email = current.email.trim())
+                    startResendCooldown()
+                }
+                is CodeRequest.Failed ->
+                    _signIn.value = current.copy(sending = false, error = result.error)
             }
         }
     }
 
     fun resendSignInCode() {
         val current = _signIn.value as? SignInState.EnteringCode ?: return
+        // Refuse while the cooldown is running -- the UI hides the control then, so
+        // this is belt-and-braces against a stray call, and it keeps us off the
+        // backend's rate limit.
+        if (current.resendInSeconds > 0) return
         viewModelScope.launch {
             val result = authRepository.requestEmailCode(current.email)
             recordDelivery(deliveryProofFor(result, current.email, System.currentTimeMillis()))
-            _signIn.value = when (result) {
-                is CodeRequest.Sent -> current.copy(resent = true, error = null)
-                is CodeRequest.Failed -> current.copy(error = result.error)
+            when (result) {
+                is CodeRequest.Sent -> {
+                    _signIn.value = current.copy(resent = true, error = null)
+                    startResendCooldown()
+                }
+                is CodeRequest.Failed -> _signIn.value = current.copy(error = result.error)
             }
+        }
+    }
+
+    /**
+     * Runs the resend countdown from [RESEND_COOLDOWN_SECONDS] to 0, ticking the
+     * EnteringCode state each second. Atomic [update] so a keystroke landing between
+     * ticks is not clobbered, and it stops the moment the flow leaves the code step
+     * (back to email, or signed in), so no stray timer outlives the screen.
+     */
+    private fun startResendCooldown(seconds: Int = RESEND_COOLDOWN_SECONDS) {
+        resendCooldownJob?.cancel()
+        resendCooldownJob = viewModelScope.launch {
+            var remaining = seconds
+            while (remaining > 0) {
+                if (_signIn.value !is SignInState.EnteringCode) return@launch
+                _signIn.update { s -> if (s is SignInState.EnteringCode) s.copy(resendInSeconds = remaining) else s }
+                delay(1_000)
+                remaining--
+            }
+            _signIn.update { s -> if (s is SignInState.EnteringCode) s.copy(resendInSeconds = 0) else s }
         }
     }
 
@@ -288,6 +331,7 @@ class MapViewModel(
 
     /** Back to the address step, e.g. wrong address entered. */
     fun restartSignIn() {
+        resendCooldownJob?.cancel()
         _signIn.value = SignInState.EnteringEmail()
     }
 

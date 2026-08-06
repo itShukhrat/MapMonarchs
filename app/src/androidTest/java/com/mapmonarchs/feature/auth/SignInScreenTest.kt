@@ -111,6 +111,15 @@ class SignInScreenTest {
     }
 
     @Test
+    fun duringCooldownResendBecomesACalmCountdownNotAButton() {
+        // The point of the cooldown: the player waits instead of jabbing RESEND
+        // into the backend's rate limit. The control becomes a timer naming when
+        // it returns, rather than a live button or a silent disabled one.
+        show(SignInState.EnteringCode(email = "player@example.com", resendInSeconds = 25))
+        rule.onNodeWithText("25", substring = true).assertIsDisplayed()
+    }
+
+    @Test
     fun aResendIsAcknowledgedSoTheActionDoesNotFeelIgnored() {
         show(SignInState.EnteringCode(email = "player@example.com", resent = true))
         rule.onNodeWithText("A new code has been sent.").assertIsDisplayed()
