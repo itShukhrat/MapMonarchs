@@ -127,7 +127,7 @@
     <string name="signin_what_for">UNI NIMA UCHUN ISHLATAMIZ</string>
     <string name="signin_what_for_body">Kirish uchun. Xolos. Manzilingiz boshqa oʻyinchilarga koʻrsatilmaydi, marketing uchun ishlatilmaydi va joylashuv tarixingizga bogʻlanmaydi.</string>
     <string name="signin_enter_code">KODNI KIRITING</string>
-    <string name="signin_sent_to">%1$s ga yuborildi. Amal qilish muddati tez orada tugaydi.</string>
+    <string name="signin_sent_to">%1$s ga 6 xonali kod yubordik. Amal qilish muddati tez orada tugaydi.</string>
     <string name="signin_code_placeholder">000000</string>
     <string name="signin_resend">QAYTA YUBORISH</string>
     <string name="signin_resent">Yangi kod yuborildi.</string>

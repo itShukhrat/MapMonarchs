@@ -3,23 +3,35 @@ package com.mapmonarchs.feature.auth
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import com.mapmonarchs.R
 import com.mapmonarchs.feature.common.localizedMessage
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.mapmonarchs.ui.components.ActionState
 import com.mapmonarchs.ui.components.BodyNote
@@ -151,12 +163,11 @@ private fun CodeStep(
     SectionHeader(stringResource(R.string.signin_enter_code))
     BodyNote(stringResource(R.string.signin_sent_to, state.email))
 
-    FieldBox(
+    CodeInput(
         value = state.code,
         onValueChange = onCodeChanged,
-        placeholder = stringResource(R.string.signin_code_placeholder),
-        keyboardType = KeyboardType.NumberPassword,
-        tag = SignInTags.CODE_FIELD
+        onDone = onVerifyCode,
+        modifier = Modifier.padding(top = 16.dp)
     )
 
     state.error?.let {
@@ -208,6 +219,85 @@ private fun CodeStep(
             .offset(x = (-10).dp)
             .testTag(SignInTags.CHANGE_EMAIL)
     )
+}
+
+private const val CODE_LEN = 6
+
+/**
+ * A six-cell code entry.
+ *
+ * One hidden BasicTextField backs six visible cells, so the platform's own paste,
+ * one-time-code autofill, and keyboard all work while the app draws its own
+ * hairline cells in the product's geometry. Typing auto-advances -- the lit cell
+ * is wherever the next digit lands -- and pasting a code fills every cell at once.
+ * Input is digit-only and capped at six; the keyboard's Done verifies when the
+ * six are complete, so a player never has to reach for the CONFIRM button.
+ */
+@Composable
+private fun CodeInput(
+    value: String,
+    onValueChange: (String) -> Unit,
+    onDone: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val focus = remember { FocusRequester() }
+    BasicTextField(
+        value = value,
+        onValueChange = { raw -> onValueChange(raw.filter(Char::isDigit).take(CODE_LEN)) },
+        singleLine = true,
+        keyboardOptions = KeyboardOptions(
+            keyboardType = KeyboardType.NumberPassword,
+            imeAction = ImeAction.Done
+        ),
+        keyboardActions = KeyboardActions(onDone = { if (value.length == CODE_LEN) onDone() }),
+        // The caret is the lit cell, not a blinking bar drawn across the row.
+        cursorBrush = SolidColor(Color.Transparent),
+        textStyle = MaterialTheme.typography.titleLarge.copy(color = Color.Transparent),
+        modifier = modifier
+            .fillMaxWidth()
+            .focusRequester(focus)
+            .testTag(SignInTags.CODE_FIELD),
+        decorationBox = {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                repeat(CODE_LEN) { i ->
+                    CodeCell(
+                        char = value.getOrNull(i)?.toString() ?: "",
+                        active = i == value.length,
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+            }
+        }
+    )
+    // Open the keyboard straight onto the code, so a player pasting from their
+    // mail app does not have to tap the field first.
+    LaunchedEffect(Unit) { focus.requestFocus() }
+}
+
+@Composable
+private fun CodeCell(char: String, active: Boolean, modifier: Modifier = Modifier) {
+    Box(
+        modifier = modifier
+            .height(56.dp)
+            .clip(RoundedCornerShape(10.dp))
+            .background(Slate)
+            .border(
+                width = if (active) 1.5.dp else 1.dp,
+                color = if (active) Sovereign else SlateEdge,
+                shape = RoundedCornerShape(10.dp)
+            ),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = char,
+            style = MaterialTheme.typography.titleLarge,
+            color = TextPrimary,
+            textAlign = TextAlign.Center
+        )
+    }
 }
 
 /**

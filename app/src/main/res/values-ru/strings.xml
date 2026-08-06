@@ -126,7 +126,7 @@
     <string name="signin_what_for">ДЛЯ ЧЕГО МЫ ЕГО ИСПОЛЬЗУЕМ</string>
     <string name="signin_what_for_body">Для входа. И только. Ваш адрес не показывается другим игрокам, не используется для маркетинга и не связывается с историей ваших перемещений.</string>
     <string name="signin_enter_code">ВВЕДИТЕ КОД</string>
-    <string name="signin_sent_to">Отправлено на %1$s. Срок действия скоро истечёт.</string>
+    <string name="signin_sent_to">Мы отправили 6-значный код на %1$s. Срок действия скоро истечёт.</string>
     <string name="signin_code_placeholder">000000</string>
     <string name="signin_resend">ОТПРАВИТЬ СНОВА</string>
     <string name="signin_resent">Новый код отправлен.</string>

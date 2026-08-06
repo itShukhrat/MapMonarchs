@@ -189,7 +189,7 @@
     <string name="signin_what_for">WHAT WE USE IT FOR</string>
     <string name="signin_what_for_body">Signing in. That is all. Your address is not shown to other players, not used for marketing, and not linked to your location history.</string>
     <string name="signin_enter_code">ENTER THE CODE</string>
-    <string name="signin_sent_to">Sent to %1$s. It expires shortly.</string>
+    <string name="signin_sent_to">We emailed a 6-digit code to %1$s. It expires shortly.</string>
     <string name="signin_code_placeholder">000000</string>
     <string name="signin_resend">RESEND</string>
     <string name="signin_resent">A new code has been sent.</string>

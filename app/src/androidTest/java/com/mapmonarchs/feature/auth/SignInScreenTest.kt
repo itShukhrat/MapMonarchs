@@ -106,7 +106,8 @@ class SignInScreenTest {
     fun theCodeStepNamesTheAddressItWasSentTo() {
         show(SignInState.EnteringCode(email = "player@example.com"))
         // Without this a typo means waiting forever for mail sent somewhere else.
-        rule.onNodeWithText("Sent to player@example.com. It expires shortly.").assertIsDisplayed()
+        // Substring so the surrounding copy can change without breaking the intent.
+        rule.onNodeWithText("player@example.com", substring = true).assertIsDisplayed()
     }
 
     @Test
