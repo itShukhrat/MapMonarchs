@@ -71,7 +71,16 @@ import com.mapbox.maps.extension.compose.style.MapStyle
  * it brings its own sources and appends to the top of whatever style loads -- so
  * nothing here depends on the custom style existing.
  */
-private const val MAP_STYLE = "mapbox://styles/shukhra-t/cmryd7j1700nf01qt76jvf82q"
+// The style is BUNDLED as an app asset rather than fetched from the Studio URL,
+// so the tactical tuning lives in the repo and needs no Mapbox secret token to
+// change. mm-tactical.json is the Studio style (dark-v11 retuned to the palette)
+// pushed further toward a command board: roads receded to faint tactical lines,
+// street-name and district labels dropped (the road-map tell), the base deepened
+// toward Void. Cities/country/state stay, dimmed, so it still reads as
+// Uzbekistan. It references mapbox:// sources/sprites/glyphs, resolved by the
+// public token set in MainActivity. Territory, fog, border and the puck are still
+// added on top in MapEffects, so the on-device H3 territory path is untouched.
+private const val MAP_STYLE = "asset://mm-tactical.json"
 
 /** Layer and source ids, namespaced so a future style cannot collide with them. */
 private const val BOUNDARY_SOURCE = "mm-country-boundaries"
