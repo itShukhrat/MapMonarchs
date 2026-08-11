@@ -95,8 +95,8 @@ android {
         unitTests {
             // android.util.Log and friends are stubs in host unit tests. Return
             // defaults (Log.w -> 0) instead of throwing "not mocked", so pure
-            // logic that happens to log -- e.g. H3Boundary's degrade path -- can
-            // be verified off-device without pulling in a logging shim.
+            // logic that happens to log can be verified off-device without
+            // pulling in a logging shim.
             isReturnDefaultValues = true
         }
     }

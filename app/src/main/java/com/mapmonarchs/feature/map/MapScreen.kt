@@ -30,7 +30,6 @@ import com.mapmonarchs.ui.theme.Fog
 import com.mapmonarchs.ui.theme.Sovereign
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
-import com.mapbox.geojson.Feature
 import com.mapbox.geojson.FeatureCollection
 import com.mapbox.geojson.Point
 import com.mapbox.maps.CameraOptions
@@ -495,25 +494,6 @@ fun MapScreen(
     }
 }
 
-/**
- * Splits the server's territory FeatureCollection into (mine, others) by the
- * `mine` flag the SERVER stamped on each feature. The client only reads that flag
- * -- it does not decide ownership. Null/blank/malformed GeoJSON yields two empty
- * collections, so a failed load clears territory rather than crashing. SDK types
- * appear only here, at the render boundary.
- */
-private fun splitTerritory(geojson: String?): Pair<FeatureCollection, FeatureCollection> {
-    val empty = FeatureCollection.fromFeatures(emptyList<Feature>())
-    if (geojson.isNullOrBlank()) return empty to empty
-    val fc = runCatching { FeatureCollection.fromJson(geojson) }.getOrNull()
-        ?: return empty to empty
-    val mine = ArrayList<Feature>()
-    val others = ArrayList<Feature>()
-    fc.features()?.forEach { f ->
-        if (f.getBooleanProperty("mine") == true) mine.add(f) else others.add(f)
-    }
-    return FeatureCollection.fromFeatures(mine) to FeatureCollection.fromFeatures(others)
-}
 
 /**
  * Adds a territory source with its fill + outline layers the first time, then
