@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Privacy Policy — MapMonarchs</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="How MapMonarchs handles your email, location, and gameplay data.">
+<link rel="stylesheet" href="/assets/styles.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="brand" href="/"><svg viewBox="0 0 32 32" fill="none" aria-hidden="true"><path d="M16 2 27 8.5v15L16 30 5 23.5v-15L16 2Z" stroke="currentColor" stroke-width="1.5"/><path d="M16 9 22 12.5v7L16 23l-6-3.5v-7L16 9Z" fill="currentColor" opacity=".18"/></svg>MapMonarchs</a>
+  <nav class="anchors">
+    <a href="/privacy" aria-current="page">Privacy</a><a href="/terms">Terms</a><a href="/safety">Safety</a>
+    <a href="/account-deletion">Delete account</a><a href="/support">Support</a><a href="/about">About</a>
+  </nav>
+</div></header>
+
+<div class="hero"><div class="wrap">
+  <span class="eyebrow">Trust Center</span>
+  <h1>Privacy Policy</h1>
+  <p class="lede">What MapMonarchs collects, why, who processes it, how long it stays, and how to remove it. This reflects the app as built — where a library has a capability we do not use, it is stated as off.</p>
+  <div class="meta"><span>Applies to&nbsp; com.mapmonarchs</span><span>Version&nbsp; 1.0</span><span>Updated&nbsp; <span class="human">[DATE]</span></span></div>
+</div></div>
+
+<main class="wrap">
+  <section>
+    <h2>Who we are</h2>
+    <p>MapMonarchs is operated by <span class="human">[OPERATOR LEGAL ENTITY]</span> (&ldquo;we&rdquo;). You sign in with an emailed code — there is no password. While the map is open, the app reads your precise location so our servers can decide whether you may claim the cell you are standing in. Ownership is decided server-side, never by your device.</p>
+  </section>
+
+  <section>
+    <h2>What we handle</h2>
+    <div class="tablewrap"><table>
+      <thead><tr><th>Data</th><th>Collected</th><th>Why</th><th>Retention</th></tr></thead>
+      <tbody>
+        <tr><td class="k">Email address</td><td><span class="pill yes">Yes</span></td><td>To send your one-time sign-in code and identify your account. Never shown to other players, never used for marketing.</td><td>Until account deletion</td></tr>
+        <tr><td class="k">Account id</td><td><span class="pill yes">Yes</span></td><td>Your identity in the game. Your callsign and map colour are computed from it and are not stored separately.</td><td>Until account deletion</td></tr>
+        <tr><td class="k">Precise location</td><td><span class="pill yes">Yes</span></td><td>Read while the map is open to place you and check claim eligibility. Each attempt — coordinates, accuracy, speed, a mock-location flag, and whether it was accepted — is logged to detect cheating.</td><td><strong>30 days</strong>, then auto-deleted</td></tr>
+        <tr><td class="k">Territory &amp; gameplay</td><td><span class="pill yes">Yes</span></td><td>Cells you hold, capture/reinforcement times, records and badges — the state of the game.</td><td>See <a href="/account-deletion">deletion</a></td></tr>
+        <tr><td class="k">Crash diagnostics</td><td><span class="pill off">Opt-in</span></td><td>Firebase Crashlytics, <strong>off by default</strong>; sends reports only after you enable it in Settings.</td><td>Per Google, if enabled</td></tr>
+        <tr><td class="k">Analytics</td><td><span class="pill no">Off</span></td><td>Firebase Analytics is present but collection is disabled in the app.</td><td>—</td></tr>
+        <tr><td class="k">Advertising ID</td><td><span class="pill no">No</span></td><td>Not used. No ads. The advertising-id permission is removed from the app.</td><td>—</td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <section>
+    <h2>Who processes your data</h2>
+    <ul>
+      <li><strong>Supabase</strong> — authentication, database, realtime, and server functions. Holds your email, account, location log, and game state. Acts as our processor.</li>
+      <li><strong>Resend</strong> — delivers your sign-in code email; receives your email address for that purpose.</li>
+      <li><strong>Mapbox</strong> — renders the map; receives the map view (derived from your location) to fetch the correct tiles.</li>
+      <li><strong>Firebase Crashlytics</strong> — crash diagnostics, only if you opt in.</li>
+    </ul>
+    <p class="muted">We do not sell your data and do not use it for advertising. These providers process data on our behalf to run the game; they are not given your data for their own purposes.</p>
+  </section>
+
+  <section>
+    <h2>Location</h2>
+    <p>MapMonarchs uses <strong>precise, foreground location</strong> — only while the app is open and the map is on screen. There is <strong>no background tracking</strong>, no location service that runs when the app is closed, and no record of where you have been beyond the 30-day anti-cheat log above. Claims are only allowed on a fix accurate to within 30 metres. Other players can see the ground you hold — never your position.</p>
+  </section>
+
+  <section>
+    <h2>Deleting your data</h2>
+    <p>You can delete your account and personal data at any time, in the app or by request — see <a href="/account-deletion">Delete your account</a>.</p>
+    <div class="callout vacate">
+      <span class="tag">One accurate detail</span>
+      Territory is shared game-world state. When you delete your account, the ground you held is <strong>not erased</strong>; its owner is set to none, so the cells become neutral and claimable by others. Nothing about the vacated ground identifies you.
+    </div>
+  </section>
+
+  <section>
+    <h2>Security &amp; your rights</h2>
+    <p>Traffic is encrypted in transit (HTTPS). Game data is governed server-side: your device cannot assert ownership, entitlement, rank, or another player&rsquo;s identity. To ask about your data or exercise your rights, contact <span class="human">[CONTACT EMAIL]</span>.</p>
+  </section>
+</main>
+
+<footer><div class="wrap">
+  <span>MapMonarchs — Ground you walk becomes ground you hold.</span>
+  <a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/account-deletion">Delete account</a><a href="/support">Support</a>
+  <span class="sep">com.mapmonarchs</span>
+</div></footer>
+</body>
+</html>
