@@ -9,6 +9,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -37,6 +41,8 @@ object IdentityTags {
     const val RETRY = "identity_retry"
     const val SIGN_IN = "identity_sign_in"
     const val SIGN_OUT = "identity_sign_out"
+    const val DELETE = "identity_delete"
+    const val DELETE_CONFIRM = "identity_delete_confirm"
 }
 
 /**
@@ -55,6 +61,7 @@ fun IdentityScreen(
     onRetry: () -> Unit,
     onSignIn: () -> Unit,
     onSignOut: () -> Unit,
+    onDeleteAccount: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     CommandScreen(
@@ -127,6 +134,41 @@ fun IdentityScreen(
                         .padding(top = 16.dp)
                         .testTag(IdentityTags.SIGN_OUT)
                 )
+
+                // Account deletion. A Play requirement for any app with accounts,
+                // and irreversible, so it is TWO steps: the first tap only reveals
+                // exactly what disappears and the confirm. State is local -- when
+                // deletion succeeds the identity flips to SignedOut and this whole
+                // branch is gone, so the confirm can never outlive the account.
+                SectionHeader(stringResource(R.string.identity_delete_header))
+                var confirmingDelete by remember { mutableStateOf(false) }
+                if (!confirmingDelete) {
+                    BodyNote(stringResource(R.string.identity_delete_body))
+                    CommandAction(
+                        label = stringResource(R.string.identity_delete),
+                        onClick = { confirmingDelete = true },
+                        emphasis = ActionEmphasis.SECONDARY,
+                        modifier = Modifier
+                            .padding(top = 12.dp)
+                            .testTag(IdentityTags.DELETE)
+                    )
+                } else {
+                    BodyNote(stringResource(R.string.identity_delete_confirm_body))
+                    CommandAction(
+                        label = stringResource(R.string.identity_delete_confirm),
+                        onClick = onDeleteAccount,
+                        emphasis = ActionEmphasis.SECONDARY,
+                        modifier = Modifier
+                            .padding(top = 12.dp)
+                            .testTag(IdentityTags.DELETE_CONFIRM)
+                    )
+                    CommandAction(
+                        label = stringResource(R.string.identity_delete_cancel),
+                        onClick = { confirmingDelete = false },
+                        emphasis = ActionEmphasis.SECONDARY,
+                        modifier = Modifier.padding(top = 8.dp)
+                    )
+                }
             }
             is Identity.Unavailable -> {
                 SectionHeader(stringResource(R.string.identity_why_none))

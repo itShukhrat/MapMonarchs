@@ -315,7 +315,8 @@ fun AppShell(modifier: Modifier = Modifier) {
                 onBack = { navigator.back() },
                 onRetry = { viewModel.resolveIdentity() },
                 onSignIn = { navigator.navigateTo(Route.SignIn) },
-                onSignOut = { viewModel.signOut() }
+                onSignOut = { viewModel.signOut() },
+                onDeleteAccount = { viewModel.deleteAccount() }
             )
 
             route == Route.SignIn -> {

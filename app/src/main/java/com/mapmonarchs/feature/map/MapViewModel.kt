@@ -359,6 +359,25 @@ class MapViewModel(
         }
     }
 
+    /**
+     * Permanently deletes the account. On success the server has erased the
+     * player's personal data and vacated their territory, so we drop to
+     * SignedOut and re-read the map (their old ground is now unowned). On failure
+     * we keep the player signed in -- a retryable state beats a stranded one.
+     */
+    fun deleteAccount() {
+        viewModelScope.launch {
+            when (val error = authRepository.deleteAccount()) {
+                null -> {
+                    Log.i(TAG, "account deleted; returning to signed-out")
+                    _uiState.value = _uiState.value.copy(identity = Identity.SignedOut)
+                    loadTerritory()
+                }
+                else -> Log.w(TAG, "account deletion failed: ${error.technical}")
+            }
+        }
+    }
+
     /** Retry both axes -- the failure strip is a single control. */
     fun onRetry() {
         if (_uiState.value.identity !is Identity.SignedIn) resolveIdentity()

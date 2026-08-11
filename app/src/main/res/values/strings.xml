@@ -141,6 +141,12 @@
     <string name="identity_derived">HOW THIS IS DERIVED</string>
     <string name="identity_derived_body">Your callsign and colour are computed from your account id, so they are the same on every device and after every reinstall. They are not stored as a profile and cannot be changed — which also means nobody can impersonate your colour on the map.</string>
     <string name="identity_sign_out">SIGN OUT</string>
+    <string name="identity_delete_header">DELETE ACCOUNT</string>
+    <string name="identity_delete_body">Permanently deletes your account, your sign-in email, and your personal data. Ground you hold is released back to the map, not tied to anyone.</string>
+    <string name="identity_delete">DELETE ACCOUNT</string>
+    <string name="identity_delete_confirm_body">This cannot be undone. Your email, records, badges, and location history are erased; territory you hold is released. Continue?</string>
+    <string name="identity_delete_confirm">CONFIRM DELETE</string>
+    <string name="identity_delete_cancel">CANCEL</string>
     <string name="identity_why_none">WHY YOU HAVE NO IDENTITY</string>
     <string name="identity_no_session_effect">Without a session the server cannot attribute territory to you, so claiming is disabled. The map stays readable in the meantime.</string>
     <string name="identity_retry">RETRY SIGN-IN</string>

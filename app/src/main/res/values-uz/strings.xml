@@ -89,6 +89,12 @@
     <string name="identity_derived">BU QANDAY OLINADI</string>
     <string name="identity_derived_body">Chaqiruv belgingiz va rangingiz akkaunt identifikatoringizdan hisoblanadi, shuning uchun ular har bir qurilmada va har bir qayta oʻrnatishdan keyin bir xil boʻladi. Ular profil sifatida saqlanmaydi va oʻzgartirib boʻlmaydi — bu esa hech kim xaritada sizning rangingizni oʻzlashtira olmasligini bildiradi.</string>
     <string name="identity_sign_out">CHIQISH</string>
+    <string name="identity_delete_header">HISOBNI OʻCHIRISH</string>
+    <string name="identity_delete_body">Hisobingiz, kirish emailingiz va shaxsiy maʼlumotlaringiz butunlay oʻchiriladi. Egallagan hududingiz xaritaga qaytariladi va hech kimga bogʻlanmaydi.</string>
+    <string name="identity_delete">HISOBNI OʻCHIRISH</string>
+    <string name="identity_delete_confirm_body">Buni ortga qaytarib boʻlmaydi. Emailingiz, yozuvlaringiz, nishonlaringiz va joylashuv tarixingiz oʻchiriladi; hududingiz boʻshatiladi. Davom etasizmi?</string>
+    <string name="identity_delete_confirm">OʻCHIRISHNI TASDIQLASH</string>
+    <string name="identity_delete_cancel">BEKOR QILISH</string>
     <string name="identity_why_none">NIMA UCHUN SIZDA SHAXS YOʻQ</string>
     <string name="identity_no_session_effect">Sessiyasiz server sizga hududni biriktira olmaydi, shuning uchun egallash oʻchirilgan. Shu vaqt ichida xarita oʻqilishi mumkin boʻlib qoladi.</string>
     <string name="identity_retry">KIRISHNI QAYTA URINISH</string>

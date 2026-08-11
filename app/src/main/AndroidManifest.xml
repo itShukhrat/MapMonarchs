@@ -7,6 +7,14 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
 
+    <!-- Firebase's measurement SDK declares the advertising-id permission
+         transitively. MapMonarchs does not use the advertising id: analytics
+         and adid collection are disabled above, and there is no ads SDK. Remove
+         the permission so the manifest matches the truthful Play "Advertising ID:
+         No" declaration and the app is not flagged for a capability it never uses. -->
+    <uses-permission android:name="com.google.android.gms.permission.AD_ID"
+        tools:node="remove" />
+
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"

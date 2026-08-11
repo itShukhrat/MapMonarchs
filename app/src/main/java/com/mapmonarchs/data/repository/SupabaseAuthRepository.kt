@@ -14,6 +14,11 @@ import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.auth.OtpType
 import io.github.jan.supabase.auth.auth
 import io.github.jan.supabase.auth.providers.builtin.OTP
+import io.github.jan.supabase.functions.functions
+import io.ktor.client.call.body
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.TimeoutCancellationException
@@ -161,6 +166,36 @@ class SupabaseAuthRepository(
         } catch (t: Throwable) {
             val error = t.toAppError()
             Log.w(TAG, "signOut failed: ${error.technical}", t)
+            error
+        }
+    }
+
+    override suspend fun deleteAccount(): AppError? = withContext(Dispatchers.IO) {
+        try {
+            // The Edge Function deletes the account behind the caller's verified
+            // JWT (attached by the Functions plugin). The body is empty on
+            // purpose: the id to delete comes from the session, never the client.
+            val response = client.functions
+                .invoke(function = "delete_account", body = buildJsonObject { })
+                .body<JsonObject>()
+            val ok = response["ok"]?.jsonPrimitive?.content?.toBooleanStrictOrNull() ?: false
+            if (!ok) {
+                // A refusal is RETURNED, not swallowed: the caller keeps the player
+                // signed in so a transient failure is retryable rather than leaving
+                // them stranded between two states.
+                val reason = response["reason"]?.jsonPrimitive?.content.orEmpty()
+                Log.w(TAG, "deleteAccount refused: $reason")
+                return@withContext AppError.Unexpected("delete_account refused: $reason")
+            }
+            // The server account is gone; drop the local session so the app lands
+            // in a clean signed-out state rather than holding a token for a user
+            // that no longer exists. Best-effort: the deletion already succeeded.
+            runCatching { client.auth.signOut() }
+            Log.i(TAG, "account deleted")
+            null
+        } catch (t: Throwable) {
+            val error = t.toAppError()
+            Log.w(TAG, "deleteAccount failed: ${error.technical}", t)
             error
         }
     }

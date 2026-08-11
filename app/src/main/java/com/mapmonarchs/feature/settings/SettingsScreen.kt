@@ -35,9 +35,10 @@ object SettingsTags {
  * their location at all, and how hard we hit their battery doing it.
  *
  * WHY NOT GENERIC: no theme switch (the product is committed to dark), no
- * notification toggles (there are no notifications), no account section (there is
- * no account to manage). Every row here changes real behaviour. A settings screen
- * padded with inert switches is the clearest tell of a template app.
+ * notification toggles (there are no notifications), no account section (account
+ * controls -- sign out and delete account -- live on IDENTITY, where the player
+ * expects them). Every row here changes real behaviour. A settings screen padded
+ * with inert switches is the clearest tell of a template app.
  */
 @Composable
 fun SettingsScreen(

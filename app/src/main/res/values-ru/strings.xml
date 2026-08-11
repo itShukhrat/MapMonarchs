@@ -88,6 +88,12 @@
     <string name="identity_derived">КАК ЭТО ВЫВОДИТСЯ</string>
     <string name="identity_derived_body">Ваш позывной и цвет вычисляются из идентификатора вашего аккаунта, поэтому они одинаковы на каждом устройстве и после каждой переустановки. Они не хранятся как профиль и не могут быть изменены — а значит, никто не сможет присвоить ваш цвет на карте.</string>
     <string name="identity_sign_out">ВЫЙТИ ИЗ АККАУНТА</string>
+    <string name="identity_delete_header">УДАЛИТЬ АККАУНТ</string>
+    <string name="identity_delete_body">Полностью удаляет ваш аккаунт, адрес для входа и личные данные. Удерживаемая территория освобождается и больше ни с кем не связана.</string>
+    <string name="identity_delete">УДАЛИТЬ АККАУНТ</string>
+    <string name="identity_delete_confirm_body">Это необратимо. Ваш email, записи, значки и история местоположений будут удалены; территория освобождается. Продолжить?</string>
+    <string name="identity_delete_confirm">ПОДТВЕРДИТЬ УДАЛЕНИЕ</string>
+    <string name="identity_delete_cancel">ОТМЕНА</string>
     <string name="identity_why_none">ПОЧЕМУ У ВАС НЕТ ЛИЧНОСТИ</string>
     <string name="identity_no_session_effect">Без сессии сервер не может закрепить за вами территорию, поэтому захват отключён. Карта тем временем остаётся читаемой.</string>
     <string name="identity_retry">ПОВТОРИТЬ ВХОД</string>

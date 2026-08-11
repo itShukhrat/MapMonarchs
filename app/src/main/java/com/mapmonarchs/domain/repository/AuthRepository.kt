@@ -46,6 +46,20 @@ interface AuthRepository {
     suspend fun signOut(): AppError?
 
     /**
+     * Permanently deletes the signed-in player's account and personal data.
+     *
+     * The account to delete is taken from the server-verified session, never a
+     * client-supplied id. Personal rows (email, records, badges, entitlements,
+     * and the precise-location trail) are erased; territory the player held is
+     * VACATED -- kept on the shared board, no longer tied to anyone -- rather than
+     * destroyed, so deleting an account cannot rewrite other players' map.
+     *
+     * Returns null on success (the local session is cleared too); an [AppError]
+     * if the server refused, so the caller can leave the player signed in to retry.
+     */
+    suspend fun deleteAccount(): AppError?
+
+    /**
      * Asks the backend which sign-in methods it actually permits.
      *
      * Exists so diagnostics can report observed configuration instead of a
