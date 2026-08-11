@@ -26,10 +26,9 @@ enum class TrackingMode(
          * Resolves a stored value explicitly. No runCatching, nothing swallowed.
          *
          * Absent means "never chosen" and unknown means "written by a different
-         * app version" -- both are legitimately the default, unlike a malformed
-         * SERVER value, which is corruption and must throw (see
-         * parseServerTimestamp). A default is only acceptable when absence is
-         * itself a valid state.
+         * app version" -- both are legitimately the default. A default is only
+         * acceptable when absence is itself a valid state, unlike corrupt server
+         * data, which must surface rather than silently become a plausible value.
          */
         fun resolve(stored: String?): TrackingMode =
             entries.firstOrNull { it.name == stored } ?: BALANCED

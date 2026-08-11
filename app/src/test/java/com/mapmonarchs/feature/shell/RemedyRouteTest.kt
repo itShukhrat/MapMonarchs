@@ -1,5 +1,6 @@
 package com.mapmonarchs.feature.shell
 
+import com.mapmonarchs.domain.model.TerritoryGeometry
 import com.mapmonarchs.domain.model.AppError
 import com.mapmonarchs.domain.model.Blocker
 import com.mapmonarchs.domain.model.Identity
@@ -29,7 +30,7 @@ class RemedyRouteTest {
     private fun state(
         permission: Boolean = true,
         identity: Identity = Identity.from("user-a"),
-        territory: TerritoryLoad = TerritoryLoad.Loaded(emptyList()),
+        territory: TerritoryLoad = TerritoryLoad.Loaded(TerritoryGeometry.EMPTY),
         capture: CaptureState = CaptureState.Ready,
         previewMode: Boolean = false
     ) = MapUiState(

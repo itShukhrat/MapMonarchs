@@ -12,7 +12,6 @@ mapbox = "11.26.0"
 supabase = "3.6.0"
 ktor = "3.4.1"
 playServicesLocation = "21.3.0"
-h3 = "4.1.1"
 googleServices = "4.4.3"
 firebaseCrashlyticsPlugin = "3.0.3"
 firebaseBom = "34.16.0"
@@ -43,7 +42,6 @@ supabase-realtime = { group = "io.github.jan-tennert.supabase", name = "realtime
 supabase-functions = { group = "io.github.jan-tennert.supabase", name = "functions-kt" }
 ktor-client-okhttp = { group = "io.ktor", name = "ktor-client-okhttp", version.ref = "ktor" }
 play-services-location = { group = "com.google.android.gms", name = "play-services-location", version.ref = "playServicesLocation" }
-h3 = { group = "com.uber", name = "h3", version.ref = "h3" }
 firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebaseBom" }
 firebase-analytics = { group = "com.google.firebase", name = "firebase-analytics" }
 firebase-crashlytics = { group = "com.google.firebase", name = "firebase-crashlytics" }

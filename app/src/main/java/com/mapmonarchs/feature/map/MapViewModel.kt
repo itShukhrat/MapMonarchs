@@ -208,7 +208,7 @@ class MapViewModel(
     fun loadTerritory() {
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(territory = TerritoryLoad.Loading)
-            when (val result = repository.territorySnapshot()) {
+            when (val result = repository.territoryGeometry()) {
                 is Outcome.Success ->
                     _uiState.value = _uiState.value.copy(territory = TerritoryLoad.Loaded(result.value))
                 is Outcome.Failure ->
@@ -322,6 +322,9 @@ class MapViewModel(
                     )
                     _signIn.value = SignInState.Complete
                     Log.i(TAG, "signed in as ${result.identity.callsign}")
+                    // Reload territory so the server re-tags `mine` for this user
+                    // (it was fetched signed-out, i.e. all not-mine).
+                    loadTerritory()
                 }
                 is CodeVerification.Failed ->
                     _signIn.value = current.copy(verifying = false, error = result.error)
@@ -343,6 +346,8 @@ class MapViewModel(
             _uiState.value = _uiState.value.copy(
                 identity = if (error != null) Identity.Unavailable(error) else Identity.SignedOut
             )
+            // Re-tag territory as not-mine now that there is no session.
+            loadTerritory()
         }
     }
 

@@ -3,17 +3,14 @@ package com.mapmonarchs.data.repository
 import io.ktor.client.call.body
 
 import android.util.Log
-import com.mapmonarchs.data.dto.HexOwnershipDto
-import com.mapmonarchs.data.dto.toDomain
 import com.mapmonarchs.data.remote.toAppError
 import com.mapmonarchs.domain.model.CaptureOutcome
-import com.mapmonarchs.domain.model.HexOwnership
 import com.mapmonarchs.domain.model.LocationFix
+import com.mapmonarchs.domain.model.TerritoryGeometry
 import com.mapmonarchs.domain.repository.Outcome
 import com.mapmonarchs.domain.repository.TerritoryRepository
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.functions.functions
-import io.github.jan.supabase.postgrest.postgrest
 import io.github.jan.supabase.realtime.PostgresAction
 import io.github.jan.supabase.realtime.channel
 import io.github.jan.supabase.realtime.postgresChangeFlow
@@ -24,6 +21,7 @@ import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.JsonNull
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.put
 
@@ -33,19 +31,23 @@ class SupabaseTerritoryRepository(
     private val client: SupabaseClient
 ) : TerritoryRepository {
 
-    override suspend fun territorySnapshot(limit: Int): Outcome<List<HexOwnership>> =
+    override suspend fun territoryGeometry(): Outcome<TerritoryGeometry> =
         withContext(Dispatchers.IO) {
             try {
-                val hexes = client.postgrest["hex_ownership"]
-                    .select { limit(limit.toLong()) }
-                    .decodeList<HexOwnershipDto>()
-                    .map { it.toDomain() }
-                Outcome.Success(hexes)
+                // The Edge Function computes the boundaries (h3-js) and tags `mine`
+                // for this caller. The Functions plugin attaches the session JWT
+                // when signed in, so `mine` is personalised; signed out, all false.
+                // Body is unused by the function; sent for a consistent POST.
+                val fc = client.functions
+                    .invoke(function = "territory_geometry", body = buildJsonObject { })
+                    .body<JsonObject>()
+                val count = fc["features"]?.jsonArray?.size ?: 0
+                Outcome.Success(TerritoryGeometry(geojson = fc.toString(), cellCount = count))
             } catch (t: Throwable) {
                 val error = t.toAppError()
                 // Logged with the cause, then RETURNED. This is not a silent
                 // catch: the failure reaches the UI and is rendered.
-                Log.w(TAG, "territorySnapshot failed: ${error.technical}", t)
+                Log.w(TAG, "territoryGeometry failed: ${error.technical}", t)
                 Outcome.Failure(error)
             }
         }

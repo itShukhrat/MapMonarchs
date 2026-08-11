@@ -2,8 +2,8 @@ package com.mapmonarchs.domain.repository
 
 import com.mapmonarchs.domain.model.AppError
 import com.mapmonarchs.domain.model.CaptureOutcome
-import com.mapmonarchs.domain.model.HexOwnership
 import com.mapmonarchs.domain.model.LocationFix
+import com.mapmonarchs.domain.model.TerritoryGeometry
 
 /** Either a value or an explained failure. There is no third, silent option. */
 sealed interface Outcome<out T> {
@@ -21,16 +21,17 @@ sealed interface Outcome<out T> {
 interface TerritoryRepository {
 
     /**
-     * Current territory snapshot, bounded.
+     * Current territory as ready-to-draw GeoJSON, computed by the server.
      *
-     * Deliberately not viewport-scoped yet: scoping means polyfilling the visible
-     * region into H3 cells and querying those. h3-java is now on the client (for
-     * drawing ownership boundaries), so this is no longer blocked on a library --
-     * it is simply future work. A bounded snapshot stays honest for v0 data
-     * volumes and -- unlike the previous ownershipFor(indexes) -- it can actually
-     * be called, so the read path and its failure modes are exercised on launch.
+     * The territory_geometry Edge Function reads the authoritative hex_ownership,
+     * converts each cell to a boundary polygon with h3-js, and tags each `mine`
+     * for the caller. The client renders the FeatureCollection and computes no
+     * geometry -- which is what allowed the client-side H3 native library (and its
+     * non-16 KB-aligned `.so`) to be removed entirely. Bounded server-side; a
+     * viewport-scoped query is the next step once territory volume warrants it.
+     * Empty territory is an empty collection, never an error.
      */
-    suspend fun territorySnapshot(limit: Int = 200): Outcome<List<HexOwnership>>
+    suspend fun territoryGeometry(): Outcome<TerritoryGeometry>
 
     /**
      * Submits movement evidence. The SERVER derives the hex, runs the anti-cheat
@@ -48,7 +49,7 @@ interface TerritoryRepository {
      *
      * Suspends until the collector is cancelled, then unsubscribes cleanly. The
      * change PAYLOAD is deliberately ignored: rather than trust an incremental row
-     * off the wire, the caller reloads the authoritative [territorySnapshot],
+     * off the wire, the caller reloads the authoritative [territoryGeometry],
      * which keeps the client a reader of server truth even for live updates. Backed
      * by the Realtime publication on hex_ownership (added in the foundation
      * migration); a dropped socket ends the flow rather than silently starving it.

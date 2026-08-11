@@ -1,5 +1,6 @@
 package com.mapmonarchs.feature.map
 
+import com.mapmonarchs.domain.model.TerritoryGeometry
 import com.mapmonarchs.domain.model.AppError
 import com.mapmonarchs.domain.model.Identity
 import com.mapmonarchs.domain.validation.RejectionReason
@@ -25,7 +26,7 @@ class PreviewIsNotLiveTest {
         identity: Identity = Identity.from(realUser),
         capture: CaptureState = CaptureState.Ready,
         preview: Boolean = false,
-        territory: TerritoryLoad = TerritoryLoad.Loaded(emptyList())
+        territory: TerritoryLoad = TerritoryLoad.Loaded(TerritoryGeometry.EMPTY)
     ) = MapUiState(
         identity = identity,
         territory = territory,

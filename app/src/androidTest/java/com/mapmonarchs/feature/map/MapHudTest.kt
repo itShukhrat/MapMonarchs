@@ -7,6 +7,7 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.mapmonarchs.domain.model.TerritoryGeometry
 import com.mapmonarchs.domain.model.AppError
 import com.mapmonarchs.domain.model.Identity
 import com.mapmonarchs.domain.validation.RejectionReason
@@ -37,7 +38,7 @@ class MapHudTest {
     /** Defaults to a fully healthy live state: signed in, permission held, fix accepted. */
     private fun state(
         identity: Identity = Identity.from(realUser),
-        territory: TerritoryLoad = TerritoryLoad.Loaded(emptyList()),
+        territory: TerritoryLoad = TerritoryLoad.Loaded(TerritoryGeometry.EMPTY),
         capture: CaptureState = CaptureState.Ready,
         permission: Boolean = true,
         previewMode: Boolean = false,

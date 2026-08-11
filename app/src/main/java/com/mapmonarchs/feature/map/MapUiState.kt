@@ -4,7 +4,7 @@ import androidx.compose.ui.graphics.Color
 import com.mapmonarchs.domain.model.AppError
 import com.mapmonarchs.domain.model.CaptureOutcome
 import com.mapmonarchs.domain.model.Blocker
-import com.mapmonarchs.domain.model.HexOwnership
+import com.mapmonarchs.domain.model.TerritoryGeometry
 import com.mapmonarchs.domain.model.Identity
 import com.mapmonarchs.domain.model.WorldPosition
 import com.mapmonarchs.domain.validation.RejectionReason
@@ -20,7 +20,7 @@ data class PreviewPoint(val lat: Double, val lng: Double)
  */
 sealed interface TerritoryLoad {
     data object Loading : TerritoryLoad
-    data class Loaded(val hexes: List<HexOwnership>) : TerritoryLoad
+    data class Loaded(val geometry: TerritoryGeometry) : TerritoryLoad
     data class Failed(val error: AppError) : TerritoryLoad
 }
 

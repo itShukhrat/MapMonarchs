@@ -1,5 +1,6 @@
 package com.mapmonarchs.feature.map
 
+import com.mapmonarchs.domain.model.TerritoryGeometry
 import com.mapmonarchs.domain.model.AppError
 import com.mapmonarchs.domain.model.Identity
 import com.mapmonarchs.domain.validation.RejectionReason
@@ -41,7 +42,7 @@ class MapUiStateTest {
 
     @Test
     fun `holdings stay unknown when loaded because ownership filtering is not real yet`() {
-        assertEquals(UNKNOWN_HOLDINGS, state(territory = TerritoryLoad.Loaded(emptyList())).holdingsLabel())
+        assertEquals(UNKNOWN_HOLDINGS, state(territory = TerritoryLoad.Loaded(TerritoryGeometry.EMPTY)).holdingsLabel())
     }
 
     // --- identity honesty ---
@@ -155,7 +156,7 @@ class MapUiStateTest {
     @Test
     fun `territory failure does not change the capture blocker - independent axes`() {
         val failed = state(territory = TerritoryLoad.Failed(AppError.Offline("x")), capture = CaptureState.Ready)
-        val loaded = state(territory = TerritoryLoad.Loaded(emptyList()), capture = CaptureState.Ready)
+        val loaded = state(territory = TerritoryLoad.Loaded(TerritoryGeometry.EMPTY), capture = CaptureState.Ready)
         assertEquals(resolveBlocker(loaded), resolveBlocker(failed))
         assertEquals(loaded.isCaptureActionable(), failed.isCaptureActionable())
     }

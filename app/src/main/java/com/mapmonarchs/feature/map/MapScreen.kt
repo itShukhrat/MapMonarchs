@@ -33,12 +33,8 @@ import androidx.core.content.ContextCompat
 import com.mapbox.geojson.Feature
 import com.mapbox.geojson.FeatureCollection
 import com.mapbox.geojson.Point
-import com.mapbox.geojson.Polygon
 import com.mapbox.maps.CameraOptions
 import com.mapbox.maps.Style
-import com.mapmonarchs.data.h3.H3Boundary
-import com.mapmonarchs.domain.model.HexOwnership
-import com.mapmonarchs.domain.model.Identity
 import com.mapmonarchs.ui.theme.Contested
 import com.mapbox.maps.dsl.cameraOptions
 import com.mapbox.maps.plugin.animation.MapAnimationOptions
@@ -325,36 +321,35 @@ fun MapScreen(
 
             // ---- Real, server-owned territory --------------------------------
             //
-            // Drawn ONLY outside preview, and ONLY from hex_ownership the server
-            // recorded -- never invented. This is the line between preview (a
-            // local simulation) and the live board. Territory is the most
-            // saturated thing on screen: your ground in your palette colour,
-            // rivals' ground in one muted hostile tone, both above the fog and
-            // border and below the player puck (this MapEffect runs before the
-            // puck's, so the puck's persistent layers land on top).
+            // Drawn ONLY outside preview, from the SERVER's GeoJSON (the
+            // territory_geometry Edge Function). The server reads the authoritative
+            // hex_ownership, converts each cell to a boundary with h3-js, and tags
+            // each hex `mine` for the signed-in caller. The client renders that
+            // answer -- it computes no geometry and decides no ownership. This
+            // replaced a client-side H3 native library whose .so could not meet
+            // Android's 16 KB page-size requirement; authority is unchanged.
             //
-            // H3-to-boundary runs for real on an ARM device; on an x86_64
-            // emulator the h3 native lib cannot load, so H3Boundary returns
-            // nothing and this draws an empty collection -- honest, not a crash.
-            // Today the collection is empty everywhere because no capture has
-            // landed yet; it fills the instant one does.
-            MapEffect(state.territory, state.identity, state.previewMode) { mapView ->
+            // Territory is the most saturated thing on screen: your ground in your
+            // palette colour, rivals' in one muted tone, above the fog and border
+            // and below the player puck (this MapEffect runs before the puck's, so
+            // the puck's persistent layers land on top). Empty when signed out or
+            // before any capture -- an empty collection, never invented.
+            MapEffect(state.territory, state.previewMode) { mapView ->
                 mapView.mapboxMap.getStyle { style ->
-                    val hexes = if (state.previewMode) emptyList()
-                        else (state.territory as? TerritoryLoad.Loaded)?.hexes ?: emptyList()
-                    val myId = (state.identity as? Identity.SignedIn)?.userId
-                    val (mine, others) = hexes.partition { myId != null && it.ownerId == myId }
+                    val geojson = if (state.previewMode) null
+                        else (state.territory as? TerritoryLoad.Loaded)?.geometry?.geojson
+                    val (mine, others) = splitTerritory(geojson)
 
                     val mineColor = (state.territoryColor() ?: Color(TERRITORY_PALETTE.first())).toArgb()
                     upsertTerritory(
                         style, TERRITORY_MINE_SOURCE, TERRITORY_MINE_FILL, TERRITORY_MINE_LINE,
-                        territoryFeatures(mine),
+                        mine,
                         fill = mineColor, line = SovereignGlow.toArgb(),
                         fillOpacity = 0.55, lineOpacity = 0.95
                     )
                     upsertTerritory(
                         style, TERRITORY_OTHER_SOURCE, TERRITORY_OTHER_FILL, TERRITORY_OTHER_LINE,
-                        territoryFeatures(others),
+                        others,
                         fill = Contested.toArgb(), line = Contested.toArgb(),
                         fillOpacity = 0.40, lineOpacity = 0.85
                     )
@@ -501,20 +496,23 @@ fun MapScreen(
 }
 
 /**
- * Boundaries of [hexes] as a Mapbox FeatureCollection, skipping any whose cell id
- * cannot be converted (malformed, or H3 unavailable on this ABI). SDK types only
- * appear at this render boundary; the ownership split that decides which hexes
- * land here is a plain predicate the caller applies. Pure and side-effect free.
+ * Splits the server's territory FeatureCollection into (mine, others) by the
+ * `mine` flag the SERVER stamped on each feature. The client only reads that flag
+ * -- it does not decide ownership. Null/blank/malformed GeoJSON yields two empty
+ * collections, so a failed load clears territory rather than crashing. SDK types
+ * appear only here, at the render boundary.
  */
-private fun territoryFeatures(hexes: List<HexOwnership>): FeatureCollection {
-    val features = hexes.mapNotNull { hex ->
-        val ring = H3Boundary.ring(hex.h3Index)
-        // A drawable polygon needs at least a triangle plus the closing vertex.
-        if (ring.size < 4) return@mapNotNull null
-        val points = ring.map { (lat, lng) -> Point.fromLngLat(lng, lat) }
-        Feature.fromGeometry(Polygon.fromLngLats(listOf(points)))
+private fun splitTerritory(geojson: String?): Pair<FeatureCollection, FeatureCollection> {
+    val empty = FeatureCollection.fromFeatures(emptyList<Feature>())
+    if (geojson.isNullOrBlank()) return empty to empty
+    val fc = runCatching { FeatureCollection.fromJson(geojson) }.getOrNull()
+        ?: return empty to empty
+    val mine = ArrayList<Feature>()
+    val others = ArrayList<Feature>()
+    fc.features()?.forEach { f ->
+        if (f.getBooleanProperty("mine") == true) mine.add(f) else others.add(f)
     }
-    return FeatureCollection.fromFeatures(features)
+    return FeatureCollection.fromFeatures(mine) to FeatureCollection.fromFeatures(others)
 }
 
 /**

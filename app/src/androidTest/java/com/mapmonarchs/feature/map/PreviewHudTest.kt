@@ -7,6 +7,7 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.mapmonarchs.domain.model.TerritoryGeometry
 import com.mapmonarchs.domain.model.AppError
 import com.mapmonarchs.domain.model.Identity
 import com.mapmonarchs.ui.theme.MapMonarchsTheme
@@ -30,7 +31,7 @@ class PreviewHudTest {
 
     private fun previewState(
         held: Int = 0,
-        territory: TerritoryLoad = TerritoryLoad.Loaded(emptyList())
+        territory: TerritoryLoad = TerritoryLoad.Loaded(TerritoryGeometry.EMPTY)
     ) = MapUiState(
         identity = Identity.preview(),
         territory = territory,
@@ -45,7 +46,7 @@ class PreviewHudTest {
 
     private fun liveState() = MapUiState(
         identity = Identity.from("6f2c1e4a-1111-4b2a-9c3d-000000000001"),
-        territory = TerritoryLoad.Loaded(emptyList()),
+        territory = TerritoryLoad.Loaded(TerritoryGeometry.EMPTY),
         capture = CaptureState.Ready,
         locationPermissionGranted = true
     )

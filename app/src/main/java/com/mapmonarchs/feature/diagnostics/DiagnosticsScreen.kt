@@ -123,7 +123,7 @@ fun DiagnosticsScreen(
             )
             StatusRow(
                 label = stringResource(R.string.diag_hexes_returned),
-                value = (state.territory as? TerritoryLoad.Loaded)?.hexes?.size?.toString() ?: UNKNOWN_HOLDINGS,
+                value = (state.territory as? TerritoryLoad.Loaded)?.geometry?.cellCount?.toString() ?: UNKNOWN_HOLDINGS,
                 valueColor = TextMuted
             )
         }

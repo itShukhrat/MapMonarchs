@@ -125,15 +125,6 @@ dependencies {
     implementation(libs.ktor.client.okhttp)
     implementation(libs.play.services.location)
 
-    // Uber H3 (official Java binding). The ONLY place client-side H3 lives, and
-    // only to CONVERT a server-issued cell id into its boundary polygon for
-    // drawing -- never to decide which cell the player is in (that stays
-    // server-authoritative in the Edge Function). Ships android-arm/android-arm64
-    // native libs (real devices) and windows/linux/darwin (host unit tests); it
-    // does NOT ship android-x86_64, so it cannot load on an x86_64 emulator --
-    // H3Boundary degrades to drawing nothing there rather than crashing.
-    implementation(libs.h3)
-
     // Firebase — ADDITIVE ONLY. Supabase remains the backend of record (auth,
     // data, entitlements, server-authoritative capture). These add client-side
     // Analytics and crash reporting. Data collection defaults OFF in the
