@@ -197,6 +197,14 @@ class MapViewModel(
                 else -> Log.i(TAG, "identity state: $identity")
             }
             _uiState.value = _uiState.value.copy(identity = identity)
+            // A restored session attaches the JWT only once restoreSession()
+            // returns. The launch-time loadTerritory() races ahead of that and can
+            // be tagged mine=false, painting the player's OWN ground in the
+            // contested colour until something else reloads it. Re-tag now that the
+            // session is authenticated -- the same reload the fresh sign-in path
+            // does. Only for SignedIn: the eager load already gave the correct
+            // signed-out view for every other outcome.
+            if (identity is Identity.SignedIn) loadTerritory()
         }
     }
 
