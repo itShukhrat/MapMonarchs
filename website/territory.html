@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<title>Territory — MapMonarchs</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="In MapMonarchs, territory is accumulated presence. Cells knit into a shape, a border is just the edges you hold, and a rival can push where you're thin.">
+<meta name="theme-color" content="#06080D">
+<link rel="canonical" href="https://mapmonarchs.com/territory">
+<meta property="og:title" content="Territory — MapMonarchs">
+<meta property="og:description" content="A border is only held edges. Rivals push where you're thin. You take it back by being there.">
+<meta property="og:url" content="https://mapmonarchs.com/territory">
+<link rel="stylesheet" href="/assets/home.css">
+</head>
+<body>
+<div id="progress"></div>
+<div id="stage" aria-hidden="true"></div>
+<div class="scrim" aria-hidden="true"></div>
+
+<header class="nav">
+  <a class="brand" href="/">
+    <img class="mark" src="/assets/mapmonarchs-crown.png" alt="" aria-hidden="true" width="28" height="24">
+    MapMonarchs <span class="by">by Monarchs</span>
+  </a>
+  <span class="spacer"></span>
+  <a class="link" href="/how-it-works">How it works</a>
+  <a class="link" href="/territory" aria-current="page">Territory</a>
+  <a class="link" href="/#trust">Trust</a>
+  <a class="cta" href="/privacy">Privacy</a>
+</header>
+
+<div class="readout" id="readout">
+  <div><b>Held ground</b> <span id="ro-held">forming</span></div>
+  <div><b>Border</b> <span id="ro-edge">—</span></div>
+</div>
+
+<main>
+  <section class="sec" id="t-hero">
+    <div class="wrap"><div class="col">
+      <div class="eyebrow reveal">Territory</div>
+      <h1 class="reveal">Ground you hold<br>becomes a shape.</h1>
+      <p class="lede reveal">One cell is small. Hold the ones around it and they knit into territory — a border drawn not on a map, but from the edges you actually keep. Scroll to watch it grow.</p>
+      <div class="legend reveal">
+        <span><i class="dot mine"></i> Your ground</span>
+        <span><i class="dot rival"></i> A rival's</span>
+        <span><i class="dot open"></i> Unclaimed</span>
+      </div>
+    </div></div>
+  </section>
+
+  <section class="sec right" id="t-border">
+    <div class="wrap"><div class="col">
+      <div class="step reveal">01 · The border</div>
+      <h2 class="reveal">A border is only<br>held edges.</h2>
+      <p class="body reveal">There's no wall to build and no line to draw. Your border is simply the outer cells you're still holding — the bright rim of your ground. Lose an edge cell and the border moves in; take one and it moves out.</p>
+    </div></div>
+  </section>
+
+  <section class="sec" id="t-contest">
+    <div class="wrap"><div class="col">
+      <div class="step reveal">02 · The pressure</div>
+      <h2 class="reveal">Rivals push<br>where you're thin.</h2>
+      <p class="body reveal">Another player walks into an edge cell and it turns. Not because they bought it — because they were standing there and you weren't. A thin border is an invitation; a deep one is hard to move.</p>
+    </div></div>
+  </section>
+
+  <section class="sec right" id="t-reclaim">
+    <div class="wrap"><div class="col">
+      <div class="step reveal">03 · The answer</div>
+      <h2 class="reveal">You take it back<br>the only way.</h2>
+      <p class="body reveal">By being there again. Ground changes hands through presence, both directions — so a contested edge isn't a loss, it's a reason to walk back out. When it flips, the whole map sees it, live.</p>
+      <div class="actions reveal">
+        <a class="btn ghost" href="/how-it-works">See a single claim</a>
+        <a class="btn ghost" href="/#trust">How location is handled</a>
+      </div>
+    </div></div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap foot-top">
+    <div class="foot-brand">
+      <img class="mark lg" src="/assets/mapmonarchs-crown.png" alt="MapMonarchs" width="46" height="40">
+      <div><div class="foot-name">MapMonarchs</div><div class="foot-rel">A game by <b>Monarchs</b></div></div>
+    </div>
+    <p class="foot-stmt">Ground you walk becomes ground you hold.<br>Uzbekistan first — the board is opening.</p>
+    <nav class="foot-nav" aria-label="Footer">
+      <span class="foot-h">Trust</span>
+      <a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/safety">Safety</a><a href="/account-deletion">Delete account</a>
+      <span class="foot-h">More</span>
+      <a href="/how-it-works">How it works</a><a href="/territory">Territory</a><a href="/contact">Contact</a><a href="/about">About</a>
+    </nav>
+  </div>
+  <div class="wrap foot-base">
+    <span class="sig">MapMonarchs — by Monarchs</span><span>com.mapmonarchs</span><span class="foot-yr">© 2026 Monarchs</span>
+  </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/0.160.0/three.min.js" defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js" defer></script>
+<script src="/assets/territory.js" defer></script>
+</body>
+</html>
