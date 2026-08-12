@@ -26,3 +26,6 @@ mapbox.token
 
 # --- from Android Studio wizard ---
 .externalNativeBuild
+
+# Wrangler local cache (never commit)
+.wrangler/
