@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<title>Identity — MapMonarchs</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="In MapMonarchs your identity is a callsign and a colour, derived from your account — the same on every device, impossible to impersonate. The board knows you by the ground you hold.">
+<meta name="theme-color" content="#06080D">
+<link rel="canonical" href="https://mapmonarchs.com/identity">
+<meta property="og:title" content="Identity — MapMonarchs">
+<meta property="og:description" content="A name you didn't choose and can't lose. One colour that's yours. The board knows you by where you've stood.">
+<meta property="og:url" content="https://mapmonarchs.com/identity">
+<link rel="stylesheet" href="/assets/home.css">
+</head>
+<body>
+<div id="progress"></div>
+<div id="stage" aria-hidden="true"></div>
+<div class="scrim" aria-hidden="true"></div>
+
+<header class="nav">
+  <a class="brand" href="/">
+    <img class="mark" src="/assets/mapmonarchs-crown.png" alt="" aria-hidden="true" width="28" height="24">
+    MapMonarchs <span class="by">by Monarchs</span>
+  </a>
+  <span class="spacer"></span>
+  <a class="link" href="/how-it-works">How it works</a>
+  <a class="link" href="/territory">Territory</a>
+  <a class="link" href="/identity" aria-current="page">Identity</a>
+  <a class="cta" href="/privacy">Privacy</a>
+</header>
+
+<div class="readout" id="readout">
+  <div><b>Callsign</b> derived from your account</div>
+  <div><b>Colour</b> yours alone</div>
+</div>
+
+<main>
+  <section class="sec" id="i-hero">
+    <div class="wrap"><div class="col">
+      <div class="eyebrow reveal">Identity</div>
+      <h1 class="reveal">A name you didn't choose,<br>and can't lose.</h1>
+      <p class="lede reveal">You don't build a profile in MapMonarchs. Your callsign and your colour are computed from your account — the same on every device, after every reinstall, and impossible for anyone else to wear.</p>
+    </div></div>
+  </section>
+
+  <section class="sec" id="i-callsign">
+    <div class="wrap"><div class="col">
+      <div class="step reveal">01 · The callsign</div>
+      <h2 class="reveal">Given, not typed.</h2>
+      <p class="body reveal">There's no username field, because a name you pick is a name someone else can fake. Your callsign is derived from your account and shown on the ground you hold — so a crest on the map is always the player it claims to be.</p>
+    </div></div>
+  </section>
+
+  <section class="sec" id="i-colour">
+    <div class="wrap"><div class="col">
+      <div class="step reveal">02 · The colour</div>
+      <h2 class="reveal">One colour is yours.<br>Your ground wears it.</h2>
+      <p class="body reveal">Every player gets a colour, fixed to their identity. It's how you read the board at a glance: your territory glows in it, rivals in theirs. Nobody can copy your colour any more than they can copy your ground.</p>
+    </div></div>
+  </section>
+
+  <section class="sec" id="i-presence">
+    <div class="wrap"><div class="col">
+      <div class="step reveal">03 · The presence</div>
+      <h2 class="reveal">Identity isn't a profile.<br>It's where you've stood.</h2>
+      <p class="body reveal">The board doesn't know you by a bio or an avatar you uploaded. It knows you by the cells you've walked into and kept. Your reputation is a shape on a map, earned on foot.</p>
+      <div class="actions reveal">
+        <a class="btn ghost" href="/territory">See how ground accumulates</a>
+        <a class="btn ghost" href="/how-it-works">Watch a claim</a>
+      </div>
+    </div></div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap foot-top">
+    <div class="foot-brand">
+      <img class="mark lg" src="/assets/mapmonarchs-crown.png" alt="MapMonarchs" width="46" height="40">
+      <div><div class="foot-name">MapMonarchs</div><div class="foot-rel">A game by <b>Monarchs</b></div></div>
+    </div>
+    <p class="foot-stmt">Ground you walk becomes ground you hold.<br>Uzbekistan first — the board is opening.</p>
+    <nav class="foot-nav" aria-label="Footer">
+      <span class="foot-h">Trust</span>
+      <a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/safety">Safety</a><a href="/account-deletion">Delete account</a>
+      <span class="foot-h">More</span>
+      <a href="/how-it-works">How it works</a><a href="/territory">Territory</a><a href="/identity">Identity</a><a href="/contact">Contact</a>
+    </nav>
+  </div>
+  <div class="wrap foot-base">
+    <span class="sig">MapMonarchs — by Monarchs</span><span>com.mapmonarchs</span><span class="foot-yr">© 2026 Monarchs</span>
+  </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/0.160.0/three.min.js" defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js" defer></script>
+<script src="/assets/identity.js" defer></script>
+</body>
+</html>
