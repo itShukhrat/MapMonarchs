@@ -138,6 +138,14 @@ fun BrandIntro(
         animationSpec = tween(durationMillis = 700, delayMillis = 520, easing = LinearOutSlowInEasing),
         label = "introWordmark"
     )
+    // The studio signature settles in last and quietest -- MapMonarchs is a
+    // product of Monarchs, said once, subordinate to the wordmark above it. It
+    // lands inside the existing hold, so it costs no extra startup time.
+    val byline by animateFloatAsState(
+        targetValue = if (started) 1f else 0f,
+        animationSpec = tween(durationMillis = 560, delayMillis = 780, easing = LinearOutSlowInEasing),
+        label = "introByline"
+    )
 
     Box(
         modifier = modifier
@@ -226,6 +234,17 @@ fun BrandIntro(
                     .padding(top = 22.dp)
                     .alpha(wordmark)
                     .scale(0.98f + 0.02f * wordmark)
+            )
+
+            // Studio signature. Muted and small so it stays clearly beneath the
+            // product wordmark -- an attribution, not a second title.
+            Text(
+                text = stringResource(R.string.brand_by),
+                style = MaterialTheme.typography.labelSmall,
+                color = TextMuted,
+                modifier = Modifier
+                    .padding(top = 6.dp)
+                    .alpha(byline * 0.85f)
             )
 
             // A rule that draws outward from the centre, tying the wordmark to

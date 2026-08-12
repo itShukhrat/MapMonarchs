@@ -48,13 +48,14 @@
     <string name="command_not_open">HALI OCHILMAGAN</string>
     <string name="command_not_open_body">Bular haqiqiy ochilish shartlariga ega haqiqiy tizimlar, zaglushkalar emas. Har biri ishlashidan oldin nima haqiqat boʻlishi kerakligini bildiradi.</string>
     <string name="brand_wordmark">MAPMONARCHS</string>
+    <string name="brand_by">by MONARCHS</string>
     <string name="onboarding_tagline">Yurgan yeringiz — egallagan yeringizga aylanadi.</string>
     <string name="onboarding_world">Oʻyin dunyosi — bu %1$s. Faqat mamlakat ichidagi yerni egallash mumkin; qolgan hamma joyda xarita xiralashtiriladi.</string>
     <string name="onboarding_location">Xarita qaysi geksda turganingizni bilishi uchun joylashuvingiz kerak. Hudud haqiqatan yurgan yoʻlingiz asosida serverlarimizda hal qilinadi — aynan shu halollikni saqlaydi.</string>
     <string name="onboarding_privacy">Biz sizni fonda kuzatmaymiz. Boshqa oʻyinchilar qaysi yerni egallaganingizni koʻra oladi — lekin hech qachon hozir qayerdaligingizni va hech qachon qayerda boʻlganingizni emas.</string>
     <string name="onboarding_continue">DAVOM ETISH</string>
     <string name="onboarding_permission_next">Keyin Android ruxsat soʻraydi.</string>
-    <string name="brand_intro_a11y">MapMonarchs. Davom etish uchun bosing.</string>
+    <string name="brand_intro_a11y">MapMonarchs by Monarchs. Davom etish uchun bosing.</string>
     <string name="locked_status">YOPIQ</string>
     <string name="locked_why">NIMA UCHUN</string>
     <string name="locked_unlocks_when">QACHON OCHILADI</string>

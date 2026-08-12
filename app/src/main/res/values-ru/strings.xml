@@ -47,13 +47,14 @@
     <string name="command_not_open">ПОКА НЕ ОТКРЫТО</string>
     <string name="command_not_open_body">Это настоящие системы с настоящими условиями открытия, а не заглушки. Каждая указывает, что должно стать правдой, прежде чем она заработает.</string>
     <string name="brand_wordmark">MAPMONARCHS</string>
+    <string name="brand_by">by MONARCHS</string>
     <string name="onboarding_tagline">Земля, по которой вы идёте, становится землёй, которой вы владеете.</string>
     <string name="onboarding_world">Игровой мир — это %1$s. Захватывать можно только землю внутри страны; всюду за её пределами карта затемнена.</string>
     <string name="onboarding_location">Карте нужно ваше местоположение, чтобы понимать, в каком гексе вы стоите. Территория определяется на наших серверах по маршруту, которым вы действительно идёте, — именно это сохраняет честность.</string>
     <string name="onboarding_privacy">Мы не отслеживаем вас в фоне. Другие игроки видят, какой землёй вы владеете, — но никогда где вы сейчас и никогда где вы были.</string>
     <string name="onboarding_continue">ПРОДОЛЖИТЬ</string>
     <string name="onboarding_permission_next">Далее Android запросит разрешение.</string>
-    <string name="brand_intro_a11y">MapMonarchs. Нажмите, чтобы продолжить.</string>
+    <string name="brand_intro_a11y">MapMonarchs by Monarchs. Нажмите, чтобы продолжить.</string>
     <string name="locked_status">ЗАКРЫТО</string>
     <string name="locked_why">ПОЧЕМУ</string>
     <string name="locked_unlocks_when">ОТКРОЕТСЯ, КОГДА</string>
