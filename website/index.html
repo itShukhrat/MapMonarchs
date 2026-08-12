@@ -2,56 +2,168 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>MapMonarchs</title>
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<title>MapMonarchs — the real world is the board</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="description" content="MapMonarchs is a location-based territory strategy game. Ground you walk becomes ground you hold.">
-<link rel="stylesheet" href="/assets/styles.css">
+<meta name="description" content="MapMonarchs is a location-based territory game. Walk into a hexagonal cell, claim it, hold it. Territory is decided on our servers from where you actually go. Uzbekistan first. By Monarchs.">
+<meta name="theme-color" content="#06080D">
+<link rel="canonical" href="https://mapmonarchs.com/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="MapMonarchs — the real world is the board">
+<meta property="og:description" content="Walk into a hex. Claim it. Hold it. A location territory game, decided server-side from where you actually go. Uzbekistan first.">
+<meta property="og:url" content="https://mapmonarchs.com/">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="stylesheet" href="/assets/home.css">
 </head>
 <body>
-<header class="top"><div class="wrap">
-  <a class="brand" href="/"><svg viewBox="0 0 32 32" fill="none" aria-hidden="true"><path d="M16 2 27 8.5v15L16 30 5 23.5v-15L16 2Z" stroke="currentColor" stroke-width="1.5"/><path d="M16 9 22 12.5v7L16 23l-6-3.5v-7L16 9Z" fill="currentColor" opacity=".18"/></svg>MapMonarchs</a>
-  <nav class="anchors">
-    <a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/safety">Safety</a>
-    <a href="/account-deletion">Delete account</a><a href="/support">Support</a><a href="/about">About</a>
-  </nav>
-</div></header>
+<div id="progress"></div>
+<div id="stage" aria-hidden="true"></div>
+<div class="scrim" aria-hidden="true"></div>
 
-<div class="hero"><div class="wrap">
-  <span class="eyebrow">Territory Strategy</span>
-  <h1>Ground you walk becomes ground you hold.</h1>
-  <p class="lede">MapMonarchs turns the real map of Uzbekistan into a board. Walk into a hexagonal cell, claim it, and hold it against everyone else. Territory is decided on our servers, from where you actually go — which is what keeps it fair.</p>
-  <div class="meta"><span>Android · Google Play</span><span>Package&nbsp; com.mapmonarchs</span></div>
-</div></div>
+<header class="nav">
+  <a class="brand" href="/">
+    <svg viewBox="0 0 32 32" fill="none" aria-hidden="true"><path d="M16 2 27 8.5v15L16 30 5 23.5v-15L16 2Z" stroke="currentColor" stroke-width="1.5"/><path d="M16 9 22 12.5v7L16 23l-6-3.5v-7L16 9Z" fill="currentColor" opacity=".18"/></svg>
+    MapMonarchs <span class="by">by Monarchs</span>
+  </a>
+  <span class="spacer"></span>
+  <a class="link" href="#hex">How it works</a>
+  <a class="link" href="#command">The game</a>
+  <a class="link" href="#trust">Trust</a>
+  <a class="cta" href="/privacy">Privacy</a>
+</header>
 
-<main class="wrap">
-  <section>
-    <h2>The trust layer</h2>
-    <p>MapMonarchs reads real-world location and creates an account for you, so it carries real obligations. These pages state plainly what the app does with your data and how to stay in control of it.</p>
-    <div class="cards">
-      <a class="card" href="/privacy"><div class="t">Privacy Policy</div><div class="d">What we handle, why, who processes it, and how long it stays.</div></a>
-      <a class="card" href="/account-deletion"><div class="t">Delete your account</div><div class="d">Remove your account and data — in the app or by request.</div></a>
-      <a class="card" href="/terms"><div class="t">Terms of Use</div><div class="d">Fair play, accounts, and the rules of the game.</div></a>
-      <a class="card" href="/safety"><div class="t">Safety &amp; Community</div><div class="d">Playing safely and keeping the game trustworthy.</div></a>
-      <a class="card" href="/support"><div class="t">Support</div><div class="d">Trouble signing in, capturing, or with your account.</div></a>
-      <a class="card" href="/about"><div class="t">About</div><div class="d">What MapMonarchs is, and what it is not.</div></a>
-    </div>
+<div class="readout" id="readout">
+  <div><b>REGION</b> Uzbekistan</div>
+  <div><b>GRID</b> H3 · res 9</div>
+  <div><b>CLAIM</b> <span id="ro-claim">server-authoritative</span></div>
+</div>
+
+<main>
+  <!-- 01 THE WORLD -->
+  <section class="sec" id="hero">
+    <div class="wrap"><div class="col">
+      <div class="eyebrow reveal">Territory · played on foot</div>
+      <h1 class="reveal">The real world<br>is the board.</h1>
+      <p class="lede reveal">MapMonarchs divides the map of Uzbekistan into hexagonal cells. Walk into one, and it's yours to claim. Stand your ground, and it stays yours — until someone else walks in.</p>
+      <div class="flow reveal">
+        <span class="chip">Real location</span><span class="arr">→</span>
+        <span class="chip">Hex</span><span class="arr">→</span>
+        <span class="chip">Claim</span><span class="arr">→</span>
+        <span class="chip">Territory</span>
+      </div>
+      <div class="actions reveal">
+        <span class="badge">◆ <b>Coming to Google Play</b> · Uzbekistan first</span>
+      </div>
+      <p class="mono-note reveal" style="margin-top:22px">Scroll to walk the loop.</p>
+    </div></div>
   </section>
 
-  <section>
-    <h2>How it plays</h2>
-    <ul>
-      <li><strong>Sign in with a code.</strong> No password — we email you a six-digit code.</li>
-      <li><strong>Claim where you stand.</strong> With the map open, a good GPS fix lets you claim the cell you are in.</li>
-      <li><strong>Hold the board.</strong> Your ground is drawn in your colour; rivals can take it by walking there themselves.</li>
-    </ul>
-    <p class="muted">MapMonarchs is a strategy game, not a navigation app. It never tracks you in the background, and other players see the ground you hold — never where you are.</p>
+  <!-- 03 THE HEX -->
+  <section class="sec right" id="hex">
+    <div class="wrap"><div class="col">
+      <div class="step reveal">01 · The hex</div>
+      <h2 class="reveal">One hexagon.<br>The atom of territory.</h2>
+      <p class="body reveal">Every place on Earth sits inside exactly one <b class="kicker">H3</b> cell — a hexagon roughly a football pitch across. The whole game is built on them: you never own a point or a pin, you own a cell. Which cell you're in is derived from your GPS position on our servers, so it can't be spoofed by naming a hex the client didn't earn.</p>
+      <p class="mono-note reveal">8928308280fffff — a single res-9 cell</p>
+    </div></div>
+  </section>
+
+  <!-- 04 THE CLAIM -->
+  <section class="sec" id="claim">
+    <div class="wrap"><div class="col">
+      <div class="step reveal">02 · The claim</div>
+      <h2 class="reveal">You don't tap to claim.<br>You stand there.</h2>
+      <p class="body reveal">A claim needs a real GPS fix, accurate to within 30 metres. The app sends your raw coordinates — never a hex you picked — and the server decides the cell, checks the fix is plausible, and writes ownership. Presence is the whole cost. That's what keeps the board honest.</p>
+      <div class="flow reveal">
+        <span class="chip">Fix ≤ 30 m</span><span class="arr">→</span>
+        <span class="chip">Server validates</span><span class="arr">→</span>
+        <span class="chip">Hex secured</span>
+      </div>
+    </div></div>
+  </section>
+
+  <!-- 05 THE TERRITORY -->
+  <section class="sec right" id="territory">
+    <div class="wrap"><div class="col">
+      <div class="step reveal">03 · The territory</div>
+      <h2 class="reveal">Ground accumulates.<br>Borders appear.</h2>
+      <p class="body reveal">Held cells fill with your colour and knit into a shape that is unmistakably yours. Your territory is drawn from authoritative server geometry — the same ground, seen the same way by everyone on the map.</p>
+      <div class="legend reveal">
+        <span><i class="dot mine"></i> Your ground</span>
+        <span><i class="dot rival"></i> A rival's</span>
+        <span><i class="dot open"></i> Unclaimed</span>
+      </div>
+    </div></div>
+  </section>
+
+  <!-- 06 THE CONTEST -->
+  <section class="sec" id="contest">
+    <div class="wrap"><div class="col">
+      <div class="step reveal">04 · The contest</div>
+      <h2 class="reveal">Nothing you hold<br>is permanent.</h2>
+      <p class="body reveal">Another player can walk into your cell and take it — the same way you took it. No cell is safe because you paid; it's safe because you keep showing up. When ownership changes, the map updates for everyone in real time.</p>
+    </div></div>
+  </section>
+
+  <!-- 07 THE COMMAND -->
+  <section class="sec right" id="command">
+    <div class="wrap"><div class="col">
+      <div class="step reveal">05 · The command</div>
+      <h2 class="reveal">A callsign.<br>A colour. A board.</h2>
+      <p class="body reveal">Your identity is a sovereign callsign and a territory colour, derived from your account so no one can impersonate it. From the command view you read your standing on the world you're building.</p>
+      <div class="cards reveal">
+        <div class="card"><div class="tag live">Live now</div><h3>Map &amp; capture</h3><p>Real GPS, real H3 claims, server-authoritative ownership, live territory.</p></div>
+        <div class="card"><div class="tag live">Live now</div><h3>Identity &amp; command</h3><p>Derived callsign, territory colour, account control, account deletion.</p></div>
+        <div class="card"><div class="tag soon">Roadmap</div><h3>Empire &amp; missions</h3><p>Strategy layers over the ground you hold. In development — shown honestly as not yet live.</p></div>
+        <div class="card"><div class="tag soon">Roadmap</div><h3>Leaderboards</h3><p>Standing across the whole board, once there is a board full of monarchs.</p></div>
+      </div>
+    </div></div>
+  </section>
+
+  <!-- 09 TRUST -->
+  <section class="sec trust center" id="trust">
+    <div class="wrap"><div class="col">
+      <div class="eyebrow reveal">Location, handled honestly</div>
+      <h2 class="reveal">A territory game can respect<br>where you are.</h2>
+      <p class="lede reveal">Location is the whole mechanic, so we take the least of it that works.</p>
+      <ul class="reveal">
+        <li>Precise location only while the app is open — <b class="kicker">never</b> in the background.</li>
+        <li>Other players see the ground you hold, never where you are or where you've been.</li>
+        <li>The anti-cheat location log is kept 30 days, then deleted automatically.</li>
+        <li>Delete your account in the app — your data goes; your ground is released back to the map.</li>
+      </ul>
+      <div class="actions reveal" style="justify-content:center">
+        <a class="btn ghost" href="/privacy">Read the privacy policy</a>
+        <a class="btn ghost" href="/account-deletion">How deletion works</a>
+      </div>
+    </div></div>
+  </section>
+
+  <!-- 10 ENTER -->
+  <section class="sec center" id="enter">
+    <div class="wrap"><div class="col">
+      <div class="step reveal">Enter the game</div>
+      <h2 class="reveal">Uzbekistan first.<br>The board is opening.</h2>
+      <p class="lede reveal">MapMonarchs is in closed testing on Google Play, Uzbekistan first. Ground you walk becomes ground you hold.</p>
+      <div class="actions reveal" style="justify-content:center">
+        <span class="badge">◆ <b>Coming to Google Play</b></span>
+        <a class="btn ghost" href="/support">Questions? Support</a>
+      </div>
+    </div></div>
   </section>
 </main>
 
-<footer><div class="wrap">
-  <span>MapMonarchs — Ground you walk becomes ground you hold.</span>
-  <a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/account-deletion">Delete account</a><a href="/support">Support</a>
-  <span class="sep">com.mapmonarchs</span>
-</div></footer>
+<footer>
+  <div class="wrap">
+    <a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/safety">Safety</a>
+    <a href="/account-deletion">Delete account</a><a href="/support">Support</a><a href="/about">About</a>
+    <span class="sig">MapMonarchs — by Monarchs</span>
+  </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/0.160.0/three.min.js" defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js" defer></script>
+<script src="/assets/home.js" defer></script>
 </body>
 </html>
