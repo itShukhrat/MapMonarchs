@@ -126,3 +126,53 @@ footer .sig{margin-left:auto; font-family:var(--mono); letter-spacing:.14em; tex
 .reveal{opacity:0; transform:translateY(22px)}
 .reveal.in{opacity:1; transform:none; transition:opacity .8s cubic-bezier(.2,.7,.2,1), transform .8s cubic-bezier(.2,.7,.2,1)}
 @media (prefers-reduced-motion:reduce){ .reveal{opacity:1; transform:none} }
+
+/* real crown mark (replaces the invented hex) */
+.brand .mark{width:28px; height:24px; object-fit:contain; flex:none;
+  filter:drop-shadow(0 1px 5px rgba(120,170,255,.35))}
+
+/* footer — the world going dark */
+footer{background:linear-gradient(180deg, var(--ink), #05070b)}
+.foot-top{display:grid; grid-template-columns:1.1fr 1.2fr 1.4fr; gap:34px; align-items:start; padding-bottom:30px}
+.foot-brand{display:flex; align-items:center; gap:14px}
+.foot-brand .mark.lg{width:46px; height:40px; object-fit:contain; filter:drop-shadow(0 2px 10px rgba(120,170,255,.3))}
+.foot-name{font-weight:700; letter-spacing:.05em; font-size:16px; color:var(--text)}
+.foot-rel{color:var(--muted); font-size:13px; margin-top:2px}
+.foot-rel b{color:var(--sovereign-hi); font-weight:600; letter-spacing:.04em}
+.foot-stmt{color:var(--muted); font-size:15px; margin:0; max-width:34ch; line-height:1.55}
+.foot-nav{display:flex; flex-wrap:wrap; gap:9px 16px; align-content:flex-start}
+.foot-nav a{color:var(--muted); text-decoration:none; font-size:14px}
+.foot-nav a:hover{color:var(--text)}
+.foot-h{width:100%; font-family:var(--mono); font-size:10.5px; letter-spacing:.18em; text-transform:uppercase; color:var(--faint); margin-top:4px}
+.foot-h:first-child{margin-top:0}
+.foot-base{display:flex; gap:18px; flex-wrap:wrap; align-items:baseline; padding-top:22px; border-top:1px solid var(--edge);
+  font-family:var(--mono); font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--faint)}
+.foot-base .sig{color:var(--muted)}
+.foot-base .foot-yr{margin-left:auto}
+@media (max-width:760px){ .foot-top{grid-template-columns:1fr; gap:24px} .foot-base .foot-yr{margin-left:0} }
+
+/* ---- /how-it-works : pinned single-hex mechanic ---- */
+.how-intro{padding:150px 24px 40px}
+.pin{position:relative}
+.pin .sticky{position:sticky; top:0; height:100vh; overflow:hidden}
+#howstage{position:absolute; inset:0}
+#howstage canvas{display:block; width:100%; height:100%}
+#howstage.fallback::before{content:""; position:absolute; inset:0; opacity:.4;
+  background:radial-gradient(40% 40% at 60% 45%, rgba(230,138,61,.18), transparent 60%),
+  radial-gradient(60% 60% at 50% 50%, rgba(76,141,255,.06), transparent 70%)}
+.pin .steps{position:absolute; inset:0; display:flex; align-items:center; pointer-events:none}
+.pin .steps .inner{position:relative; max-width:1080px; margin:0 auto; width:100%; padding:0 24px; height:220px}
+.stepcard{position:absolute; top:0; width:min(440px,calc(100% - 48px)); background:linear-gradient(180deg, rgba(10,14,22,.84), rgba(10,14,22,.64));
+  border:1px solid var(--edge); border-left:2px solid var(--sovereign); border-radius:14px; padding:22px 24px;
+  backdrop-filter:blur(8px); opacity:0; transform:translateY(14px); transition:opacity .45s, transform .45s}
+.stepcard.on{opacity:1; transform:none}
+.stepcard .n{font-family:var(--mono); font-size:12px; letter-spacing:.2em; color:var(--sovereign-hi)}
+.stepcard h3{margin:.4em 0 .3em; font-size:clamp(24px,3vw,32px); letter-spacing:-.01em}
+.stepcard p{margin:0; color:var(--muted); font-size:15.5px}
+.stepcard .meta{margin-top:12px; font-family:var(--mono); font-size:12px; color:var(--faint); letter-spacing:.02em}
+/* spacer blocks that drive the scrub */
+.pin .track{position:relative}
+.pin .track .mark{height:100vh}
+.how-legend{position:absolute; left:24px; bottom:22px; font-family:var(--mono); font-size:11px; color:var(--faint); line-height:1.7; pointer-events:none}
+.how-legend b{color:var(--muted); font-weight:500}
+@media (max-width:760px){ .stepcard{max-width:none} .how-legend{display:none} }

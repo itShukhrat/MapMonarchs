@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<title>How it works — MapMonarchs</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="How a MapMonarchs claim works: your GPS fix resolves to an H3 cell on our servers, the fix is validated, and ownership is written. Presence is the whole cost.">
+<meta name="theme-color" content="#06080D">
+<link rel="canonical" href="https://mapmonarchs.com/how-it-works">
+<meta property="og:title" content="How a claim works — MapMonarchs">
+<meta property="og:description" content="Location → cell → validation → ownership → territory. Decided on our servers, from where you actually stand.">
+<meta property="og:url" content="https://mapmonarchs.com/how-it-works">
+<link rel="stylesheet" href="/assets/home.css">
+</head>
+<body>
+<div id="progress"></div>
+
+<header class="nav">
+  <a class="brand" href="/">
+    <img class="mark" src="/assets/mapmonarchs-crown.png" alt="" aria-hidden="true" width="28" height="24">
+    MapMonarchs <span class="by">by Monarchs</span>
+  </a>
+  <span class="spacer"></span>
+  <a class="link" href="/how-it-works" aria-current="page">How it works</a>
+  <a class="link" href="/#command">The game</a>
+  <a class="link" href="/#trust">Trust</a>
+  <a class="cta" href="/privacy">Privacy</a>
+</header>
+
+<main>
+  <section class="sec how-intro" style="min-height:auto">
+    <div class="wrap"><div class="col">
+      <div class="eyebrow reveal">The mechanic, in full</div>
+      <h1 class="reveal" style="font-size:clamp(34px,5.5vw,64px)">One fix.<br>One cell. One owner.</h1>
+      <p class="lede reveal">A claim isn't a tap on a map. It's your real position, resolved to a hexagon on our servers, checked, and written as ownership. Scroll to watch a single cell change hands.</p>
+    </div></div>
+  </section>
+
+  <!-- pinned single-hex lifecycle -->
+  <div class="pin" id="pin">
+    <div class="sticky">
+      <div id="howstage" aria-hidden="true"></div>
+      <div class="steps"><div class="inner">
+        <div class="stepcard" data-step="0">
+          <div class="n">01 · Location</div>
+          <h3>You are somewhere real.</h3>
+          <p>The app reads your precise GPS position while the map is open. Nothing about the world moves until you do.</p>
+          <div class="meta">lat 39.7411 · lng 64.1108 · Bukhara</div>
+        </div>
+        <div class="stepcard" data-step="1">
+          <div class="n">02 · The cell</div>
+          <h3>Your point falls in one hexagon.</h3>
+          <p>The server converts your coordinates to a single H3 cell — about a football pitch across. You never name the cell; it is derived from where you stand.</p>
+          <div class="meta">h3 · res 9 · 8928308280fffff</div>
+        </div>
+        <div class="stepcard" data-step="2">
+          <div class="n">03 · Validation</div>
+          <h3>The fix has to be worth trusting.</h3>
+          <p>A claim needs accuracy within 30 metres, and the movement has to be plausible. Spoofed or teleporting fixes are refused before anything is written.</p>
+          <div class="meta">accuracy 8 m · mock false · accepted</div>
+        </div>
+        <div class="stepcard" data-step="3">
+          <div class="n">04 · Ownership</div>
+          <h3>The server writes the ground to you.</h3>
+          <p>Only the server decides ownership — your device can't assert it. The cell is stamped with your identity and fills with your colour.</p>
+          <div class="meta">owner ← you · captured_at now</div>
+        </div>
+        <div class="stepcard" data-step="4">
+          <div class="n">05 · Territory</div>
+          <h3>Cells become a shape.</h3>
+          <p>Hold neighbouring ground and it knits into territory — the same geometry, seen the same way by everyone on the map, in real time.</p>
+          <div class="meta">realtime · authoritative geometry</div>
+        </div>
+        <div class="stepcard" data-step="5">
+          <div class="n">06 · Persistence</div>
+          <h3>It holds until it's taken.</h3>
+          <p>Close the app, come back tomorrow — your ground is still yours, restored from the server. It changes only when someone walks in and claims it.</p>
+          <div class="meta">survives restart · server-restored</div>
+        </div>
+      </div></div>
+      <div class="how-legend">
+        <div><b>CLAIM</b> <span id="how-state">standing by</span></div>
+        <div><b>OWNER</b> <span id="how-owner">—</span></div>
+      </div>
+    </div>
+    <div class="track">
+      <div class="mark"></div><div class="mark"></div><div class="mark"></div>
+      <div class="mark"></div><div class="mark"></div><div class="mark"></div>
+    </div>
+  </div>
+
+  <section class="sec center" style="min-height:70vh">
+    <div class="wrap"><div class="col">
+      <div class="eyebrow reveal">Why it's built this way</div>
+      <h2 class="reveal">Presence is the only currency.</h2>
+      <p class="lede reveal">No purchase, no tap, no shortcut buys a cell. Because ownership is decided server-side from a validated fix, the only way onto the board is to actually be there — which is what makes holding ground mean something.</p>
+      <div class="actions reveal" style="justify-content:center">
+        <a class="btn ghost" href="/#trust">How your location is handled</a>
+        <a class="btn ghost" href="/privacy">Privacy policy</a>
+      </div>
+    </div></div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap foot-top">
+    <div class="foot-brand">
+      <img class="mark lg" src="/assets/mapmonarchs-crown.png" alt="MapMonarchs" width="46" height="40">
+      <div><div class="foot-name">MapMonarchs</div><div class="foot-rel">A game by <b>Monarchs</b></div></div>
+    </div>
+    <p class="foot-stmt">Ground you walk becomes ground you hold.<br>Uzbekistan first — the board is opening.</p>
+    <nav class="foot-nav" aria-label="Footer">
+      <span class="foot-h">Trust</span>
+      <a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/safety">Safety</a><a href="/account-deletion">Delete account</a>
+      <span class="foot-h">More</span>
+      <a href="/how-it-works">How it works</a><a href="/support">Support</a><a href="/about">About</a>
+    </nav>
+  </div>
+  <div class="wrap foot-base">
+    <span class="sig">MapMonarchs — by Monarchs</span><span>com.mapmonarchs</span><span class="foot-yr">© 2026 Monarchs</span>
+  </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/0.160.0/three.min.js" defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js" defer></script>
+<script src="/assets/how.js" defer></script>
+</body>
+</html>
