@@ -5,7 +5,7 @@
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <title>How it works — MapMonarchs</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="description" content="How a MapMonarchs claim works: your GPS fix resolves to an H3 cell on our servers, the fix is validated, and ownership is written. Presence is the whole cost.">
+<meta name="description" content="How a MapMonarchs claim works: your GPS fix resolves to a single map cell on our servers, the fix is validated, and ownership is written. Presence is the whole cost.">
 <meta name="theme-color" content="#06080D">
 <link rel="canonical" href="https://mapmonarchs.com/how-it-works">
 <meta property="og:title" content="How a claim works — MapMonarchs">
@@ -46,37 +46,37 @@
           <div class="n">01 · Location</div>
           <h3>You are somewhere real.</h3>
           <p>The app reads your precise GPS position while the map is open. Nothing about the world moves until you do.</p>
-          <div class="meta">lat 39.7411 · lng 64.1108 · Bukhara</div>
+          <div class="meta">Your position · Bukhara</div>
         </div>
         <div class="stepcard" data-step="1">
           <div class="n">02 · The cell</div>
           <h3>Your point falls in one hexagon.</h3>
-          <p>The server converts your coordinates to a single H3 cell — about a football pitch across. You never name the cell; it is derived from where you stand.</p>
-          <div class="meta">h3 · res 9 · 8928308280fffff</div>
+          <p>The server converts your coordinates to a single map cell — about a football pitch across. You never name the cell; it is derived from where you stand.</p>
+          <div class="meta">One cell on the board</div>
         </div>
         <div class="stepcard" data-step="2">
           <div class="n">03 · Validation</div>
           <h3>The fix has to be worth trusting.</h3>
           <p>A claim needs accuracy within 30 metres, and the movement has to be plausible. Spoofed or teleporting fixes are refused before anything is written.</p>
-          <div class="meta">accuracy 8 m · mock false · accepted</div>
+          <div class="meta">A trustworthy fix · accepted</div>
         </div>
         <div class="stepcard" data-step="3">
           <div class="n">04 · Ownership</div>
           <h3>The server writes the ground to you.</h3>
           <p>Only the server decides ownership — your device can't assert it. The cell is stamped with your identity and fills with your colour.</p>
-          <div class="meta">owner ← you · captured_at now</div>
+          <div class="meta">The ground is yours</div>
         </div>
         <div class="stepcard" data-step="4">
           <div class="n">05 · Territory</div>
           <h3>Cells become a shape.</h3>
           <p>Hold neighbouring ground and it knits into territory — the same geometry, seen the same way by everyone on the map, in real time.</p>
-          <div class="meta">realtime · authoritative geometry</div>
+          <div class="meta">Updates for everyone, live</div>
         </div>
         <div class="stepcard" data-step="5">
           <div class="n">06 · Persistence</div>
           <h3>It holds until it's taken.</h3>
           <p>Close the app, come back tomorrow — your ground is still yours, restored from the server. It changes only when someone walks in and claims it.</p>
-          <div class="meta">survives restart · server-restored</div>
+          <div class="meta">Still yours tomorrow</div>
         </div>
       </div></div>
       <div class="how-legend">
