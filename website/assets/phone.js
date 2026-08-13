@@ -42,7 +42,7 @@
   host.className = "phone-gl";
   phoneEl.appendChild(host);
 
-  var ASPECT = 1080 / 2214;            // cropped screenshot ratio (w/h)
+  var ASPECT = 512 / 1024;             // cropped screenshot ratio (w/h), power-of-two
   var Ws = 2.0, Hs = Ws / ASPECT;      // screen size in world units
   var frame = 0.11, depth = 0.17, rad = 0.30;
   var Wb = Ws + frame * 2, Hb = Hs + frame * 2;
