@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<title>Command — MapMonarchs</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Command is where you read the game: who you are, what you hold, and what you can do. What's live is live; what's coming is marked coming.">
+<meta name="theme-color" content="#06080D">
+<link rel="canonical" href="https://mapmonarchs.com/command">
+<meta property="og:title" content="Command — MapMonarchs">
+<meta property="og:description" content="Read the board: identity, territory, and the moves you can make. Honest about what's live and what's on the way.">
+<meta property="og:url" content="https://mapmonarchs.com/command">
+<link rel="stylesheet" href="/assets/home.css">
+</head>
+<body>
+<div id="progress"></div>
+<div id="stage" aria-hidden="true"></div>
+<div class="scrim" aria-hidden="true"></div>
+<div class="hud-frame" aria-hidden="true"><span class="tl"></span><span class="tr"></span><span class="bl"></span><span class="br"></span></div>
+
+<header class="nav">
+  <a class="brand" href="/">
+    <img class="mark" src="/assets/mapmonarchs-crown.png" alt="" aria-hidden="true" width="28" height="24">
+    MapMonarchs <span class="by">by Monarchs</span>
+  </a>
+  <span class="spacer"></span>
+  <a class="link" href="/territory">Territory</a>
+  <a class="link" href="/identity">Identity</a>
+  <a class="link" href="/command" aria-current="page">Command</a>
+  <a class="cta" href="/privacy">Privacy</a>
+</header>
+
+<div class="readout" id="readout">
+  <div><b>Command</b> read the board</div>
+  <div><b>State</b> <span id="ro-state">standing by</span></div>
+</div>
+
+<main>
+  <section class="sec" id="c-hero">
+    <div class="wrap"><div class="col">
+      <div class="eyebrow reveal">Command</div>
+      <h1 class="reveal">Read the board.<br>Then move.</h1>
+      <p class="lede reveal">Command is the quiet layer over the map: who you are, the ground you hold, and the moves that are actually open to you. It doesn't invent numbers — it shows you the state of your game.</p>
+    </div></div>
+  </section>
+
+  <section class="sec" id="c-you">
+    <div class="wrap"><div class="col">
+      <div class="step reveal">01 · Who you are</div>
+      <h2 class="reveal">A crest and a colour,<br>read at a glance.</h2>
+      <p class="body reveal">Your callsign and colour sit at the top of command, the same identity that marks your ground on the map. No profile to curate — just the sovereign the board recognises.</p>
+    </div></div>
+  </section>
+
+  <section class="sec" id="c-hold">
+    <div class="wrap"><div class="col">
+      <div class="step reveal">02 · What you hold</div>
+      <h2 class="reveal">Your ground, as it stands.</h2>
+      <p class="body reveal">The shape you've built, drawn from the server's own record so it agrees with what everyone else sees. When a cell changes hands — yours or a rival's — command reflects it, because the map already did.</p>
+    </div></div>
+  </section>
+
+  <section class="sec" id="c-do">
+    <div class="wrap"><div class="col">
+      <div class="step reveal">03 · What you can do</div>
+      <h2 class="reveal">Only the moves<br>that are real.</h2>
+      <p class="body reveal">Command shows what's live today, and marks what's on the way — never dressing a plan up as a feature.</p>
+      <div class="statuslist reveal">
+        <div class="statusrow"><span class="st live">Live</span><span class="lbl">Claim &amp; hold ground</span><span class="dsc">Stand in a cell, claim it, keep it.</span></div>
+        <div class="statusrow"><span class="st live">Live</span><span class="lbl">Identity &amp; colour</span><span class="dsc">Your callsign and territory colour.</span></div>
+        <div class="statusrow"><span class="st live">Live</span><span class="lbl">Account control</span><span class="dsc">Sign out and delete your account.</span></div>
+        <div class="statusrow"><span class="st soon">Coming</span><span class="lbl">Empire</span><span class="dsc">Strategy across connected ground.</span></div>
+        <div class="statusrow"><span class="st soon">Coming</span><span class="lbl">Missions</span><span class="dsc">Objectives over the board.</span></div>
+        <div class="statusrow"><span class="st soon">Coming</span><span class="lbl">Leaderboards</span><span class="dsc">Standing once the board is full.</span></div>
+      </div>
+    </div></div>
+  </section>
+
+  <section class="sec center" id="c-cta">
+    <div class="wrap"><div class="col">
+      <div class="step reveal">The board is yours to read</div>
+      <h2 class="reveal">Everything here is earned<br>on foot.</h2>
+      <p class="lede reveal">Command doesn't give you an edge you didn't walk for. It just makes the ground you hold legible — and shows you where you can still move.</p>
+      <div class="actions reveal" style="justify-content:center">
+        <a class="btn ghost" href="/territory">How ground accumulates</a>
+        <a class="btn ghost" href="/how-it-works">Watch a claim</a>
+      </div>
+    </div></div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap foot-top">
+    <div class="foot-brand">
+      <img class="mark lg" src="/assets/mapmonarchs-crown.png" alt="MapMonarchs" width="46" height="40">
+      <div><div class="foot-name">MapMonarchs</div><div class="foot-rel">A game by <b>Monarchs</b></div></div>
+    </div>
+    <p class="foot-stmt">Ground you walk becomes ground you hold.<br>Uzbekistan first — the board is opening.</p>
+    <nav class="foot-nav" aria-label="Footer">
+      <span class="foot-h">Trust</span>
+      <a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/safety">Safety</a><a href="/account-deletion">Delete account</a>
+      <span class="foot-h">More</span>
+      <a href="/how-it-works">How it works</a><a href="/territory">Territory</a><a href="/identity">Identity</a><a href="/contact">Contact</a>
+    </nav>
+  </div>
+  <div class="wrap foot-base">
+    <span class="sig">MapMonarchs — by Monarchs</span><span>com.mapmonarchs</span><span class="foot-yr">© 2026 Monarchs</span>
+  </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/0.160.0/three.min.js" defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js" defer></script>
+<script src="/assets/command.js" defer></script>
+</body>
+</html>

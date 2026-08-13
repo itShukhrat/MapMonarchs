@@ -175,6 +175,25 @@ footer{background:linear-gradient(180deg, var(--ink), #05070b)}
   h1{font-size:clamp(34px,10vw,46px)}
 }
 
+/* ---- /command : tactical HUD frame + live/roadmap language ---- */
+.hud-frame{position:fixed; inset:16px; z-index:4; pointer-events:none}
+.hud-frame span{position:absolute; width:26px; height:26px; border:1.5px solid color-mix(in srgb,var(--sovereign) 55%,transparent); opacity:.6}
+.hud-frame .tl{top:0; left:0; border-right:0; border-bottom:0}
+.hud-frame .tr{top:0; right:0; border-left:0; border-bottom:0}
+.hud-frame .bl{bottom:0; left:0; border-right:0; border-top:0}
+.hud-frame .br{bottom:0; right:0; border-left:0; border-top:0}
+@media (max-width:560px){ .hud-frame{inset:10px} .hud-frame span{width:18px; height:18px} }
+.statuslist{display:flex; flex-direction:column; gap:10px; margin-top:24px; max-width:56ch}
+.statusrow{display:flex; align-items:center; gap:14px; border:1px solid var(--edge); border-radius:12px;
+  padding:13px 16px; background:rgba(12,16,26,.55)}
+.statusrow .st{font-family:var(--mono); font-size:10px; letter-spacing:.16em; text-transform:uppercase; padding:3px 9px;
+  border-radius:999px; border:1px solid var(--edge); white-space:nowrap}
+.statusrow .st.live{color:var(--sovereign-hi); border-color:color-mix(in srgb,var(--sovereign) 45%,var(--edge))}
+.statusrow .st.soon{color:var(--crest); border-color:color-mix(in srgb,var(--crest) 45%,var(--edge))}
+.statusrow .lbl{font-weight:640; letter-spacing:.01em}
+.statusrow .dsc{color:var(--muted); font-size:14px; margin-left:auto; text-align:right; max-width:30ch}
+@media (max-width:560px){ .statusrow{flex-wrap:wrap; gap:8px} .statusrow .dsc{margin-left:0; text-align:left; max-width:none; width:100%} }
+
 /* ---- /how-it-works : pinned single-hex mechanic ---- */
 .how-intro{padding:150px 24px 40px}
 .pin{position:relative}
