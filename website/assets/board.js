@@ -36,7 +36,7 @@
   }
 
   // ---------- build hex field clipped to Uzbekistan ----------
-  var S = 0.42, dir = [[1, 0], [1, -1], [0, -1], [-1, 0], [-1, 1], [0, 1]];
+  var S = 0.34, dir = [[1, 0], [1, -1], [0, -1], [-1, 0], [-1, 1], [0, 1]];
   var cells = [], index = {};
   (function build() {
     var minX = 1e9, maxX = -1e9, minZ = 1e9, maxZ = -1e9, p;
