@@ -134,7 +134,7 @@
     ScrollTrigger.create({ trigger: pin, start: "top top", end: "bottom bottom",
       onUpdate: function (s) {
         goto(Math.min(N - 1, Math.floor(s.progress * (N - 0.001))));
-        targetYaw = (s.progress - 0.5) * 0.55;    // gentle turntable across the pin
+        targetYaw = (s.progress - 0.5) * 0.34;    // gentle turntable across the pin
       } });
   }
 
@@ -144,9 +144,9 @@
     var t = (now - t0) / 1000, dt = Math.min(0.05, (now - last) / 1000); last = now;
 
     scrollYaw += (targetYaw - scrollYaw) * 0.06;
-    group.rotation.y = scrollYaw + Math.sin(t * 0.5) * 0.10;
-    group.rotation.x = -0.04 + Math.sin(t * 0.42) * 0.026;
-    group.position.y = Math.sin(t * 0.8) * 0.07;
+    group.rotation.y = scrollYaw + Math.sin(t * 0.5) * 0.06;
+    group.rotation.x = -0.028 + Math.sin(t * 0.42) * 0.018;
+    group.position.y = Math.sin(t * 0.8) * 0.06;
 
     if (xactive) {
       xfade += dt / 0.5;                 // ~0.5s crossfade
