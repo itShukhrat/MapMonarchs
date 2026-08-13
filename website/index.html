@@ -33,17 +33,20 @@
 </header>
 
 <div class="readout" id="readout">
-  <div><b>Playable world</b> Uzbekistan</div>
-  <div><b>Status</b> Closed testing</div>
+  <div class="sim-tag">Board simulation</div>
+  <div><b>Sovereigns</b> <span id="ro-players">0</span></div>
+  <div><b>Cells held</b> <span id="ro-cells">0</span></div>
+  <div><b>Changed hands</b> <span id="ro-changed">0</span></div>
+  <div><b>Era</b> <span id="ro-era">The board opens</span></div>
 </div>
 
 <main>
   <!-- 01 THE WORLD -->
   <section class="sec" id="hero">
     <div class="wrap"><div class="col">
-      <div class="eyebrow reveal">Territory · played on foot</div>
-      <h1 class="reveal">The real world<br>is the board.</h1>
-      <p class="lede reveal">MapMonarchs divides the map of Uzbekistan into hexagonal cells. Walk into one, and it's yours to claim. Stand your ground, and it stays yours — until someone else walks in.</p>
+      <div class="eyebrow reveal">Uzbekistan · a living board</div>
+      <h1 class="reveal">Stand on a cell.<br>Hold it if you can.</h1>
+      <p class="lede reveal">MapMonarchs makes the map of Uzbekistan a board of hexagonal cells. You claim the one you're standing in — and keep it only until someone else walks in and takes it back. Scroll, and watch the whole country get contested.</p>
       <div class="flow reveal">
         <span class="chip">Real location</span><span class="arr">→</span>
         <span class="chip">Hex</span><span class="arr">→</span>
@@ -53,7 +56,7 @@
       <div class="actions reveal">
         <span class="badge">◆ <b>Coming to Google Play</b> · Uzbekistan first</span>
       </div>
-      <p class="mono-note reveal" style="margin-top:22px">Scroll to walk the loop.</p>
+      <p class="mono-note reveal" style="margin-top:22px">The board below is an illustrative simulation — the real game is in closed testing. Scroll: time moves the map.</p>
     </div></div>
   </section>
 
@@ -180,6 +183,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/0.160.0/three.min.js" defer></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" defer></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js" defer></script>
-<script src="/assets/home.js" defer></script>
+<script src="/assets/uz-outline.js" defer></script>
+<script src="/assets/board.js" defer></script>
 </body>
 </html>
