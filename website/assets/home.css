@@ -209,6 +209,11 @@ footer{background:linear-gradient(180deg, var(--ink), #05070b)}
 .phone .screen img{position:absolute; inset:0; width:100%; height:100%; object-fit:cover; opacity:0; transition:opacity .5s ease}
 .phone .screen img.on{opacity:1}
 .phone .notch{position:absolute; top:12px; left:50%; transform:translateX(-50%); width:86px; height:6px; border-radius:99px; background:#05070b; z-index:3}
+/* 3D mode: the device (bezel + shadow) is drawn in the canvas, so drop the DOM chrome */
+.phone.gl{background:transparent; border:0; box-shadow:none; padding:0; overflow:visible; border-radius:0}
+.phone.gl .screen, .phone.gl .notch{display:none}
+.phone-gl{position:absolute; inset:0}
+.phone-gl canvas{display:block; width:100%; height:100%}
 .showsteps{position:relative; min-height:210px}
 .showstep{position:absolute; top:0; left:0; right:0; opacity:0; transform:translateY(12px); transition:opacity .45s, transform .45s}
 .showstep.on{opacity:1; transform:none}
