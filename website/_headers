@@ -1,0 +1,11 @@
+# Always revalidate CSS/JS so a new HTML deploy never pairs with a stale
+# cached stylesheet/script (which silently breaks layout). ETags make the
+# revalidation a cheap 304 when nothing changed.
+/assets/*.css
+  Cache-Control: public, max-age=0, must-revalidate
+/assets/*.js
+  Cache-Control: public, max-age=0, must-revalidate
+
+# Images are content-stable; let them cache hard.
+/assets/shots/*
+  Cache-Control: public, max-age=604800
